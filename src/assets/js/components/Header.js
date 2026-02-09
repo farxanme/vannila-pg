@@ -6,6 +6,8 @@ export class Header {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
+      // لوگوی دوم برای سمت دیگر هدر (به جای کارت)
+      secondaryLogo: options.secondaryLogo || null,
       title: options.title || '',
       showCard: options.showCard !== false,
       cardContent: options.cardContent || null,
@@ -46,7 +48,7 @@ export class Header {
     const innerContainer = document.createElement('div');
     innerContainer.className = 'header-inner';
 
-    // Logo
+    // Logo (main brand logo)
     if (this.options.logo) {
       const logo = document.createElement('div');
       logo.className = 'header-logo';
@@ -69,19 +71,19 @@ export class Header {
       innerContainer.appendChild(title);
     }
 
-    // Card
-    if (this.options.showCard && this.options.cardContent) {
-      const card = document.createElement('div');
-      card.className = 'header-card';
-      
-      if (typeof this.options.cardContent === 'string') {
-        card.innerHTML = this.options.cardContent;
-      } else if (this.options.cardContent instanceof HTMLElement) {
-        card.appendChild(this.options.cardContent);
+    // Secondary logo (to replace header card)
+    if (this.options.secondaryLogo) {
+      const secondary = document.createElement('div');
+      secondary.className = 'header-secondary-logo';
+      if (typeof this.options.secondaryLogo === 'string') {
+        const img = document.createElement('img');
+        img.src = this.options.secondaryLogo;
+        img.alt = 'Secondary Logo';
+        secondary.appendChild(img);
+      } else if (this.options.secondaryLogo instanceof HTMLElement) {
+        secondary.appendChild(this.options.secondaryLogo);
       }
-      
-      innerContainer.appendChild(card);
-      this.cardElement = card;
+      innerContainer.appendChild(secondary);
     }
 
     container.appendChild(innerContainer);

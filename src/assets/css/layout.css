@@ -41,6 +41,16 @@
   width: auto;
 }
 
+.header-secondary-logo {
+  display: flex;
+  align-items: center;
+}
+
+.header-secondary-logo img {
+  height: 40px;
+  width: auto;
+}
+
 .header-title {
   flex: 1;
   font-size: var(--font-size-lg);
@@ -129,16 +139,16 @@
   .header {
     height: var(--header-height-mobile);
   }
-  
+
   .header-title {
     font-size: var(--font-size-base);
   }
-  
+
   .header-card {
     font-size: var(--font-size-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
   }
-  
+
   .header-logo img {
     height: 32px;
   }

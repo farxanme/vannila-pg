@@ -96,7 +96,22 @@ export function getBankLogo(bankName) {
   
   // Normalize bank name for file path
   const normalized = bankName.toLowerCase().replace(/\s+/g, '-');
-  return `/assets/images/banks/${normalized}.png`;
+
+  // Map some known names to existing SVGs, fallback to default
+  const map = {
+    'melli': 'melli',
+    'melli-iran': 'melli',
+    'saderat': 'saderat',
+    'mellat': 'mellat',
+    'parsian': 'parsian',
+    'saman': 'saman',
+    'tejarat': 'tejarat',
+    'pasargad': 'pasargad',
+    'keshavarzi': 'keshavarzi'
+  };
+
+  const key = map[normalized] || 'default';
+  return `/assets/images/banks/${key}.svg`;
 }
 
 /**

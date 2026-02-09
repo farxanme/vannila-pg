@@ -4,7 +4,9 @@
  */
 class I18n {
   constructor() {
-    this.currentLang = 'fa';
+    // Load language from localStorage or use default
+    const savedLang = localStorage.getItem('app_language');
+    this.currentLang = savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
     this.translations = {};
     this.loadTranslations();
   }
@@ -48,6 +50,8 @@ class I18n {
   setLanguage(lang) {
     if (['fa', 'en', 'tr', 'ar', 'ru'].includes(lang)) {
       this.currentLang = lang;
+      // Save to localStorage
+      localStorage.setItem('app_language', lang);
       document.documentElement.setAttribute('lang', lang);
       document.documentElement.setAttribute('dir', this.getDirection(lang));
       this.updatePageDirection();

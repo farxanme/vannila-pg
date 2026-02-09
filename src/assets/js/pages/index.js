@@ -42,18 +42,14 @@ async function initializePage() {
     // Initialize header
     header = new Header({
       title: i18n.t('header.title'),
-      logo: '/assets/images/logo.png',
-      showCard: true,
-      cardContent: '1234 5678 9012 3456',
-      onLanguageChange: (lang) => {
-        // Reload page content on language change
-        location.reload();
-      }
+      logo: '/assets/images/logo.svg',
+      secondaryLogo: '/assets/images/partners/logo1.svg',
+      showCard: false
     });
 
     // Initialize footer
     footer = new Footer({
-      logo: '/assets/images/logo.png',
+      logo: '/assets/images/logo-small.svg',
       copyright: '© 2024 All rights reserved'
     });
 
@@ -74,6 +70,9 @@ async function initializePage() {
 
     // Attach form events
     attachFormEvents();
+
+    // Listen for language changes
+    document.addEventListener('languageChange', handleLanguageChange);
 
     // Hide loading screen
     loadingScreen.hide();
@@ -441,8 +440,8 @@ function initializePartnerLogos() {
   
   // Mock partner logos
   const logos = [
-    '/assets/images/partners/logo1.png',
-    '/assets/images/partners/logo2.png'
+    '/assets/images/partners/logo1.svg',
+    '/assets/images/partners/logo2.svg'
   ];
   
   logos.forEach(src => {
@@ -518,4 +517,111 @@ function attachFormEvents() {
       window.location.href = '/';
     }
   });
+}
+
+/**
+ * Handle language change event
+ */
+function handleLanguageChange(event) {
+  updatePageContent();
+}
+
+/**
+ * Update page content after language change
+ */
+function updatePageContent() {
+  // Update header title
+  if (header) {
+    header.updateTitle(i18n.t('header.title'));
+  }
+
+  // Update card titles
+  const cardTitles = document.querySelectorAll('.card-title');
+  cardTitles.forEach((title, index) => {
+    if (index === 0) {
+      title.textContent = i18n.t('timer.title');
+    } else if (index === 1) {
+      title.textContent = i18n.t('form.partnerLogos');
+    } else if (index === 2) {
+      title.textContent = i18n.t('form.title');
+    }
+  });
+
+  // Update form labels and placeholders
+  if (cardNumberInput) {
+    cardNumberInput.setLabel(i18n.t('form.cardNumber'));
+    cardNumberInput.setPlaceholder(i18n.t('form.cardNumber.placeholder'));
+  }
+  if (cvv2Input) {
+    cvv2Input.setLabel(i18n.t('form.cvv2'));
+    cvv2Input.setPlaceholder(i18n.t('form.cvv2.placeholder'));
+  }
+  if (expiryMonthInput) {
+    expiryMonthInput.setLabel(i18n.t('form.expiryMonth'));
+  }
+  if (expiryYearInput) {
+    expiryYearInput.setLabel(i18n.t('form.expiryYear'));
+  }
+  if (captchaInput) {
+    captchaInput.setLabel(i18n.t('form.captcha'));
+    captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
+  }
+  if (otpInput) {
+    otpInput.setLabel(i18n.t('form.otp'));
+    otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+  }
+  if (mobileInput) {
+    mobileInput.setLabel(i18n.t('form.mobile'));
+    mobileInput.setPlaceholder(i18n.t('form.mobile.placeholder'));
+  }
+  if (emailInput) {
+    emailInput.setLabel(i18n.t('form.email'));
+    emailInput.setPlaceholder(i18n.t('form.email.placeholder'));
+  }
+
+  // Update buttons
+  const submitButton = document.getElementById('submit-button');
+  if (submitButton) {
+    submitButton.textContent = i18n.t('form.submit');
+  }
+  const cancelButton = document.getElementById('cancel-button');
+  if (cancelButton) {
+    cancelButton.textContent = i18n.t('form.cancel');
+  }
+  const showReceiptButton = document.getElementById('show-receipt-button');
+  if (showReceiptButton) {
+    showReceiptButton.textContent = i18n.t('form.showReceipt');
+  }
+
+  // Update transaction info labels
+  const transactionLabels = document.querySelectorAll('.transaction-info-label');
+  transactionLabels.forEach((label, index) => {
+    const text = label.textContent.trim();
+    if (text.includes('پذیرنده') || text.includes('Merchant')) {
+      label.textContent = i18n.t('transaction.merchant') + ':';
+    } else if (text.includes('مبلغ') || text.includes('Amount')) {
+      label.textContent = i18n.t('transaction.amount') + ':';
+    } else if (text.includes('ترمینال') || text.includes('Terminal')) {
+      label.textContent = i18n.t('transaction.terminal') + ':';
+    } else if (text.includes('سایت') || text.includes('Site')) {
+      label.textContent = i18n.t('transaction.site') + ':';
+    }
+  });
+
+  // Update more/less toggle button
+  const moreToggle = document.getElementById('more-toggle');
+  if (moreToggle) {
+    const moreContent = document.getElementById('more-transaction-info');
+    if (moreContent && moreContent.classList.contains('show')) {
+      moreToggle.textContent = i18n.t('transaction.showLess');
+    } else {
+      moreToggle.textContent = i18n.t('transaction.showMore');
+    }
+  }
+
+  // Update checkbox label
+  const saveCardCheckbox = document.querySelector('#save-card-checkbox + label');
+  if (saveCardCheckbox) {
+    saveCardCheckbox.textContent = i18n.t('form.saveCard');
+  }
 }

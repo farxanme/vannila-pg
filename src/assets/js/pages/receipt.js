@@ -17,13 +17,13 @@ async function initializePage() {
   // Initialize header
   header = new Header({
     title: i18n.t('header.title'),
-    logo: '/assets/images/logo.png',
+    logo: '/assets/images/logo.svg',
     showCard: false
   });
 
   // Initialize footer
   footer = new Footer({
-    logo: '/assets/images/logo.png',
+    logo: '/assets/images/logo-small.svg',
     copyright: '© 2024 All rights reserved'
   });
 
