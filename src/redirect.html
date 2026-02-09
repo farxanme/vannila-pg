@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#007bff">
+  <title>در حال انتقال...</title>
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/pages/redirect.css">
+</head>
+<body>
+  <div class="redirect-container">
+    <div class="redirect-content">
+      <div class="redirect-logo">
+        <img src="/assets/images/logo.png" alt="Logo" style="width: 160px;">
+      </div>
+      <div class="redirect-progress-bar">
+        <div class="redirect-progress-bar-indeterminate">
+          <div class="redirect-progress"></div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Hidden form for redirect -->
+    <form id="redirect-form" method="POST" action="" style="display: none;">
+      <!-- Form fields will be populated by JavaScript -->
+    </form>
+  </div>
+  
+  <!-- Scripts -->
+  <script type="module" src="/assets/js/pages/redirect.js"></script>
+</body>
+</html>

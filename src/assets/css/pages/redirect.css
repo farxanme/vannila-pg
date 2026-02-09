@@ -1,0 +1,64 @@
+@import '../variables.css';
+
+.redirect-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-bg-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.redirect-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
+  padding: var(--spacing-xl);
+}
+
+.redirect-logo img {
+  width: 160px;
+  height: auto;
+}
+
+.redirect-progress-bar {
+  width: 160px;
+  height: 6px;
+  background: var(--color-stroke);
+  border-radius: 5px;
+  overflow: hidden;
+  direction: ltr;
+}
+
+.redirect-progress-bar-indeterminate {
+  height: 100%;
+  position: relative;
+  animation: bluebar 1.5s infinite ease;
+  animation-direction: alternate;
+}
+
+.redirect-progress {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 15px;
+}
+
+@keyframes bluebar {
+  0%, 10% {
+    width: 15%;
+    left: 0;
+  }
+  40%, 60% {
+    width: 100%;
+    left: 0;
+  }
+  90%, 100% {
+    width: 15%;
+    left: 85%;
+  }
+}

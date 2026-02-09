@@ -1,0 +1,21 @@
+{
+  "name": "vanilla-pg",
+  "version": "1.0.0",
+  "description": "Payment Gateway - Vanilla JS",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "terser": "^5.24.0"
+  },
+  "dependencies": {
+    "crypto-js": "^4.2.0"
+  }
+}
