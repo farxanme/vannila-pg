@@ -26,6 +26,7 @@ let header, footer, timer, cardNumberInput, cvv2Input, expiryDateInput, captchaI
 let cardDropdown, cvv2PinPad, otpPinPad;
 let cardList = [];
 let isManagingCards = false;
+let otpLabelElement = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -43,8 +44,8 @@ async function initializePage() {
     // Initialize header
     header = new Header({
       title: i18n.t('header.title'),
-      logo: '/assets/images/logo.svg',
-      secondaryLogo: '/assets/images/partners/logo1.svg',
+      logo: '/assets/images/logo-sep.svg',
+      secondaryLogo: '/assets/images/logo-shaparak.svg',
       showCard: false
     });
 
@@ -103,7 +104,7 @@ function initializeTimer() {
       const minutes = Math.floor(remaining / 60);
       const seconds = remaining % 60;
       timerValue.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      
+
       // Update timer class based on progress
       timerContainer.classList.remove('warning', 'danger');
       const progress = remaining / 900;
@@ -137,11 +138,11 @@ function initializeTimer() {
 async function loadCards() {
   try {
     const response = await cardService.getCards();
-    
+
     if (response && response.Data && Array.isArray(response.Data)) {
       // Convert API format to internal format
       cardList = response.Data.map(card => cardService.convertCardFormat(card));
-      
+
       // Also save to localStorage for offline access
       dataStore.set('savedCards', cardList);
     } else {
@@ -178,11 +179,11 @@ function initializeFormInputs() {
       if (formatted !== value) {
         cardNumberInput.setValue(formatted);
       }
-      
+
       // Detect bank and show logo
       const bank = detectBank(value);
       updateBankLogo(bank);
-      
+
       // Auto-open card list if cards exist and input is focused
       if (cardList.length > 0 && value.length === 0) {
         // Will be handled by focus event
@@ -299,7 +300,7 @@ function initializeFormInputs() {
   const captchaContainer = document.getElementById('captcha-container');
   const captchaWrapper = document.createElement('div');
   captchaWrapper.className = 'captcha-container';
-  
+
   captchaInput = new Input(captchaWrapper, {
     id: 'captcha',
     name: 'captcha',
@@ -309,7 +310,7 @@ function initializeFormInputs() {
     required: true,
     maxLength: 6
   });
-  
+
   const captchaImage = document.createElement('img');
   captchaImage.src = '/api/captcha/image';
   captchaImage.className = 'captcha-image';
@@ -317,7 +318,7 @@ function initializeFormInputs() {
   captchaImage.onclick = () => {
     captchaImage.src = '/api/captcha/image?' + Date.now();
   };
-  
+
   const captchaAudio = document.createElement('button');
   captchaAudio.type = 'button';
   captchaAudio.className = 'captcha-audio';
@@ -326,23 +327,34 @@ function initializeFormInputs() {
     const audio = new Audio('/api/captcha/audio');
     audio.play();
   };
-  
+
   captchaWrapper.appendChild(captchaImage);
   captchaWrapper.appendChild(captchaAudio);
   captchaContainer.appendChild(captchaWrapper);
 
   // OTP Input
   const otpContainer = document.getElementById('otp-input-container');
+  
+  // Create label separately (outside flex container)
+  otpLabelElement = document.createElement('label');
+  otpLabelElement.className = 'input-label';
+  otpLabelElement.setAttribute('for', 'otp');
+  otpLabelElement.innerHTML = i18n.t('form.otp') + ' <span class="input-required">*</span>';
+  otpContainer.appendChild(otpLabelElement);
+  
+  // Create flex wrapper for input and button
   const otpWrapper = document.createElement('div');
+  otpWrapper.className = 'otp-input-row';
   otpWrapper.style.display = 'flex';
   otpWrapper.style.gap = 'var(--spacing-sm)';
-  otpWrapper.style.alignItems = 'flex-end';
+  otpWrapper.style.alignItems = 'flex-start';
   
+  // Create input without label
   otpInput = new Input(otpWrapper, {
     id: 'otp',
     name: 'otp',
     type: 'password',
-    label: i18n.t('form.otp'),
+    label: '', // No label, we created it separately
     placeholder: i18n.t('form.otp.placeholder'),
     required: true,
     validator: validateOTP,
@@ -368,10 +380,26 @@ function initializeFormInputs() {
     }
   });
   
+  // Make OTP input wrapper flex to fill remaining space
+  const otpInputWrapper = otpWrapper.querySelector('.input-wrapper');
+  if (otpInputWrapper) {
+    otpInputWrapper.style.flex = '1 1 auto';
+    otpInputWrapper.style.minWidth = '0';
+    // Hide the label inside input-wrapper since we have it separately
+    const innerLabel = otpInputWrapper.querySelector('.input-label');
+    if (innerLabel) {
+      innerLabel.style.display = 'none';
+    }
+  }
+  
   const getOtpButton = document.createElement('button');
   getOtpButton.type = 'button';
   getOtpButton.className = 'btn btn-secondary';
   getOtpButton.textContent = 'دریافت رمز پویا';
+  getOtpButton.style.maxWidth = '154px';
+  getOtpButton.style.flexShrink = '0';
+  getOtpButton.style.alignSelf = 'flex-start';
+  getOtpButton.style.marginTop = '0';
   getOtpButton.onclick = () => {
     // Request OTP
     errorHandler.show({
@@ -382,6 +410,15 @@ function initializeFormInputs() {
   };
   otpWrapper.appendChild(getOtpButton);
   otpContainer.appendChild(otpWrapper);
+  
+  // Move error message outside of flex container
+  const otpInputWrapperForError = otpWrapper.querySelector('.input-wrapper');
+  if (otpInputWrapperForError) {
+    const errorElement = otpInputWrapperForError.querySelector('.input-error');
+    if (errorElement) {
+      // Keep error inside wrapper but adjust positioning via CSS
+    }
+  }
 
   // Mobile Input (hidden initially)
   const mobileContainer = document.getElementById('mobile-input-container');
@@ -426,7 +463,7 @@ function numberToPersianWords(num) {
   const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
   const hundreds = ['', 'یکصد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
   const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
-  
+
   if (num === 0) return 'صفر';
   if (num < 10) return ones[num];
   if (num < 20) return teens[num - 10];
@@ -455,7 +492,7 @@ function numberToPersianWords(num) {
 
 function initializeTransactionInfo() {
   const container = document.getElementById('transaction-info');
-  
+
   // Mock transaction data
   const transactionData = {
     merchant: 'فروشگاه نمونه',
@@ -463,11 +500,11 @@ function initializeTransactionInfo() {
     terminal: '12345678',
     site: 'example.com'
   };
-  
+
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToPersianWords(amountInTomans);
-  
+
   container.innerHTML = `
     <div class="transaction-info-item">
       <div class="transaction-info-icon">🏪</div>
@@ -504,10 +541,10 @@ function initializeTransactionInfo() {
     </div>
     <button type="button" class="more-toggle" id="more-toggle">${i18n.t('transaction.showMore')}</button>
   `;
-  
+
   const moreToggle = document.getElementById('more-toggle');
   const moreContent = document.getElementById('more-transaction-info');
-  
+
   if (moreToggle && moreContent) {
     moreToggle.onclick = () => {
       const isShowing = moreContent.classList.contains('show');
@@ -525,13 +562,13 @@ function initializeTransactionInfo() {
 function initializePartnerLogos() {
   const container = document.getElementById('partner-logos');
   const section = document.getElementById('partner-logos-section');
-  
+
   // Mock partner logos - can be empty array
   const logos = [
     '/assets/images/partners/logo1.svg',
     '/assets/images/partners/logo2.svg'
   ];
-  
+
   // Hide section if no logos
   if (!logos || logos.length === 0) {
     if (section) {
@@ -539,15 +576,15 @@ function initializePartnerLogos() {
     }
     return;
   }
-  
+
   // Show section if logos exist
   if (section) {
     section.classList.remove('hidden');
   }
-  
+
   // Clear container first
   container.innerHTML = '';
-  
+
   // Add logos (max 2 logos side by side)
   logos.slice(0, 2).forEach(src => {
     const img = document.createElement('img');
@@ -560,7 +597,7 @@ function initializePartnerLogos() {
     };
     container.appendChild(img);
   });
-  
+
   // Hide section if no valid logos were added
   const visibleLogos = Array.from(container.children).filter(img => img.style.display !== 'none');
   if (visibleLogos.length === 0) {
@@ -569,7 +606,7 @@ function initializePartnerLogos() {
     }
     return;
   }
-  
+
   // Add class for single logo (center it)
   if (visibleLogos.length === 1) {
     container.classList.add('single-logo');
@@ -582,10 +619,10 @@ function attachFormEvents() {
   const form = document.getElementById('payment-form');
   const showReceiptButton = document.getElementById('show-receipt-button');
   const receiptFields = document.getElementById('receipt-fields');
-  
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    
+
     // Validate all fields
     const isValid = [
       cardNumberInput.validate(),
@@ -594,7 +631,7 @@ function attachFormEvents() {
       captchaInput.validate(),
       otpInput.validate()
     ].every(v => v);
-    
+
     if (!isValid) {
       errorHandler.show({
         message: i18n.t('form.validation.error'),
@@ -603,7 +640,7 @@ function attachFormEvents() {
       });
       return;
     }
-    
+
     // Submit form
     // This would call the payment API
     soundManager.beep();
@@ -613,14 +650,14 @@ function attachFormEvents() {
       type: 'info'
     });
   });
-  
+
   showReceiptButton.addEventListener('click', () => {
     receiptFields.style.display = receiptFields.style.display === 'none' ? 'block' : 'none';
     if (receiptFields.style.display === 'block') {
       showReceiptButton.style.display = 'none';
     }
   });
-  
+
   document.getElementById('cancel-button').addEventListener('click', () => {
     if (confirm('آیا از انصراف اطمینان دارید؟')) {
       window.location.href = '/';
@@ -671,8 +708,11 @@ function updatePageContent() {
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
   }
   if (otpInput) {
-    otpInput.setLabel(i18n.t('form.otp'));
     otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+    // Update separate OTP label
+    if (otpLabelElement) {
+      otpLabelElement.innerHTML = i18n.t('form.otp') + ' <span class="input-required">*</span>';
+    }
   }
   if (mobileInput) {
     mobileInput.setLabel(i18n.t('form.mobile'));

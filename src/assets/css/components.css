@@ -26,6 +26,8 @@
   border-radius: var(--radius-md);
   background: var(--color-bg-white);
   transition: all var(--transition-base);
+  height: 48px;
+  min-height: 48px;
 }
 
 .input-container.focused {
@@ -51,6 +53,9 @@
   background: transparent;
   text-align: center;
   direction: ltr;
+  height: 100%;
+  border: none;
+  outline: none;
 }
 
 .input-field:disabled {
@@ -518,8 +523,12 @@
   transition: all var(--transition-base);
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-xs);
   border: none;
+  height: 48px;
+  min-height: 48px;
+  box-sizing: border-box;
 }
 
 .btn-primary {
