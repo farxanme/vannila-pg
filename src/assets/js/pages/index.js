@@ -22,7 +22,7 @@ import { soundManager } from '../utils/sound.js';
 soundManager.init();
 
 // Initialize components
-let header, footer, timer, cardNumberInput, cvv2Input, expiryMonthInput, expiryYearInput, captchaInput, otpInput, mobileInput, emailInput;
+let header, footer, timer, cardNumberInput, cvv2Input, expiryDateInput, captchaInput, otpInput, mobileInput, emailInput;
 let cardDropdown, cvv2PinPad, otpPinPad;
 let cardList = [];
 let isManagingCards = false;
@@ -71,6 +71,9 @@ async function initializePage() {
 
     // Attach form events
     attachFormEvents();
+
+    // Update page content with current language
+    updatePageContent();
 
     // Listen for language changes
     document.addEventListener('languageChange', handleLanguageChange);
@@ -249,41 +252,44 @@ function initializeFormInputs() {
     }
   });
 
-  // Expiry Month Input
-  const expiryMonthContainer = document.getElementById('expiry-month-container');
-  expiryMonthInput = new Input(expiryMonthContainer, {
-    id: 'expiry-month',
-    name: 'expiryMonth',
+  // Expiry Date Input (MM/YY format)
+  const expiryDateContainer = document.getElementById('expiry-date-container');
+  expiryDateInput = new Input(expiryDateContainer, {
+    id: 'expiry-date',
+    name: 'expiryDate',
     type: 'password',
-    label: i18n.t('form.expiryMonth'),
-    placeholder: 'MM',
+    label: i18n.t('form.expiryDate'),
+    placeholder: 'MM/YY',
     required: true,
     inputMode: 'numeric',
-    maxLength: 2,
-    validator: (value) => {
-      const month = parseInt(extractNumbers(value));
-      if (month < 1 || month > 12) {
-        return { valid: false, message: 'Invalid month' };
+    maxLength: 5,
+    onInput: (value) => {
+      // Auto-format as MM/YY
+      const numbers = extractNumbers(value);
+      let formatted = numbers;
+      if (numbers.length >= 2) {
+        formatted = numbers.substring(0, 2) + '/' + numbers.substring(2, 4);
       }
-      return { valid: true, message: '' };
-    }
-  });
-
-  // Expiry Year Input
-  const expiryYearContainer = document.getElementById('expiry-year-container');
-  expiryYearInput = new Input(expiryYearContainer, {
-    id: 'expiry-year',
-    name: 'expiryYear',
-    type: 'password',
-    label: i18n.t('form.expiryYear'),
-    placeholder: 'YY',
-    required: true,
-    inputMode: 'numeric',
-    maxLength: 2,
+      if (formatted !== value) {
+        expiryDateInput.setValue(formatted);
+      }
+    },
     validator: (value) => {
-      const year = parseInt(extractNumbers(value));
-      if (year < 0 || year > 99) {
-        return { valid: false, message: 'Invalid year' };
+      const numbers = extractNumbers(value);
+      if (numbers.length !== 4) {
+        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
+      }
+      const month = parseInt(numbers.substring(0, 2));
+      const year = parseInt(numbers.substring(2, 4));
+      if (month < 1 || month > 12) {
+        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
+      }
+      // Validate expiry date (not expired)
+      const currentDate = new Date();
+      const currentYear = currentDate.getFullYear() % 100;
+      const currentMonth = currentDate.getMonth() + 1;
+      if (year < currentYear || (year === currentYear && month < currentMonth)) {
+        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
       }
       return { valid: true, message: '' };
     }
@@ -584,8 +590,7 @@ function attachFormEvents() {
     const isValid = [
       cardNumberInput.validate(),
       cvv2Input.validate(),
-      expiryMonthInput.validate(),
-      expiryYearInput.validate(),
+      expiryDateInput.validate(),
       captchaInput.validate(),
       otpInput.validate()
     ].every(v => v);
@@ -593,21 +598,6 @@ function attachFormEvents() {
     if (!isValid) {
       errorHandler.show({
         message: i18n.t('form.validation.error'),
-        mode: 'toast',
-        type: 'error'
-      });
-      return;
-    }
-    
-    // Validate expiry date together
-    const expiryValidation = validateExpiryDate(
-      expiryMonthInput.getValue(),
-      expiryYearInput.getValue()
-    );
-    
-    if (!expiryValidation.valid) {
-      errorHandler.show({
-        message: expiryValidation.message,
         mode: 'toast',
         type: 'error'
       });
@@ -654,15 +644,12 @@ function updatePageContent() {
     header.updateTitle(i18n.t('header.title'));
   }
 
-  // Update card titles
-  const cardTitles = document.querySelectorAll('.card-title');
-  cardTitles.forEach((title, index) => {
-    if (index === 0) {
-      title.textContent = i18n.t('timer.title');
-    } else if (index === 1) {
-      title.textContent = i18n.t('form.partnerLogos');
-    } else if (index === 2) {
-      title.textContent = i18n.t('form.title');
+  // Update all elements with data-i18n attribute
+  const i18nElements = document.querySelectorAll('[data-i18n]');
+  i18nElements.forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (key) {
+      element.textContent = i18n.t(key);
     }
   });
 
@@ -675,11 +662,9 @@ function updatePageContent() {
     cvv2Input.setLabel(i18n.t('form.cvv2'));
     cvv2Input.setPlaceholder(i18n.t('form.cvv2.placeholder'));
   }
-  if (expiryMonthInput) {
-    expiryMonthInput.setLabel(i18n.t('form.expiryMonth'));
-  }
-  if (expiryYearInput) {
-    expiryYearInput.setLabel(i18n.t('form.expiryYear'));
+  if (expiryDateInput) {
+    expiryDateInput.setLabel(i18n.t('form.expiryDate'));
+    expiryDateInput.setPlaceholder('MM/YY');
   }
   if (captchaInput) {
     captchaInput.setLabel(i18n.t('form.captcha'));
@@ -698,19 +683,7 @@ function updatePageContent() {
     emailInput.setPlaceholder(i18n.t('form.email.placeholder'));
   }
 
-  // Update buttons
-  const submitButton = document.getElementById('submit-button');
-  if (submitButton) {
-    submitButton.textContent = i18n.t('form.submit');
-  }
-  const cancelButton = document.getElementById('cancel-button');
-  if (cancelButton) {
-    cancelButton.textContent = i18n.t('form.cancel');
-  }
-  const showReceiptButton = document.getElementById('show-receipt-button');
-  if (showReceiptButton) {
-    showReceiptButton.textContent = i18n.t('form.showReceipt');
-  }
+  // Buttons are now updated via data-i18n above
 
   // Update transaction info labels and values
   const transactionLabels = document.querySelectorAll('.transaction-info-label');
@@ -760,9 +733,5 @@ function updatePageContent() {
     }
   }
 
-  // Update checkbox label
-  const saveCardCheckbox = document.querySelector('#save-card-checkbox + label');
-  if (saveCardCheckbox) {
-    saveCardCheckbox.textContent = i18n.t('form.saveCard');
-  }
+  // Checkbox label is now updated via data-i18n above
 }

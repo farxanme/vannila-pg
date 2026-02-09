@@ -29,7 +29,7 @@
           <!-- Large Card (2/3) -->
           <div class="card card-large">
             <div class="card-header">
-              <h2 class="card-title">اطلاعات پرداخت</h2>
+              <h2 class="card-title" data-i18n="form.title">اطلاعات پرداخت</h2>
             </div>
             
             <form id="payment-form" class="payment-form">
@@ -38,17 +38,11 @@
                 <div id="card-number-input-container"></div>
               </div>
               
-              <!-- CVV2 -->
+              <!-- CVV2 and Expiry Date -->
               <div class="form-group">
-                <div id="cvv2-input-container"></div>
-              </div>
-              
-              <!-- Expiry Date -->
-              <div class="form-group">
-                <label class="input-label">تاریخ انقضا</label>
                 <div class="form-row">
-                  <div id="expiry-month-container"></div>
-                  <div id="expiry-year-container"></div>
+                  <div id="cvv2-input-container"></div>
+                  <div id="expiry-date-container"></div>
                 </div>
               </div>
               
@@ -66,25 +60,19 @@
               <div class="form-group">
                 <label class="checkbox-label">
                   <input type="checkbox" id="save-card-checkbox">
-                  <span>شماره کارت در درگاه‌های سِپ ذخیره شود</span>
+                  <span data-i18n="form.saveCard">شماره کارت در درگاه‌های سِپ ذخیره شود</span>
                 </label>
               </div>
               
               <!-- Form Actions -->
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary" id="pay-button">
-                  پرداخت
-                </button>
-                <button type="button" class="btn btn-secondary" id="cancel-button">
-                  انصراف
-                </button>
+                <button type="submit" class="btn btn-primary" id="pay-button" data-i18n="form.pay">پرداخت</button>
+                <button type="button" class="btn btn-secondary" id="cancel-button" data-i18n="form.cancel">انصراف</button>
               </div>
               
               <!-- Show Receipt -->
               <div class="form-group" style="margin-top: var(--spacing-md);">
-                <button type="button" class="btn btn-secondary" id="show-receipt-button" style="width: 100%;">
-                  نمایش رسید
-                </button>
+                <button type="button" class="btn btn-secondary" id="show-receipt-button" style="width: 100%;" data-i18n="form.showReceipt">نمایش رسید</button>
               </div>
               
               <!-- Receipt Fields (Hidden initially) -->
@@ -102,7 +90,7 @@
           <!-- Small Card (1/3) -->
           <div class="card card-small">
             <div class="card-header">
-              <h2 class="card-title">زمان باقی‌مانده</h2>
+              <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
             </div>
             <div id="timer-container" class="timer">
               <div class="timer-value">15:00</div>
@@ -110,7 +98,7 @@
             
             <div id="partner-logos-section" class="partner-logos-section">
               <div class="card-header" style="margin-top: var(--spacing-lg);">
-                <h2 class="card-title">لوگوهای پذیرنده</h2>
+                <h2 class="card-title" data-i18n="form.partnerLogos">لوگوهای پذیرنده</h2>
               </div>
               <div id="partner-logos" class="partner-logos">
                 <!-- Partner logos will be inserted here -->

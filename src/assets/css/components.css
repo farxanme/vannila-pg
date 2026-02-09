@@ -3,6 +3,7 @@
 /* Input Component */
 .input-wrapper {
   margin-bottom: var(--spacing-md);
+  position: relative;
 }
 
 .input-label {
@@ -48,6 +49,8 @@
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background: transparent;
+  text-align: center;
+  direction: ltr;
 }
 
 .input-field:disabled {

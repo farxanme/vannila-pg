@@ -34,6 +34,7 @@ export class Input {
     this.isValid = true;
     this.errorMessage = '';
     this.element = null;
+    this.labelElement = null;
     this.init();
   }
 
@@ -58,17 +59,17 @@ export class Input {
 
     // Label
     if (this.options.label) {
-      const label = document.createElement('label');
-      label.className = 'input-label';
-      label.setAttribute('for', this.options.id);
-      label.textContent = this.options.label;
+      this.labelElement = document.createElement('label');
+      this.labelElement.className = 'input-label';
+      this.labelElement.setAttribute('for', this.options.id);
+      this.labelElement.textContent = this.options.label;
       if (this.options.required) {
         const required = document.createElement('span');
         required.className = 'input-required';
         required.textContent = ' *';
-        label.appendChild(required);
+        this.labelElement.appendChild(required);
       }
-      wrapper.appendChild(label);
+      wrapper.appendChild(this.labelElement);
     }
 
     // Input container
@@ -351,6 +352,43 @@ export class Input {
    */
   blur() {
     this.element.blur();
+  }
+
+  /**
+   * Set label text
+   * @param {string} label - Label text
+   */
+  setLabel(label) {
+    this.options.label = label;
+    if (!this.labelElement && this.wrapper) {
+      // Create label if it doesn't exist
+      this.labelElement = document.createElement('label');
+      this.labelElement.className = 'input-label';
+      this.labelElement.setAttribute('for', this.options.id);
+      this.wrapper.insertBefore(this.labelElement, this.wrapper.firstChild);
+    }
+    if (this.labelElement) {
+      // Remove required span if exists
+      const required = this.labelElement.querySelector('.input-required');
+      this.labelElement.textContent = label;
+      if (this.options.required) {
+        const requiredSpan = document.createElement('span');
+        requiredSpan.className = 'input-required';
+        requiredSpan.textContent = ' *';
+        this.labelElement.appendChild(requiredSpan);
+      }
+    }
+  }
+
+  /**
+   * Set placeholder text
+   * @param {string} placeholder - Placeholder text
+   */
+  setPlaceholder(placeholder) {
+    this.options.placeholder = placeholder;
+    if (this.element) {
+      this.element.placeholder = placeholder;
+    }
   }
 
   /**

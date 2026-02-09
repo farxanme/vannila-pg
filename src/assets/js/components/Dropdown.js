@@ -33,6 +33,8 @@ export class Dropdown {
     const dropdown = document.createElement('div');
     dropdown.className = 'dropdown';
     dropdown.style.display = 'none';
+    dropdown.style.position = 'absolute';
+    dropdown.style.zIndex = '1000';
     
     if (this.options.searchable) {
       const searchInput = document.createElement('input');
@@ -52,9 +54,19 @@ export class Dropdown {
     dropdown.appendChild(list);
     this.listElement = list;
 
-    // Insert after input
-    if (this.inputElement.parentNode) {
-      this.inputElement.parentNode.insertBefore(dropdown, this.inputElement.nextSibling);
+    // Find input wrapper (input-wrapper) and append dropdown to it
+    let wrapper = this.inputElement.closest('.input-wrapper');
+    if (!wrapper) {
+      wrapper = this.inputElement.parentNode;
+    }
+    
+    if (wrapper) {
+      // Make wrapper position relative if not already
+      const computedStyle = window.getComputedStyle(wrapper);
+      if (computedStyle.position === 'static') {
+        wrapper.style.position = 'relative';
+      }
+      wrapper.appendChild(dropdown);
     } else {
       document.body.appendChild(dropdown);
     }
@@ -189,22 +201,38 @@ export class Dropdown {
   positionDropdown() {
     if (!this.inputElement) return;
     
-    const rect = this.inputElement.getBoundingClientRect();
-    const dropdownRect = this.dropdownElement.getBoundingClientRect();
+    // Find input container (input-container) or input element
+    const inputContainer = this.inputElement.closest('.input-container');
+    const actualInput = this.inputElement.querySelector('input') || this.inputElement;
+    const targetElement = inputContainer || actualInput;
     
-    // Position below input
-    this.dropdownElement.style.top = `${rect.bottom + window.scrollY}px`;
-    this.dropdownElement.style.left = `${rect.left + window.scrollX}px`;
+    if (!targetElement) return;
+    
+    const rect = targetElement.getBoundingClientRect();
+    const wrapper = this.dropdownElement.parentElement;
+    if (!wrapper) return;
+    
+    const wrapperRect = wrapper.getBoundingClientRect();
+    
+    // Calculate position relative to wrapper
+    const topOffset = rect.bottom - wrapperRect.top;
+    const leftOffset = rect.left - wrapperRect.left;
+    
+    // Position below input container
+    this.dropdownElement.style.top = `${topOffset}px`;
+    this.dropdownElement.style.left = `${leftOffset}px`;
     this.dropdownElement.style.width = `${rect.width}px`;
     
     // Check if dropdown goes off screen
     const viewportHeight = window.innerHeight;
     const spaceBelow = viewportHeight - rect.bottom;
     const spaceAbove = rect.top;
+    const dropdownHeight = this.dropdownElement.offsetHeight || 200;
     
-    if (spaceBelow < dropdownRect.height && spaceAbove > dropdownRect.height) {
+    if (spaceBelow < dropdownHeight && spaceAbove > dropdownHeight) {
       // Position above
-      this.dropdownElement.style.top = `${rect.top + window.scrollY - dropdownRect.height}px`;
+      const topOffsetAbove = rect.top - wrapperRect.top - dropdownHeight;
+      this.dropdownElement.style.top = `${topOffsetAbove}px`;
     }
   }
 
@@ -213,8 +241,9 @@ export class Dropdown {
    * @param {Event} e - Click event
    */
   handleOutsideClick = (e) => {
+    const wrapper = this.inputElement.closest('.input-wrapper') || this.inputElement.parentNode;
     if (!this.dropdownElement.contains(e.target) && 
-        !this.inputElement.contains(e.target)) {
+        !wrapper.contains(e.target)) {
       this.close();
     }
   }
@@ -223,9 +252,12 @@ export class Dropdown {
    * Attach events
    */
   attachEvents() {
+    // Find the actual input element if wrapper was passed
+    const actualInput = this.inputElement.querySelector('input') || this.inputElement;
+    
     // Open on input focus
-    if (this.inputElement) {
-      this.inputElement.addEventListener('focus', () => {
+    if (actualInput && actualInput.tagName === 'INPUT') {
+      actualInput.addEventListener('focus', () => {
         if (this.options.autoOpen !== false) {
           this.open();
         }
