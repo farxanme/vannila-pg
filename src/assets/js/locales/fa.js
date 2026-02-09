@@ -28,7 +28,7 @@ export default {
   'form.expiryDate': 'تاریخ انقضا',
   'form.expiryMonth': 'ماه',
   'form.expiryYear': 'سال',
-  'form.expiryDate.required': 'تاریch انقضا الزامی است',
+  'form.expiryDate.required': 'تاریخ انقضا الزامی است',
   'form.expiryDate.invalid': 'تاریخ انقضا نامعتبر است',
   'form.securityCode': 'کد امنیتی',
   'form.securityCode.required': 'کد امنیتی الزامی است',
@@ -47,6 +47,12 @@ export default {
   'form.pay': 'پرداخت',
   'form.cancel': 'انصراف',
   'form.showReceipt': 'نمایش رسید',
+  'form.title': 'اطلاعات پرداخت',
+  'form.submit': 'ارسال',
+  'form.partnerLogos': 'لوگوهای پذیرنده',
+  'form.captcha': 'کد امنیتی',
+  'form.captcha.placeholder': 'کد را وارد کنید',
+  'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
   
   // Card List
   'cardList.addNew': 'افزودن کارت جدید',
@@ -69,11 +75,22 @@ export default {
   'receipt.share': 'اشتراک‌گذاری',
   'receipt.save': 'ذخیره در گالری',
   
+  // Transaction
+  'transaction.merchant': 'پذیرنده',
+  'transaction.amount': 'مبلغ',
+  'transaction.terminal': 'شماره پذیرنده / ترمینال',
+  'transaction.site': 'سایت پذیرنده',
+  'transaction.showMore': 'نمایش بیشتر',
+  'transaction.showLess': 'نمایش کمتر',
+  'transaction.rial': 'ریال',
+  'transaction.toman': 'تومان',
+  
   // Pin Pad
   'pinPad.title': 'ورود رمز',
   'pinPad.clear': 'پاک کردن',
   
   // Timer
+  'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
   
   // Errors

@@ -47,6 +47,12 @@ export default {
   'form.pay': 'Оплатить',
   'form.cancel': 'Отмена',
   'form.showReceipt': 'Показать квитанцию',
+  'form.title': 'Информация об оплате',
+  'form.submit': 'Отправить',
+  'form.partnerLogos': 'Логотипы партнеров',
+  'form.captcha': 'Код безопасности',
+  'form.captcha.placeholder': 'Введите код',
+  'form.validation.error': 'Пожалуйста, заполните все поля правильно',
   
   // Card List
   'cardList.addNew': 'Добавить новую карту',
@@ -69,11 +75,22 @@ export default {
   'receipt.share': 'Поделиться',
   'receipt.save': 'Сохранить в галерею',
   
+  // Transaction
+  'transaction.merchant': 'Торговец',
+  'transaction.amount': 'Сумма',
+  'transaction.terminal': 'Номер торговца / Терминал',
+  'transaction.site': 'Сайт торговца',
+  'transaction.showMore': 'Показать больше',
+  'transaction.showLess': 'Показать меньше',
+  'transaction.rial': 'Риал',
+  'transaction.toman': 'Томан',
+  
   // Pin Pad
   'pinPad.title': 'Введите PIN',
   'pinPad.clear': 'Очистить',
   
   // Timer
+  'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
   
   // Errors

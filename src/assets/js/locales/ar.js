@@ -47,6 +47,12 @@ export default {
   'form.pay': 'دفع',
   'form.cancel': 'إلغاء',
   'form.showReceipt': 'عرض الإيصال',
+  'form.title': 'معلومات الدفع',
+  'form.submit': 'إرسال',
+  'form.partnerLogos': 'شعارات الشريك',
+  'form.captcha': 'رمز الأمان',
+  'form.captcha.placeholder': 'أدخل الرمز',
+  'form.validation.error': 'يرجى ملء جميع الحقول بشكل صحيح',
   
   // Card List
   'cardList.addNew': 'إضافة بطاقة جديدة',
@@ -69,11 +75,22 @@ export default {
   'receipt.share': 'مشاركة',
   'receipt.save': 'حفظ في المعرض',
   
+  // Transaction
+  'transaction.merchant': 'التاجر',
+  'transaction.amount': 'المبلغ',
+  'transaction.terminal': 'رقم التاجر / الطرفية',
+  'transaction.site': 'موقع التاجر',
+  'transaction.showMore': 'عرض المزيد',
+  'transaction.showLess': 'عرض أقل',
+  'transaction.rial': 'ريال',
+  'transaction.toman': 'تومان',
+  
   // Pin Pad
   'pinPad.title': 'أدخل PIN',
   'pinPad.clear': 'مسح',
   
   // Timer
+  'timer.title': 'الوقت المتبقي',
   'timer.expired': 'انتهى الوقت',
   
   // Errors

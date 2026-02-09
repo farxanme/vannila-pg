@@ -47,6 +47,12 @@ export default {
   'form.pay': 'Pay',
   'form.cancel': 'Cancel',
   'form.showReceipt': 'Show Receipt',
+  'form.title': 'Payment Information',
+  'form.submit': 'Submit',
+  'form.partnerLogos': 'Partner Logos',
+  'form.captcha': 'Security Code',
+  'form.captcha.placeholder': 'Enter code',
+  'form.validation.error': 'Please fill all fields correctly',
   
   // Card List
   'cardList.addNew': 'Add New Card',
@@ -69,11 +75,22 @@ export default {
   'receipt.share': 'Share',
   'receipt.save': 'Save to Gallery',
   
+  // Transaction
+  'transaction.merchant': 'Merchant',
+  'transaction.amount': 'Amount',
+  'transaction.terminal': 'Merchant / Terminal Number',
+  'transaction.site': 'Merchant Site',
+  'transaction.showMore': 'Show More',
+  'transaction.showLess': 'Show Less',
+  'transaction.rial': 'Rial',
+  'transaction.toman': 'Toman',
+  
   // Pin Pad
   'pinPad.title': 'Enter PIN',
   'pinPad.clear': 'Clear',
   
   // Timer
+  'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
   
   // Errors

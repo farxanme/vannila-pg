@@ -47,6 +47,12 @@ export default {
   'form.pay': 'Öde',
   'form.cancel': 'İptal',
   'form.showReceipt': 'Fişi Göster',
+  'form.title': 'Ödeme Bilgileri',
+  'form.submit': 'Gönder',
+  'form.partnerLogos': 'Ortak Logoları',
+  'form.captcha': 'Güvenlik Kodu',
+  'form.captcha.placeholder': 'Kodu girin',
+  'form.validation.error': 'Lütfen tüm alanları doğru şekilde doldurun',
   
   // Card List
   'cardList.addNew': 'Yeni Kart Ekle',
@@ -69,11 +75,22 @@ export default {
   'receipt.share': 'Paylaş',
   'receipt.save': 'Galeriye Kaydet',
   
+  // Transaction
+  'transaction.merchant': 'Satıcı',
+  'transaction.amount': 'Tutar',
+  'transaction.terminal': 'Satıcı / Terminal Numarası',
+  'transaction.site': 'Satıcı Sitesi',
+  'transaction.showMore': 'Daha Fazla Göster',
+  'transaction.showLess': 'Daha Az Göster',
+  'transaction.rial': 'Riyal',
+  'transaction.toman': 'Toman',
+  
   // Pin Pad
   'pinPad.title': 'PIN Gir',
   'pinPad.clear': 'Temizle',
   
   // Timer
+  'timer.title': 'Kalan Süre',
   'timer.expired': 'Süre doldu',
   
   // Errors

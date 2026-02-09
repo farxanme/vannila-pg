@@ -387,70 +387,164 @@ function toggleCardList() {
   }
 }
 
+/**
+ * Convert number to Persian words (simplified version)
+ */
+function numberToPersianWords(num) {
+  const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
+  const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
+  const hundreds = ['', 'یکصد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
+  const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+  
+  if (num === 0) return 'صفر';
+  if (num < 10) return ones[num];
+  if (num < 20) return teens[num - 10];
+  if (num < 100) {
+    const ten = Math.floor(num / 10);
+    const one = num % 10;
+    return tens[ten] + (one > 0 ? ' و ' + ones[one] : '');
+  }
+  if (num < 1000) {
+    const hundred = Math.floor(num / 100);
+    const remainder = num % 100;
+    return hundreds[hundred] + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
+  }
+  if (num < 1000000) {
+    const thousand = Math.floor(num / 1000);
+    const remainder = num % 1000;
+    return numberToPersianWords(thousand) + ' هزار' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
+  }
+  if (num < 1000000000) {
+    const million = Math.floor(num / 1000000);
+    const remainder = num % 1000000;
+    return numberToPersianWords(million) + ' میلیون' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
+  }
+  return num.toString();
+}
+
 function initializeTransactionInfo() {
   const container = document.getElementById('transaction-info');
   
   // Mock transaction data
   const transactionData = {
     merchant: 'فروشگاه نمونه',
-    amount: 100000,
+    amount: 100000, // in Rials
     terminal: '12345678',
     site: 'example.com'
   };
   
+  // Convert amount to Tomans (divide by 10)
+  const amountInTomans = Math.floor(transactionData.amount / 10);
+  const amountInWords = numberToPersianWords(amountInTomans);
+  
   container.innerHTML = `
     <div class="transaction-info-item">
-      <span class="transaction-info-label">پذیرنده:</span>
-      <span class="transaction-info-value">${transactionData.merchant}</span>
+      <div class="transaction-info-icon">🏪</div>
+      <div class="transaction-info-content">
+        <div class="transaction-info-label">${i18n.t('transaction.merchant')}</div>
+        <div class="transaction-info-value">${transactionData.merchant}</div>
+      </div>
     </div>
     <div class="transaction-info-item">
-      <span class="transaction-info-label">مبلغ:</span>
-      <span class="transaction-info-value">${transactionData.amount.toLocaleString()} ریال</span>
+      <div class="transaction-info-icon">💰</div>
+      <div class="transaction-info-content">
+        <div class="transaction-info-label">${i18n.t('transaction.amount')}</div>
+        <div class="transaction-info-value">
+          <div class="transaction-amount-rial">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
+          <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
+        </div>
+      </div>
     </div>
     <div class="more-content" id="more-transaction-info">
       <div class="transaction-info-item">
-        <span class="transaction-info-label">شماره پذیرنده / ترمینال:</span>
-        <span class="transaction-info-value">${transactionData.terminal}</span>
+        <div class="transaction-info-icon">🔢</div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.terminal')}</div>
+          <div class="transaction-info-value">${transactionData.terminal}</div>
+        </div>
       </div>
       <div class="transaction-info-item">
-        <span class="transaction-info-label">سایت پذیرنده:</span>
-        <span class="transaction-info-value">${transactionData.site}</span>
+        <div class="transaction-info-icon">🌐</div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.site')}</div>
+          <div class="transaction-info-value">${transactionData.site}</div>
+        </div>
       </div>
     </div>
-    <button type="button" class="more-toggle" id="more-toggle">نمایش بیشتر</button>
+    <button type="button" class="more-toggle" id="more-toggle">${i18n.t('transaction.showMore')}</button>
   `;
   
   const moreToggle = document.getElementById('more-toggle');
   const moreContent = document.getElementById('more-transaction-info');
   
-  moreToggle.onclick = () => {
-    const isShowing = moreContent.classList.contains('show');
-    if (isShowing) {
-      moreContent.classList.remove('show');
-      moreToggle.textContent = 'نمایش بیشتر';
-    } else {
-      moreContent.classList.add('show');
-      moreToggle.textContent = 'نمایش کمتر';
-    }
-  };
+  if (moreToggle && moreContent) {
+    moreToggle.onclick = () => {
+      const isShowing = moreContent.classList.contains('show');
+      if (isShowing) {
+        moreContent.classList.remove('show');
+        moreToggle.textContent = i18n.t('transaction.showMore');
+      } else {
+        moreContent.classList.add('show');
+        moreToggle.textContent = i18n.t('transaction.showLess');
+      }
+    };
+  }
 }
 
 function initializePartnerLogos() {
   const container = document.getElementById('partner-logos');
+  const section = document.getElementById('partner-logos-section');
   
-  // Mock partner logos
+  // Mock partner logos - can be empty array
   const logos = [
     '/assets/images/partners/logo1.svg',
     '/assets/images/partners/logo2.svg'
   ];
   
-  logos.forEach(src => {
+  // Hide section if no logos
+  if (!logos || logos.length === 0) {
+    if (section) {
+      section.classList.add('hidden');
+    }
+    return;
+  }
+  
+  // Show section if logos exist
+  if (section) {
+    section.classList.remove('hidden');
+  }
+  
+  // Clear container first
+  container.innerHTML = '';
+  
+  // Add logos (max 2 logos side by side)
+  logos.slice(0, 2).forEach(src => {
     const img = document.createElement('img');
     img.src = src;
     img.className = 'partner-logo';
     img.alt = 'Partner logo';
+    img.onerror = () => {
+      // Hide image if it fails to load
+      img.style.display = 'none';
+    };
     container.appendChild(img);
   });
+  
+  // Hide section if no valid logos were added
+  const visibleLogos = Array.from(container.children).filter(img => img.style.display !== 'none');
+  if (visibleLogos.length === 0) {
+    if (section) {
+      section.classList.add('hidden');
+    }
+    return;
+  }
+  
+  // Add class for single logo (center it)
+  if (visibleLogos.length === 1) {
+    container.classList.add('single-logo');
+  } else {
+    container.classList.remove('single-logo');
+  }
 }
 
 function attachFormEvents() {
@@ -593,18 +687,40 @@ function updatePageContent() {
     showReceiptButton.textContent = i18n.t('form.showReceipt');
   }
 
-  // Update transaction info labels
+  // Update transaction info labels and values
   const transactionLabels = document.querySelectorAll('.transaction-info-label');
-  transactionLabels.forEach((label, index) => {
-    const text = label.textContent.trim();
-    if (text.includes('پذیرنده') || text.includes('Merchant')) {
-      label.textContent = i18n.t('transaction.merchant') + ':';
-    } else if (text.includes('مبلغ') || text.includes('Amount')) {
-      label.textContent = i18n.t('transaction.amount') + ':';
-    } else if (text.includes('ترمینال') || text.includes('Terminal')) {
-      label.textContent = i18n.t('transaction.terminal') + ':';
-    } else if (text.includes('سایت') || text.includes('Site')) {
-      label.textContent = i18n.t('transaction.site') + ':';
+  transactionLabels.forEach((label) => {
+    const parentItem = label.closest('.transaction-info-item');
+    if (parentItem) {
+      const icon = parentItem.querySelector('.transaction-info-icon');
+      if (icon) {
+        const iconText = icon.textContent.trim();
+        if (iconText === '🏪') {
+          label.textContent = i18n.t('transaction.merchant');
+        } else if (iconText === '💰') {
+          label.textContent = i18n.t('transaction.amount');
+          // Update amount values (rial and toman)
+          const valueContainer = parentItem.querySelector('.transaction-info-value');
+          if (valueContainer) {
+            const rialElement = valueContainer.querySelector('.transaction-amount-rial');
+            const tomanElement = valueContainer.querySelector('.transaction-amount-toman');
+            if (rialElement && tomanElement) {
+              const amountMatch = rialElement.textContent.match(/[\d,]+/);
+              if (amountMatch) {
+                const amount = amountMatch[0].replace(/,/g, '');
+                const amountInTomans = Math.floor(parseInt(amount) / 10);
+                const amountInWords = numberToPersianWords(amountInTomans);
+                rialElement.textContent = `${parseInt(amount).toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}`;
+                tomanElement.textContent = `${amountInWords} ${i18n.t('transaction.toman')}`;
+              }
+            }
+          }
+        } else if (iconText === '🔢') {
+          label.textContent = i18n.t('transaction.terminal');
+        } else if (iconText === '🌐') {
+          label.textContent = i18n.t('transaction.site');
+        }
+      }
     }
   });
 
