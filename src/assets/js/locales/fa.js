@@ -13,10 +13,10 @@ export default {
   'common.loading': 'در حال بارگذاری...',
   'common.error': 'خطا',
   'common.success': 'موفق',
-  
+
   // Header
-  'header.title': 'درگاه پرداخت',
-  
+  'header.title': 'درگاه پرداخت اینترنتی سِپ',
+
   // Form
   'form.cardNumber': 'شماره کارت',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
@@ -53,7 +53,7 @@ export default {
   'form.captcha': 'کد امنیتی',
   'form.captcha.placeholder': 'کد را وارد کنید',
   'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
-  
+
   // Card List
   'cardList.addNew': 'افزودن کارت جدید',
   'cardList.manage': 'مدیریت کارت‌ها',
@@ -62,7 +62,7 @@ export default {
   'cardList.delete': 'حذف',
   'cardList.deleteConfirm': 'آیا از حذف این کارت اطمینان دارید؟',
   'cardList.empty': 'کارتی ثبت نشده است',
-  
+
   // Receipt
   'receipt.success': 'تراکنش موفق',
   'receipt.failed': 'تراکنش ناموفق',
@@ -74,7 +74,7 @@ export default {
   'receipt.site': 'سایت پذیرنده',
   'receipt.share': 'اشتراک‌گذاری',
   'receipt.save': 'ذخیره در گالری',
-  
+
   // Transaction
   'transaction.merchant': 'پذیرنده',
   'transaction.amount': 'مبلغ',
@@ -84,15 +84,15 @@ export default {
   'transaction.showLess': 'نمایش کمتر',
   'transaction.rial': 'ریال',
   'transaction.toman': 'تومان',
-  
+
   // Pin Pad
   'pinPad.title': 'ورود رمز',
   'pinPad.clear': 'پاک کردن',
-  
+
   // Timer
   'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
-  
+
   // Errors
   'error.network': 'خطا در ارتباط با سرور',
   'error.invalidData': 'اطلاعات نامعتبر',

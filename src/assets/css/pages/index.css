@@ -1,22 +1,53 @@
 @import '../variables.css';
 
-.card-small {
-  order: 2;
-  max-width: 320px;
+/* Two-column layout like design: left small, right full */
+.grid.grid-2-col {
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-lg);
 }
 
-.card-large {
+/* RTL: small card on LEFT, large card on RIGHT */
+[dir="rtl"] .grid.grid-2-col > .card-small {
+  order: 2;
+  flex: 0 0 320px; /* fixed 320px column */
+}
+
+[dir="rtl"] .grid.grid-2-col > .card-large {
   order: 1;
+  flex: 1 1 auto; /* take remaining space */
+  min-width: 0;
+}
+
+/* LTR: small card on RIGHT, large card on LEFT */
+[dir="ltr"] .grid.grid-2-col > .card-small {
+  order: 2;
+  flex: 0 0 320px; /* fixed 320px column */
+}
+
+[dir="ltr"] .grid.grid-2-col > .card-large {
+  order: 1;
+  flex: 1 1 auto; /* take remaining space */
+  min-width: 0;
 }
 
 @media (max-width: 768px) {
-  .card-small {
-    order: 1;
-    max-width: none;
+  .grid.grid-2-col {
+    flex-direction: column;
   }
 
-  .card-large {
+  /* Mobile: small card first, large card second */
+  .grid.grid-2-col > .card-small {
+    order: 1;
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .grid.grid-2-col > .card-large {
     order: 2;
+    flex: 0 0 auto;
+    width: 100%;
   }
 }
 

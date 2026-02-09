@@ -13,6 +13,7 @@ import { validateCardNumber, validateCVV2, validateExpiryDate, validateMobile, v
 import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
 import { convertToEnglishNumbers, extractNumbers } from '../utils/numberConverter.js';
 import { dataStore } from '../services/dataStore.js';
+import { cardService } from '../services/cardService.js';
 import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
@@ -53,8 +54,8 @@ async function initializePage() {
       copyright: '© 2024 All rights reserved'
     });
 
-    // Load saved cards
-    cardList = dataStore.get('savedCards') || [];
+    // Load saved cards from API
+    await loadCards();
 
     // Initialize timer
     initializeTimer();
@@ -125,6 +126,30 @@ function initializeTimer() {
   });
 
   timer.start();
+}
+
+/**
+ * Load cards from API service
+ */
+async function loadCards() {
+  try {
+    const response = await cardService.getCards();
+    
+    if (response && response.Data && Array.isArray(response.Data)) {
+      // Convert API format to internal format
+      cardList = response.Data.map(card => cardService.convertCardFormat(card));
+      
+      // Also save to localStorage for offline access
+      dataStore.set('savedCards', cardList);
+    } else {
+      // Fallback to localStorage if API fails
+      cardList = dataStore.get('savedCards') || [];
+    }
+  } catch (error) {
+    console.error('Failed to load cards:', error);
+    // Fallback to localStorage
+    cardList = dataStore.get('savedCards') || [];
+  }
 }
 
 function initializeFormInputs() {
