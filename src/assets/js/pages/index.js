@@ -7,9 +7,14 @@ import { Input } from '../components/Input.js';
 import { Dropdown } from '../components/Dropdown.js';
 import { VirtualPinPad } from '../components/VirtualPinPad.js';
 import { Timer } from '../classes/Timer.js';
-import { Modal } from '../components/Modal.js';
 import { LoadingScreen } from '../components/LoadingScreen.js';
-import { validateCardNumber, validateCVV2, validateExpiryDate, validateMobile, validateEmail, validateOTP } from '../utils/validators.js';
+import {
+  validateCardNumber,
+  validateCVV2,
+  validateMobile,
+  validateEmail,
+  validateOTP,
+} from '../utils/validators.js';
 import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
 import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
 import { dataStore } from '../services/dataStore.js';
@@ -22,11 +27,21 @@ import { soundManager } from '../utils/sound.js';
 soundManager.init();
 
 // Initialize components
-let header, footer, timer, cardNumberInput, cvv2Input, expiryDateInput, captchaInput, otpInput, mobileInput, emailInput;
+let header,
+  footer,
+  timer,
+  cardNumberInput,
+  cvv2Input,
+  expiryDateInput,
+  captchaInput,
+  otpInput,
+  mobileInput,
+  emailInput;
 let cardDropdown, cvv2PinPad, otpPinPad;
 let cardList = [];
 let otpLabelElement = null;
 let captchaLabelElement = null;
+let isCurrentGiftCard = false;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -39,7 +54,7 @@ async function initializePage() {
   const loadingScreen = new LoadingScreen({
     logo: '/assets/images/logo.svg',
     text: i18n.t('common.loading'),
-    showProgressBar: true
+    showProgressBar: true,
   });
   loadingScreen.show();
 
@@ -49,13 +64,13 @@ async function initializePage() {
       title: i18n.t('header.title'),
       logo: '/assets/images/logo-shaparak.svg',
       secondaryLogo: '/assets/images/logo.svg',
-      showCard: false
+      showCard: false,
     });
 
     // Initialize footer
     footer = new Footer({
       logo: '/assets/images/logo.svg',
-      copyright: i18n.t('footer.copyright')
+      copyright: i18n.t('footer.copyright'),
     });
 
     // Load saved cards from API
@@ -90,7 +105,7 @@ async function initializePage() {
     errorHandler.show({
       message: i18n.t('error.unknown'),
       mode: 'toast',
-      type: 'error'
+      type: 'error',
     });
     loadingScreen.hide();
     loadingScreen.destroy();
@@ -130,9 +145,9 @@ function initializeTimer() {
       errorHandler.show({
         message: i18n.t('timer.expired'),
         mode: 'toast',
-        type: 'warning'
+        type: 'warning',
       });
-    }
+    },
   });
 
   timer.start();
@@ -147,7 +162,7 @@ async function loadCards() {
 
     if (response && response.Data && Array.isArray(response.Data)) {
       // Convert API format to internal format
-      cardList = response.Data.map(card => cardService.convertCardFormat(card));
+      cardList = response.Data.map((card) => cardService.convertCardFormat(card));
 
       // Also save to localStorage for offline access
       dataStore.set('savedCards', cardList);
@@ -165,22 +180,28 @@ async function loadCards() {
 function initializeFormInputs() {
   // Card Number Input
   const cardNumberContainer = document.getElementById('card-number-input-container');
+  const hasSavedCards = cardList.length > 0;
+  const cardNumberLabel = hasSavedCards
+    ? i18n.t('form.cardNumber.selectCard')
+    : i18n.t('form.cardNumber');
   cardNumberInput = new Input(cardNumberContainer, {
     id: 'card-number',
     name: 'cardNumber',
     type: 'text',
-    label: i18n.t('form.cardNumber'),
+    label: cardNumberLabel,
     placeholder: i18n.t('form.cardNumber.placeholder'),
     required: true,
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCardNumber,
     maxLength: 19, // 16 digits + 3 spaces
-    rightAction: cardList.length > 0 ? {
-      icon: '<img src=\"/assets/images/icons/icn-credit-card.svg\" alt=\"\" aria-hidden=\"true\" />',
-      label: i18n.t('form.showCards'),
-      onClick: () => toggleCardList()
-    } : null,
+    rightAction: hasSavedCards
+      ? {
+          icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" aria-hidden="true" />',
+          label: i18n.t('form.showCards'),
+          onClick: () => toggleCardList(),
+        }
+      : null,
     onInput: (value) => {
       // Format card number (4-4-4-4)
       const formatted = formatCardNumber(value);
@@ -191,6 +212,9 @@ function initializeFormInputs() {
       // Detect bank and show logo
       const bank = detectBank(value);
       updateBankLogo(bank);
+
+      // Detect gift card and notify
+      handleGiftCardNotificationFromPan(value);
 
       // Auto-open card list if cards exist and input is focused
       if (cardList.length > 0 && value.length === 0) {
@@ -205,7 +229,7 @@ function initializeFormInputs() {
           }
         }, 100);
       }
-    }
+    },
   });
 
   function getMaskedDisplayPan(securePan) {
@@ -221,7 +245,7 @@ function initializeFormInputs() {
   // Create card dropdown if cards exist
   if (cardList.length > 0) {
     cardDropdown = new Dropdown(cardNumberInput.element, {
-      items: cardList.map(card => ({
+      items: cardList.map((card) => ({
         text: getMaskedDisplayPan(card.securePan),
         value: card.number,
         html: (() => {
@@ -240,16 +264,55 @@ function initializeFormInputs() {
               </div>
             </div>
           `;
-        })()
+        })(),
       })),
       onSelect: (item) => {
-        const card = cardList.find(c => c.number === item.value);
+        const card = cardList.find((c) => c.number === item.value);
         if (card) {
           cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
-          updateBankLogo(detectBank(card.securePan));
+          // Use API bank name (Persian) for logo to avoid any BIN masking issues
+          updateBankLogo({ name: card.bankName });
+          handleGiftCardNotificationFromPan(card.securePan);
         }
-      }
+      },
     });
+  }
+
+  /**
+   * Detect if card is a gift card based on PAN pattern.
+   * Uses the same logic as:
+   * function isGiftCard(value) {
+   *   if (hasValue(value) && value.length != 2) {
+   *     return false;
+   *   }
+   *   return parseInt(value) >= 20 && parseInt(value) <= 49;
+   * }
+   * Here we derive the 2–digit value from the PAN.
+   */
+  function isGiftCardFromPan(pan) {
+    const numbers = extractNumbers(pan);
+    // Need at least 8 digits to extract a stable 2–digit segment
+    if (numbers.length < 8) return false;
+    // Take a 2–digit segment from the middle of the PAN (positions 7–8)
+    const value = numbers.substring(6, 8);
+    if (!value || value.length !== 2) {
+      return false;
+    }
+    const num = parseInt(value, 10);
+    if (Number.isNaN(num)) return false;
+    return num >= 20 && num <= 49;
+  }
+
+  function handleGiftCardNotificationFromPan(pan) {
+    const isGift = isGiftCardFromPan(pan);
+    if (isGift && !isCurrentGiftCard) {
+      errorHandler.show({
+        message: i18n.t('form.giftCardNotice'),
+        mode: 'toast',
+        type: 'info',
+      });
+    }
+    isCurrentGiftCard = isGift;
   }
 
   // CVV2 Input
@@ -260,14 +323,21 @@ function initializeFormInputs() {
     type: 'password',
     label: i18n.t('form.cvv2'),
     placeholder: i18n.t('form.cvv2.placeholder'),
+    hint: i18n.t('form.cvv2.hint'),
     required: true,
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCVV2,
     inputMode: 'numeric',
     maxLength: 4,
+    onInput: (value) => {
+      const digitsOnly = extractNumbers(value).slice(0, 4);
+      if (digitsOnly !== value) {
+        cvv2Input.setValue(digitsOnly);
+      }
+    },
     rightAction: {
-      icon: '<img src=\"/assets/images/icons/icn-pinpad.svg\" alt=\"\" aria-hidden=\"true\" />',
+      icon: '<img src="/assets/images/icons/icn-pinpad.svg" alt="" aria-hidden="true" />',
       label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!cvv2PinPad) {
@@ -275,12 +345,12 @@ function initializeFormInputs() {
             maxLength: 4,
             onInput: (value) => {
               cvv2Input.setValue(value);
-            }
+            },
           });
         }
         cvv2PinPad.open();
-      }
-    }
+      },
+    },
   });
 
   // Expiry Date Input (MM/YY format)
@@ -325,7 +395,7 @@ function initializeFormInputs() {
         return { valid: false, message: i18n.t('form.expiryDate.invalid') };
       }
       return { valid: true, message: '' };
-    }
+    },
   });
 
   // Captcha Input
@@ -335,7 +405,8 @@ function initializeFormInputs() {
   captchaLabelElement = document.createElement('label');
   captchaLabelElement.className = 'input-label';
   captchaLabelElement.setAttribute('for', 'captcha');
-  captchaLabelElement.innerHTML = i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+  captchaLabelElement.innerHTML =
+    i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
   captchaContainer.appendChild(captchaLabelElement);
 
   // Create flex wrapper for image and input
@@ -353,13 +424,20 @@ function initializeFormInputs() {
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
     maxLength: 6,
+    inputMode: 'numeric',
+    onInput: (value) => {
+      const digitsOnly = extractNumbers(value).slice(0, 6);
+      if (digitsOnly !== value) {
+        captchaInput.setValue(digitsOnly);
+      }
+    },
     rightAction: {
-      icon: '<img src=\"/assets/images/icons/icn-refresh.svg\" alt=\"\" aria-hidden=\"true\" />',
+      icon: '<img src="/assets/images/icons/icn-refresh.svg" alt="" aria-hidden="true" />',
       label: i18n.t('form.reloadCaptcha'),
       onClick: () => {
         captchaImage.src = '/api/captcha/image?' + Date.now();
-      }
-    }
+      },
+    },
   });
 
   // Hide the label inside input-wrapper since we have it separately
@@ -429,8 +507,14 @@ function initializeFormInputs() {
     validator: validateOTP,
     inputMode: 'numeric',
     maxLength: 6,
+    onInput: (value) => {
+      const digitsOnly = extractNumbers(value).slice(0, 6);
+      if (digitsOnly !== value) {
+        otpInput.setValue(digitsOnly);
+      }
+    },
     rightAction: {
-      icon: '<img src=\"/assets/images/icons/icn-pinpad.svg\" alt=\"\" aria-hidden=\"true\" />',
+      icon: '<img src="/assets/images/icons/icn-pinpad.svg" alt="" aria-hidden="true" />',
       label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!otpPinPad) {
@@ -441,12 +525,12 @@ function initializeFormInputs() {
             },
             onComplete: (value) => {
               otpPinPad.close();
-            }
+            },
           });
         }
         otpPinPad.open();
-      }
-    }
+      },
+    },
   });
 
   // Make OTP input wrapper flex to fill remaining space
@@ -468,7 +552,7 @@ function initializeFormInputs() {
     errorHandler.show({
       message: i18n.t('form.getOtpSuccess'),
       mode: 'toast',
-      type: 'success'
+      type: 'success',
     });
   };
   otpWrapper.appendChild(getOtpButton);
@@ -483,7 +567,13 @@ function initializeFormInputs() {
     label: i18n.t('form.mobile'),
     placeholder: i18n.t('form.mobile.placeholder'),
     validator: validateMobile,
-    inputMode: 'tel'
+    inputMode: 'tel',
+    onInput: (value) => {
+      const digitsOnly = extractNumbers(value);
+      if (digitsOnly !== value) {
+        mobileInput.setValue(digitsOnly);
+      }
+    },
   });
 
   // Email Input (hidden initially)
@@ -494,7 +584,7 @@ function initializeFormInputs() {
     type: 'email',
     label: i18n.t('form.email'),
     placeholder: i18n.t('form.email.placeholder'),
-    validator: validateEmail
+    validator: validateEmail,
   });
 }
 
@@ -513,9 +603,12 @@ function updateBankLogo(bank) {
   if (!logoWrapper) {
     logoWrapper = document.createElement('div');
     logoWrapper.className = 'card-bank-logo';
+    // Insert as first child so that in LTR it appears on the left,
+    // and in RTL (with flex-row) it appears on the right – opposite side of actions
     container.insertBefore(logoWrapper, container.firstChild);
   }
 
+  // If no bank detected or no valid logo, hide the logo inside input
   if (!bank || !bank.name) {
     logoWrapper.innerHTML = '';
     logoWrapper.classList.add('hidden');
@@ -523,7 +616,8 @@ function updateBankLogo(bank) {
   }
 
   const logoPath = getBankLogo(bank.name);
-  if (!logoPath) {
+  // If getBankLogo falls back to generic info icon or returns nothing, hide in input
+  if (!logoPath || logoPath.includes('/assets/images/icons/icn-square-info.svg')) {
     logoWrapper.innerHTML = '';
     logoWrapper.classList.add('hidden');
     return;
@@ -547,7 +641,7 @@ function initializeTransactionInfo() {
     merchant: 'فروشگاه نمونه',
     amount: 100000, // in Rials
     terminal: '12345678',
-    site: 'example.com'
+    site: 'example.com',
   };
 
   // Convert amount to Tomans (divide by 10)
@@ -592,7 +686,7 @@ function initializeTransactionInfo() {
         <div class="transaction-info-content">
           <div class="transaction-info-label">${i18n.t('transaction.amount')}</div>
           <div class="transaction-info-value">
-            <div class="transaction-amount-rial">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
+            <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
             <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
           </div>
         </div>
@@ -616,6 +710,42 @@ function initializeTransactionInfo() {
       }
     };
   }
+  // Initialize pay button label with current amount
+  setPayButtonState('active');
+}
+
+function getTransactionAmountFromDom() {
+  const rialElement = document.querySelector('.transaction-amount-rial');
+  if (!rialElement) return null;
+  const amountAttr = rialElement.getAttribute('data-amount');
+  if (!amountAttr) return null;
+  const amount = parseInt(amountAttr, 10);
+  return Number.isNaN(amount) ? null : amount;
+}
+
+function setPayButtonState(state) {
+  const payButton = document.getElementById('pay-button');
+  if (!payButton) return;
+
+  const amount = getTransactionAmountFromDom();
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  const locale = ['fa', 'ar'].includes(lang) ? 'fa-IR' : 'en-US';
+
+  if (state === 'active') {
+    if (typeof amount === 'number') {
+      const formattedAmount = amount.toLocaleString(locale);
+      payButton.textContent = `${i18n.t('form.pay.securePrefix')} ${formattedAmount} ${i18n.t('transaction.rial')}`;
+    } else {
+      payButton.textContent = i18n.t('form.pay.securePrefix');
+    }
+    payButton.disabled = false;
+  } else if (state === 'disabled') {
+    payButton.textContent = i18n.t('form.pay.disabled');
+    payButton.disabled = false;
+  } else if (state === 'processing') {
+    payButton.textContent = i18n.t('form.pay.processing');
+    payButton.disabled = true;
+  }
 }
 
 function initializePartnerLogos() {
@@ -623,10 +753,7 @@ function initializePartnerLogos() {
   const section = document.getElementById('partner-logos-section');
 
   // Mock partner logos - can be empty array
-  const logos = [
-    '/assets/images/partners/logo1.svg',
-    '/assets/images/partners/logo2.svg'
-  ];
+  const logos = ['/assets/images/partners/logo1.svg', '/assets/images/partners/logo2.svg'];
 
   // Hide section if no logos
   if (!logos || logos.length === 0) {
@@ -645,7 +772,7 @@ function initializePartnerLogos() {
   container.innerHTML = '';
 
   // Add logos (max 2 logos side by side)
-  logos.slice(0, 2).forEach(src => {
+  logos.slice(0, 2).forEach((src) => {
     const img = document.createElement('img');
     img.src = src;
     img.className = 'partner-logo';
@@ -658,7 +785,9 @@ function initializePartnerLogos() {
   });
 
   // Hide section if no valid logos were added
-  const visibleLogos = Array.from(container.children).filter(img => !img.classList.contains('hidden'));
+  const visibleLogos = Array.from(container.children).filter(
+    (img) => !img.classList.contains('hidden')
+  );
   if (visibleLogos.length === 0) {
     if (section) {
       section.classList.add('hidden');
@@ -676,8 +805,9 @@ function initializePartnerLogos() {
 
 function attachFormEvents() {
   const form = document.getElementById('payment-form');
-  const showReceiptButton = document.getElementById('show-receipt-button');
+  const showReceiptToggle = document.getElementById('show-receipt-toggle');
   const receiptFields = document.getElementById('receipt-fields');
+  const payButton = document.getElementById('pay-button');
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -688,37 +818,53 @@ function attachFormEvents() {
       cvv2Input.validate(),
       expiryDateInput.validate(),
       captchaInput.validate(),
-      otpInput.validate()
-    ].every(v => v);
+      otpInput.validate(),
+    ].every((v) => v);
 
     if (!isValid) {
+      setPayButtonState('disabled');
       errorHandler.show({
         message: i18n.t('form.validation.error'),
         mode: 'toast',
-        type: 'error'
+        type: 'error',
       });
+
+      // Restore active state after a short delay
+      setTimeout(() => {
+        setPayButtonState('active');
+      }, 2000);
       return;
     }
 
     // Submit form
     // This would call the payment API
+    setPayButtonState('processing');
     soundManager.beep();
     errorHandler.show({
-      message: i18n.t('common.processing'),
+      message: i18n.t('form.pay.processing'),
       mode: 'toast',
-      type: 'info'
+      type: 'info',
     });
   });
 
-  showReceiptButton.addEventListener('click', () => {
-    const isShowing = receiptFields.classList.contains('show');
-    if (isShowing) {
-      receiptFields.classList.remove('show');
-    } else {
-      receiptFields.classList.add('show');
-      showReceiptButton.classList.add('hidden');
-    }
-  });
+  if (showReceiptToggle) {
+    const iconWrapper = document.querySelector('.show-receipt-icon img');
+
+    showReceiptToggle.addEventListener('change', () => {
+      const isChecked = showReceiptToggle.checked;
+      if (isChecked) {
+        receiptFields.classList.add('show');
+        if (iconWrapper) {
+          iconWrapper.src = '/assets/images/icons/icn-square-minus.svg';
+        }
+      } else {
+        receiptFields.classList.remove('show');
+        if (iconWrapper) {
+          iconWrapper.src = '/assets/images/icons/icn-square-plus.svg';
+        }
+      }
+    });
+  }
 
   document.getElementById('cancel-button').addEventListener('click', () => {
     if (confirm(i18n.t('form.confirmCancel'))) {
@@ -750,12 +896,26 @@ function updatePageContent() {
   }
 
   const i18nElements = document.querySelectorAll('[data-i18n]');
-  i18nElements.forEach(element => {
+  i18nElements.forEach((element) => {
     const key = element.getAttribute('data-i18n');
     if (key) {
       element.textContent = i18n.t(key);
     }
   });
+
+  // Update card number label based on saved cards and current language
+  if (cardNumberInput && cardNumberInput.labelElement) {
+    const hasSavedCards = cardList.length > 0;
+    const cardLabel = hasSavedCards
+      ? i18n.t('form.cardNumber.selectCard')
+      : i18n.t('form.cardNumber');
+    // Preserve required asterisk if present
+    const requiredSpan = cardNumberInput.labelElement.querySelector('.input-required');
+    cardNumberInput.labelElement.textContent = cardLabel;
+    if (requiredSpan) {
+      cardNumberInput.labelElement.appendChild(requiredSpan);
+    }
+  }
 
   // Update form labels and placeholders
   if (cardNumberInput) {
@@ -773,7 +933,8 @@ function updatePageContent() {
   if (captchaInput) {
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
     if (captchaLabelElement) {
-      captchaLabelElement.innerHTML = i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+      captchaLabelElement.innerHTML =
+        i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
     }
   }
   const captchaImg = document.querySelector('.captcha-image');
@@ -843,4 +1004,7 @@ function updatePageContent() {
   }
 
   // Checkbox label is now updated via data-i18n above
+
+  // Ensure pay button label uses current language and amount
+  setPayButtonState('active');
 }

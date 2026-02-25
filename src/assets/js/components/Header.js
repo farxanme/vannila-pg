@@ -12,7 +12,7 @@ export class Header {
       showCard: options.showCard !== false,
       cardContent: options.cardContent || null,
       onLanguageChange: options.onLanguageChange || null,
-      ...options
+      ...options,
     };
 
     this.init();
@@ -109,14 +109,14 @@ export class Header {
 
     const currentLang = i18n.getLanguage();
     const languages = i18n.getAvailableLanguages();
-    const currentLangObj = languages.find(l => l.code === currentLang);
+    const currentLangObj = languages.find((l) => l.code === currentLang);
     button.textContent = currentLangObj?.nativeName || currentLang.toUpperCase();
 
     const dropdown = document.createElement('div');
     dropdown.className = 'lang-dropdown-menu';
     dropdown.style.display = 'none';
 
-    languages.forEach(lang => {
+    languages.forEach((lang) => {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = `lang-dropdown-item ${lang.code === currentLang ? 'active' : ''}`;

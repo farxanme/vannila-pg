@@ -18,38 +18,38 @@ export function validateCardNumber(cardNumber) {
   }
 
   const numbers = extractNumbers(cardNumber);
-  
+
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: 'Card number is required' };
   }
-  
+
   if (numbers.length !== 16) {
     return { valid: false, message: 'Card number must be 16 digits' };
   }
-  
+
   // Luhn algorithm check
   let sum = 0;
   let isEven = false;
-  
+
   for (let i = numbers.length - 1; i >= 0; i--) {
     let digit = parseInt(numbers[i]);
-    
+
     if (isEven) {
       digit *= 2;
       if (digit > 9) {
         digit -= 9;
       }
     }
-    
+
     sum += digit;
     isEven = !isEven;
   }
-  
+
   const valid = sum % 10 === 0;
-  
+
   return {
     valid,
-    message: valid ? '' : 'Invalid card number'
+    message: valid ? '' : 'Invalid card number',
   };
 }
 
@@ -60,19 +60,23 @@ export function validateCardNumber(cardNumber) {
  */
 export function validateMobile(mobile) {
   const numbers = extractNumbers(mobile);
-  
+
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: 'Mobile number is required' };
   }
-  
+
   // Iranian mobile: 09xxxxxxxxx (11 digits) or 9xxxxxxxxx (10 digits)
   const pattern = /^(09|\+989|989|9)\d{9}$/;
-  const cleanMobile = numbers.startsWith('09') ? numbers : (numbers.startsWith('9') ? '0' + numbers : numbers);
-  
+  const cleanMobile = numbers.startsWith('09')
+    ? numbers
+    : numbers.startsWith('9')
+      ? '0' + numbers
+      : numbers;
+
   if (!pattern.test(cleanMobile) || cleanMobile.length !== 11) {
     return { valid: false, message: 'Invalid mobile number format' };
   }
-  
+
   return { valid: true, message: '' };
 }
 
@@ -85,13 +89,13 @@ export function validateEmail(email) {
   if (!email || email.trim() === '') {
     return { valid: false, message: 'Email is required' };
   }
-  
+
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   const valid = pattern.test(email);
-  
+
   return {
     valid,
-    message: valid ? '' : 'Invalid email format'
+    message: valid ? '' : 'Invalid email format',
   };
 }
 
@@ -102,15 +106,15 @@ export function validateEmail(email) {
  */
 export function validateCVV2(cvv) {
   const numbers = extractNumbers(cvv);
-  
+
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: 'CVV2 is required' };
   }
-  
+
   if (numbers.length < 3 || numbers.length > 4) {
     return { valid: false, message: 'CVV2 must be 3 or 4 digits' };
   }
-  
+
   return { valid: true, message: '' };
 }
 
@@ -123,25 +127,25 @@ export function validateCVV2(cvv) {
 export function validateExpiryDate(month, year) {
   const monthNum = parseInt(extractNumbers(month));
   const yearNum = parseInt(extractNumbers(year));
-  
+
   if (!month || !year) {
     return { valid: false, message: 'Expiry date is required' };
   }
-  
+
   if (monthNum < 1 || monthNum > 12) {
     return { valid: false, message: 'Invalid month' };
   }
-  
+
   // Convert 2-digit year to 4-digit
   const fullYear = yearNum < 100 ? 2000 + yearNum : yearNum;
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonth = currentDate.getMonth() + 1;
-  
+
   if (fullYear < currentYear || (fullYear === currentYear && monthNum < currentMonth)) {
     return { valid: false, message: 'Card has expired' };
   }
-  
+
   return { valid: true, message: '' };
 }
 
@@ -165,14 +169,14 @@ export function validateRequired(value, fieldName = 'Field') {
  */
 export function validateOTP(otp) {
   const numbers = extractNumbers(otp);
-  
+
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: 'OTP is required' };
   }
-  
+
   if (numbers.length !== 6) {
     return { valid: false, message: 'OTP must be 6 digits' };
   }
-  
+
   return { valid: true, message: '' };
 }

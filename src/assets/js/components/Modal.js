@@ -14,9 +14,9 @@ export class Modal {
       showCloseButton: options.showCloseButton !== false,
       buttons: options.buttons || [],
       onClose: options.onClose || null,
-      ...options
+      ...options,
     };
-    
+
     this.isMobile = window.innerWidth <= 768;
     this.modalInstance = null;
     this.init();
@@ -32,12 +32,12 @@ export class Modal {
     } else {
       this.initModal();
     }
-    
+
     // Listen for resize to switch between modal and bottom sheet
     window.addEventListener('resize', () => {
       const wasMobile = this.isMobile;
       this.isMobile = window.innerWidth <= 768;
-      
+
       if (wasMobile !== this.isMobile) {
         this.destroy();
         this.init();
@@ -50,12 +50,12 @@ export class Modal {
    */
   initBottomSheet() {
     const buttons = [...this.options.buttons];
-    
+
     this.modalInstance = new BottomSheet({
       title: this.options.title,
       content: this.createMobileContent(),
       buttons: buttons,
-      onClose: this.options.onClose
+      onClose: this.options.onClose,
     });
   }
 
@@ -66,14 +66,14 @@ export class Modal {
   createMobileContent() {
     const container = document.createElement('div');
     container.className = 'modal-content-mobile';
-    
+
     if (this.options.description) {
       const desc = document.createElement('p');
       desc.className = 'modal-description';
       desc.textContent = this.options.description;
       container.appendChild(desc);
     }
-    
+
     if (this.options.image) {
       const img = document.createElement('img');
       img.src = this.options.image;
@@ -81,7 +81,7 @@ export class Modal {
       img.className = 'modal-image';
       container.appendChild(img);
     }
-    
+
     if (typeof this.options.content === 'string') {
       const content = document.createElement('div');
       content.innerHTML = this.options.content;
@@ -89,7 +89,7 @@ export class Modal {
     } else if (this.options.content instanceof HTMLElement) {
       container.appendChild(this.options.content);
     }
-    
+
     return container;
   }
 
@@ -162,33 +162,33 @@ export class Modal {
     // Body content
     const body = document.createElement('div');
     body.className = 'modal-body';
-    
+
     if (typeof this.options.content === 'string') {
       body.innerHTML = this.options.content;
     } else if (this.options.content instanceof HTMLElement) {
       body.appendChild(this.options.content);
     }
-    
+
     content.appendChild(body);
 
     // Buttons
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'modal-buttons';
-      
+
       this.options.buttons.forEach((button) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `btn btn-${button.type || 'secondary'}`;
         btn.textContent = button.text || '';
-        
+
         if (button.icon) {
           const icon = document.createElement('span');
           icon.className = 'btn-icon';
           icon.innerHTML = button.icon;
           btn.insertBefore(icon, btn.firstChild);
         }
-        
+
         btn.onclick = () => {
           if (button.onClick) {
             button.onClick(this);
@@ -197,16 +197,16 @@ export class Modal {
             this.close();
           }
         };
-        
+
         buttonsContainer.appendChild(btn);
       });
-      
+
       content.appendChild(buttonsContainer);
     }
 
     modal.appendChild(content);
     this.modalElement = modal;
-    
+
     document.body.appendChild(backdrop);
     document.body.appendChild(modal);
   }
@@ -240,9 +240,11 @@ export class Modal {
         document.body.style.overflow = 'hidden';
         this.backdrop.classList.add('show');
         this.modalElement.classList.add('show');
-        
+
         // Focus trap
-        const firstFocusable = this.modalElement.querySelector('button, input, textarea, select, a[href]');
+        const firstFocusable = this.modalElement.querySelector(
+          'button, input, textarea, select, a[href]'
+        );
         if (firstFocusable) {
           firstFocusable.focus();
         }
@@ -262,7 +264,7 @@ export class Modal {
         this.backdrop.classList.remove('show');
         this.modalElement.classList.remove('show');
         document.body.style.overflow = '';
-        
+
         setTimeout(() => {
           if (this.options.onClose) {
             this.options.onClose();

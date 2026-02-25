@@ -20,12 +20,12 @@ async function initializePage() {
     title: i18n.t('header.title'),
     logo: '/assets/images/logo-shaparak.svg',
     secondaryLogo: '/assets/images/logo.svg',
-    showCard: false
+    showCard: false,
   });
 
   footer = new Footer({
     logo: '/assets/images/logo.svg',
-    copyright: i18n.t('footer.copyright')
+    copyright: i18n.t('footer.copyright'),
   });
 
   // Load receipt data from URL params or storage
@@ -41,7 +41,7 @@ async function initializePage() {
     merchant: 'فروشگاه نمونه',
     date: new Date().toLocaleString('fa-IR'),
     cardNumber: '****1234',
-    type: 'خرید'
+    type: 'خرید',
   });
 
   attachEvents();
@@ -56,7 +56,7 @@ function updateReceiptLanguage() {
   if (footer) {
     footer.updateCopyright(i18n.t('footer.copyright'));
   }
-  document.querySelectorAll('[data-i18n]').forEach(el => {
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
     const key = el.getAttribute('data-i18n');
     if (key) el.textContent = i18n.t(key);
   });
@@ -79,10 +79,15 @@ function updateReceiptContent(data) {
 
   // Update status
   statusBadge.className = `badge badge-${data.status === 'success' ? 'success' : 'danger'}`;
-  statusBadge.textContent = data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
+  statusBadge.textContent =
+    data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
 
-  title.textContent = data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
-  subtitle.textContent = data.status === 'success' ? i18n.t('receipt.paymentSuccessDesc') : i18n.t('receipt.paymentFailedDesc');
+  title.textContent =
+    data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
+  subtitle.textContent =
+    data.status === 'success'
+      ? i18n.t('receipt.paymentSuccessDesc')
+      : i18n.t('receipt.paymentFailedDesc');
 
   amount.textContent = `${data.amount.toLocaleString()} ریال`;
   type.textContent = data.type;
@@ -100,7 +105,7 @@ function attachEvents() {
   shareButton.addEventListener('click', async () => {
     const receiptText = generateReceiptText();
     const success = await shareContent({
-      text: receiptText
+      text: receiptText,
     });
 
     if (!success) {
@@ -113,7 +118,7 @@ function attachEvents() {
   saveButton.addEventListener('click', async () => {
     const success = await shareContent({
       element: receiptCard,
-      text: i18n.t('receipt.shareText')
+      text: i18n.t('receipt.shareText'),
     });
 
     if (!success) {

@@ -9,9 +9,9 @@ export class BottomSheet {
       buttons: options.buttons || [],
       scrollable: options.scrollable !== false,
       onClose: options.onClose || null,
-      ...options
+      ...options,
     };
-    
+
     this.isOpen = false;
     this.startY = 0;
     this.currentY = 0;
@@ -61,13 +61,13 @@ export class BottomSheet {
     // Content
     const content = document.createElement('div');
     content.className = `bottom-sheet-content ${this.options.scrollable ? 'scrollable' : ''}`;
-    
+
     if (typeof this.options.content === 'string') {
       content.innerHTML = this.options.content;
     } else if (this.options.content instanceof HTMLElement) {
       content.appendChild(this.options.content);
     }
-    
+
     sheet.appendChild(content);
     this.contentElement = content;
 
@@ -75,20 +75,20 @@ export class BottomSheet {
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'bottom-sheet-buttons';
-      
-      this.options.buttons.forEach((button, index) => {
+
+      this.options.buttons.forEach((button, _index) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `btn btn-${button.type || 'secondary'}`;
         btn.textContent = button.text || '';
-        
+
         if (button.icon) {
           const icon = document.createElement('span');
           icon.className = 'btn-icon';
           icon.innerHTML = button.icon;
           btn.insertBefore(icon, btn.firstChild);
         }
-        
+
         btn.onclick = () => {
           if (button.onClick) {
             button.onClick(this);
@@ -97,10 +97,10 @@ export class BottomSheet {
             this.close();
           }
         };
-        
+
         buttonsContainer.appendChild(btn);
       });
-      
+
       sheet.appendChild(buttonsContainer);
     }
 
@@ -114,10 +114,16 @@ export class BottomSheet {
    */
   attachEvents() {
     // Touch events for swipe
-    this.sheetElement.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
-    this.sheetElement.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: false });
-    this.sheetElement.addEventListener('touchend', this.handleTouchEnd.bind(this), { passive: true });
-    
+    this.sheetElement.addEventListener('touchstart', this.handleTouchStart.bind(this), {
+      passive: true,
+    });
+    this.sheetElement.addEventListener('touchmove', this.handleTouchMove.bind(this), {
+      passive: false,
+    });
+    this.sheetElement.addEventListener('touchend', this.handleTouchEnd.bind(this), {
+      passive: true,
+    });
+
     // Keyboard events
     document.addEventListener('keydown', this.handleKeyDown.bind(this));
   }
@@ -137,10 +143,10 @@ export class BottomSheet {
    */
   handleTouchMove(e) {
     if (!this.isDragging) return;
-    
+
     this.currentY = e.touches[0].clientY;
     const deltaY = this.currentY - this.startY;
-    
+
     // Only allow downward swipe
     if (deltaY > 0) {
       e.preventDefault();
@@ -153,12 +159,12 @@ export class BottomSheet {
    * Handle touch end
    * @param {TouchEvent} e - Touch event
    */
-  handleTouchEnd(e) {
+  handleTouchEnd(_e) {
     if (!this.isDragging) return;
-    
+
     this.isDragging = false;
     const deltaY = this.currentY - this.startY;
-    
+
     // Close if swiped down more than 100px
     if (deltaY > 100) {
       this.close();
@@ -184,14 +190,16 @@ export class BottomSheet {
    */
   open() {
     if (this.isOpen) return;
-    
+
     this.isOpen = true;
     document.body.style.overflow = 'hidden';
     this.backdrop.classList.add('show');
     this.sheetElement.classList.add('show');
-    
+
     // Focus trap
-    const firstFocusable = this.sheetElement.querySelector('button, input, textarea, select, a[href]');
+    const firstFocusable = this.sheetElement.querySelector(
+      'button, input, textarea, select, a[href]'
+    );
     if (firstFocusable) {
       firstFocusable.focus();
     }
@@ -202,12 +210,12 @@ export class BottomSheet {
    */
   close() {
     if (!this.isOpen) return;
-    
+
     this.isOpen = false;
     this.backdrop.classList.remove('show');
     this.sheetElement.classList.remove('show');
     document.body.style.overflow = '';
-    
+
     setTimeout(() => {
       if (this.options.onClose) {
         this.options.onClose();

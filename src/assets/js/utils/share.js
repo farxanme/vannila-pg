@@ -7,17 +7,17 @@
  */
 export async function shareContent(options) {
   const { text, element } = options;
-  
+
   // If element provided, take screenshot
   if (element) {
     return await shareScreenshot(element, text);
   }
-  
+
   // Share text using Web Share API
   if (navigator.share && text) {
     try {
       await navigator.share({
-        text: text
+        text: text,
       });
       return true;
     } catch (err) {
@@ -27,13 +27,13 @@ export async function shareContent(options) {
       return false;
     }
   }
-  
+
   // Fallback: copy to clipboard
   if (text) {
     const { copyToClipboard } = await import('./clipboard.js');
     return await copyToClipboard(text);
   }
-  
+
   return false;
 }
 
@@ -49,16 +49,16 @@ async function shareScreenshot(element, caption) {
     if (typeof html2canvas !== 'undefined') {
       const canvas = await html2canvas(element, {
         backgroundColor: '#ffffff',
-        scale: 2
+        scale: 2,
       });
-      
+
       canvas.toBlob((blob) => {
         const file = new File([blob], 'receipt.png', { type: 'image/png' });
-        
+
         if (navigator.share && navigator.canShare({ files: [file] })) {
           navigator.share({
             files: [file],
-            text: caption || ''
+            text: caption || '',
           });
         } else {
           // Download as fallback
@@ -70,7 +70,7 @@ async function shareScreenshot(element, caption) {
           URL.revokeObjectURL(url);
         }
       });
-      
+
       return true;
     } else {
       // Fallback: copy text if html2canvas not available

@@ -34,6 +34,7 @@ export default {
   'form.cvv2': 'CVV2',
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 gereklidir',
+  'form.cvv2.hint': 'Kartın arkasındaki 3 veya 4 haneli kod',
   'form.expiryDate': 'Son Kullanma Tarihi',
   'form.expiryMonth': 'Ay',
   'form.expiryYear': 'Yıl',
@@ -54,6 +55,9 @@ export default {
   'form.email.invalid': 'Geçersiz e-posta',
   'form.saveCard': 'Kartı SEP ağ geçidinde kaydet',
   'form.pay': 'Öde',
+  'form.pay.securePrefix': 'Güvenli ödeme',
+  'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
+  'form.pay.processing': 'Banka ile bağlantı kuruluyor...',
   'form.cancel': 'İptal',
   'form.showReceipt': 'Fişi Göster',
   'form.title': 'Ödeme Bilgileri',
@@ -84,7 +88,7 @@ export default {
   'cardList.delete': 'Sil',
   'cardList.deleteConfirm': 'Bu kartı silmek istediğinizden emin misiniz?',
   'cardList.empty': 'Kayıtlı kart yok',
-  
+
   // Receipt
   'receipt.success': 'İşlem Başarılı',
   'receipt.failed': 'İşlem Başarısız',
@@ -111,17 +115,17 @@ export default {
   'transaction.showLess': 'Daha Az Göster',
   'transaction.rial': 'Riyal',
   'transaction.toman': 'Toman',
-  
+
   // Pin Pad
   'pinPad.title': 'PIN Gir',
   'pinPad.clear': 'Temizle',
-  
+
   // Timer
   'timer.title': 'Kalan Süre',
   'timer.expired': 'Süre doldu',
-  
+
   // Errors
   'error.network': 'Ağ hatası',
   'error.invalidData': 'Geçersiz veri',
-  'error.unknown': 'Bilinmeyen hata'
+  'error.unknown': 'Bilinmeyen hata',
 };

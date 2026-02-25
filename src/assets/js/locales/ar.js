@@ -34,6 +34,7 @@ export default {
   'form.cvv2': 'CVV2',
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 مطلوب',
+  'form.cvv2.hint': 'الرمز المكون من 3 أو 4 أرقام خلف البطاقة',
   'form.expiryDate': 'تاريخ الانتهاء',
   'form.expiryMonth': 'الشهر',
   'form.expiryYear': 'السنة',
@@ -54,6 +55,9 @@ export default {
   'form.email.invalid': 'البريد الإلكتروني غير صالح',
   'form.saveCard': 'حفظ البطاقة في بوابة SEP',
   'form.pay': 'دفع',
+  'form.pay.securePrefix': 'دفع آمن',
+  'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
+  'form.pay.processing': 'جارٍ الاتصال بالبنك...',
   'form.cancel': 'إلغاء',
   'form.showReceipt': 'عرض الإيصال',
   'form.title': 'معلومات الدفع',
@@ -84,7 +88,7 @@ export default {
   'cardList.delete': 'حذف',
   'cardList.deleteConfirm': 'هل أنت متأكد من حذف هذه البطاقة؟',
   'cardList.empty': 'لا توجد بطاقات مسجلة',
-  
+
   // Receipt
   'receipt.success': 'نجحت المعاملة',
   'receipt.failed': 'فشلت المعاملة',
@@ -111,17 +115,17 @@ export default {
   'transaction.showLess': 'عرض أقل',
   'transaction.rial': 'ريال',
   'transaction.toman': 'تومان',
-  
+
   // Pin Pad
   'pinPad.title': 'أدخل PIN',
   'pinPad.clear': 'مسح',
-  
+
   // Timer
   'timer.title': 'الوقت المتبقي',
   'timer.expired': 'انتهى الوقت',
-  
+
   // Errors
   'error.network': 'خطأ في الشبكة',
   'error.invalidData': 'بيانات غير صالحة',
-  'error.unknown': 'خطأ غير معروف'
+  'error.unknown': 'خطأ غير معروف',
 };

@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const loadingScreen = new LoadingScreen({
     logo: '/assets/images/logo-full.svg',
     text: i18n.t('redirect.loading'),
-    showProgressBar: true
+    showProgressBar: true,
   });
   loadingScreen.show();
 
@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   form.action = redirectUrl;
-  Object.keys(formData).forEach(key => {
+  Object.keys(formData).forEach((key) => {
     const input = document.createElement('input');
     input.type = 'hidden';
     input.name = key;

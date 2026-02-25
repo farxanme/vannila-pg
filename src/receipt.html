@@ -1,101 +1,104 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#007bff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>رسید تراکنش</title>
-  
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
-  
-  <!-- Styles -->
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/layout.css">
-  <link rel="stylesheet" href="/assets/css/pages/receipt.css">
-</head>
-<body>
-  <div id="app">
-    <!-- Header will be inserted here -->
-    
-    <main class="main-content">
-      <div class="container">
-        <div class="receipt-container">
-          <div class="card" id="receipt-card">
-            <!-- Receipt Header -->
-            <div class="receipt-header">
-              <div class="receipt-status">
-                <span class="badge badge-success" id="receipt-status-badge">موفق</span>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#007bff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>رسید تراکنش</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/components.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/pages/receipt.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header will be inserted here -->
+
+      <main class="main-content">
+        <div class="container">
+          <div class="receipt-container">
+            <div class="card" id="receipt-card">
+              <!-- Receipt Header -->
+              <div class="receipt-header">
+                <div class="receipt-status">
+                  <span class="badge badge-success" id="receipt-status-badge">موفق</span>
+                </div>
+                <h1 class="receipt-title" id="receipt-title">تراکنش موفق</h1>
+                <p class="receipt-subtitle" id="receipt-subtitle">پرداخت با موفقیت انجام شد</p>
+                <div class="receipt-amount" id="receipt-amount">100,000 ریال</div>
+                <div class="receipt-type" id="receipt-type">خرید</div>
               </div>
-              <h1 class="receipt-title" id="receipt-title">تراکنش موفق</h1>
-              <p class="receipt-subtitle" id="receipt-subtitle">پرداخت با موفقیت انجام شد</p>
-              <div class="receipt-amount" id="receipt-amount">100,000 ریال</div>
-              <div class="receipt-type" id="receipt-type">خرید</div>
-            </div>
-            
-            <div class="transaction-divider"></div>
-            
-            <!-- Merchant Info -->
-            <div class="transaction-info">
-              <h3 class="transaction-info-section-title">اطلاعات پذیرنده</h3>
-              <div class="transaction-info-item">
-                <span class="transaction-info-label">پذیرنده:</span>
-                <span class="transaction-info-value" id="merchant-name">فروشگاه نمونه</span>
+
+              <div class="transaction-divider"></div>
+
+              <!-- Merchant Info -->
+              <div class="transaction-info">
+                <h3 class="transaction-info-section-title">اطلاعات پذیرنده</h3>
+                <div class="transaction-info-item">
+                  <span class="transaction-info-label">پذیرنده:</span>
+                  <span class="transaction-info-value" id="merchant-name">فروشگاه نمونه</span>
+                </div>
               </div>
-            </div>
-            
-            <div class="transaction-divider"></div>
-            
-            <!-- Transaction Info -->
-            <div class="transaction-info">
-              <h3 class="transaction-info-section-title">اطلاعات تراکنش</h3>
-              <div class="transaction-info-item">
-                <span class="transaction-info-label">شماره تراکنش:</span>
-                <span class="transaction-info-value" id="transaction-id">123456789</span>
+
+              <div class="transaction-divider"></div>
+
+              <!-- Transaction Info -->
+              <div class="transaction-info">
+                <h3 class="transaction-info-section-title">اطلاعات تراکنش</h3>
+                <div class="transaction-info-item">
+                  <span class="transaction-info-label">شماره تراکنش:</span>
+                  <span class="transaction-info-value" id="transaction-id">123456789</span>
+                </div>
+                <div class="transaction-info-item">
+                  <span class="transaction-info-label">تاریخ:</span>
+                  <span class="transaction-info-value" id="transaction-date">1403/02/15 14:30</span>
+                </div>
+                <div class="transaction-info-item">
+                  <span class="transaction-info-label">شماره کارت:</span>
+                  <span class="transaction-info-value" id="card-number">****1234</span>
+                </div>
               </div>
-              <div class="transaction-info-item">
-                <span class="transaction-info-label">تاریخ:</span>
-                <span class="transaction-info-value" id="transaction-date">1403/02/15 14:30</span>
+
+              <div class="transaction-divider"></div>
+
+              <!-- Actions -->
+              <div class="receipt-actions">
+                <button type="button" class="btn btn-primary btn-bordered" id="share-button">
+                  <span class="btn-icon" aria-hidden="true">📤</span>
+                  <span data-i18n="receipt.share">اشتراک‌گذاری</span>
+                </button>
+                <button type="button" class="btn btn-success" id="save-button">
+                  <span class="btn-icon" aria-hidden="true">💾</span>
+                  <span data-i18n="receipt.save">ذخیره در گالری</span>
+                </button>
               </div>
-              <div class="transaction-info-item">
-                <span class="transaction-info-label">شماره کارت:</span>
-                <span class="transaction-info-value" id="card-number">****1234</span>
+
+              <!-- Logo -->
+              <div class="receipt-logo">
+                <img src="/assets/images/logo-small.png" alt="Logo" />
               </div>
-            </div>
-            
-            <div class="transaction-divider"></div>
-            
-            <!-- Actions -->
-            <div class="receipt-actions">
-              <button type="button" class="btn btn-primary btn-bordered" id="share-button">
-                <span class="btn-icon" aria-hidden="true">📤</span>
-                <span data-i18n="receipt.share">اشتراک‌گذاری</span>
-              </button>
-              <button type="button" class="btn btn-success" id="save-button">
-                <span class="btn-icon" aria-hidden="true">💾</span>
-                <span data-i18n="receipt.save">ذخیره در گالری</span>
-              </button>
-            </div>
-            
-            <!-- Logo -->
-            <div class="receipt-logo">
-              <img src="/assets/images/logo-small.png" alt="Logo">
             </div>
           </div>
         </div>
-      </div>
-    </main>
-    
-    <!-- Footer will be inserted here -->
-  </div>
-  
-  <!-- Scripts -->
-  <script type="module" src="/assets/js/main.js"></script>
-  <script type="module" src="/assets/js/pages/receipt.js"></script>
-</body>
+      </main>
+
+      <!-- Footer will be inserted here -->
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/assets/js/main.js"></script>
+    <script type="module" src="/assets/js/pages/receipt.js"></script>
+  </body>
 </html>

@@ -8,9 +8,9 @@ export class LoadingScreen {
       text: options.text || '',
       showProgressBar: options.showProgressBar !== false,
       ariaLabel: options.ariaLabel || options.text || 'Loading',
-      ...options
+      ...options,
     };
-    
+
     this.init();
   }
 
@@ -53,14 +53,14 @@ export class LoadingScreen {
     if (this.options.showProgressBar) {
       const progressBar = document.createElement('div');
       progressBar.className = 'loading-progress-bar';
-      
+
       const bar = document.createElement('div');
       bar.className = 'loading-progress-bar-indeterminate';
-      
+
       const progress = document.createElement('div');
       progress.className = 'loading-progress';
       bar.appendChild(progress);
-      
+
       progressBar.appendChild(bar);
       container.appendChild(progressBar);
     }

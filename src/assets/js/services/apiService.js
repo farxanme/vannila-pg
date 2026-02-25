@@ -5,7 +5,7 @@ class ApiService {
   constructor() {
     this.baseURL = '';
     this.defaultHeaders = {
-      'Content-Type': 'application/json'
+      'Content-Type': 'application/json',
     };
   }
 
@@ -49,7 +49,7 @@ class ApiService {
       freezePage = false,
       showLoading = false,
       loadingButton = null,
-      background = false
+      background = false,
     } = options;
 
     // Build URL
@@ -88,7 +88,7 @@ class ApiService {
       const response = await fetch(url, {
         method,
         headers: requestHeaders,
-        body
+        body,
       });
 
       const responseData = await response.json();

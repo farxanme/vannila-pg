@@ -7,14 +7,15 @@ import { BottomSheet } from './BottomSheet.js';
  */
 export class VirtualPinPad {
   constructor(inputElement, options = {}) {
-    this.inputElement = typeof inputElement === 'string' ? document.querySelector(inputElement) : inputElement;
+    this.inputElement =
+      typeof inputElement === 'string' ? document.querySelector(inputElement) : inputElement;
     this.options = {
       maxLength: options.maxLength || 6,
       onInput: options.onInput || null,
       onComplete: options.onComplete || null,
-      ...options
+      ...options,
     };
-    
+
     this.isMobile = window.innerWidth <= 768;
     this.currentValue = '';
     this.numbers = this.generateRandomNumbers();
@@ -51,7 +52,7 @@ export class VirtualPinPad {
    */
   initMobile() {
     const content = this.createPinPadContent();
-    
+
     this.bottomSheet = new BottomSheet({
       title: 'Enter PIN',
       content: content,
@@ -59,7 +60,7 @@ export class VirtualPinPad {
       onClose: () => {
         // Reset on close
         this.currentValue = '';
-      }
+      },
     });
   }
 
@@ -151,17 +152,17 @@ export class VirtualPinPad {
     const pinPad = document.createElement('div');
     pinPad.className = 'pin-pad-desktop';
     pinPad.style.display = 'none';
-    
+
     const content = this.createPinPadContent();
     pinPad.appendChild(content);
-    
+
     // Position relative to input
     if (this.inputElement && this.inputElement.parentNode) {
       this.inputElement.parentNode.insertBefore(pinPad, this.inputElement.nextSibling);
     } else {
       document.body.appendChild(pinPad);
     }
-    
+
     this.desktopElement = pinPad;
   }
 
@@ -173,11 +174,10 @@ export class VirtualPinPad {
       this.inputElement.addEventListener('focus', () => {
         this.showDesktop();
       });
-      
+
       // Close on outside click
       document.addEventListener('click', (e) => {
-        if (!this.desktopElement.contains(e.target) && 
-            !this.inputElement.contains(e.target)) {
+        if (!this.desktopElement.contains(e.target) && !this.inputElement.contains(e.target)) {
           this.hideDesktop();
         }
       });
@@ -208,7 +208,7 @@ export class VirtualPinPad {
    */
   positionDesktop() {
     if (!this.inputElement || !this.desktopElement) return;
-    
+
     const rect = this.inputElement.getBoundingClientRect();
     this.desktopElement.style.top = `${rect.bottom + 10}px`;
     this.desktopElement.style.left = `${rect.left}px`;
@@ -220,15 +220,15 @@ export class VirtualPinPad {
    */
   handleNumber(number) {
     if (this.currentValue.length >= this.options.maxLength) return;
-    
+
     this.currentValue += number.toString();
     this.updateDisplay();
     this.updateInput();
-    
+
     if (this.options.onInput) {
       this.options.onInput(this.currentValue, this);
     }
-    
+
     if (this.currentValue.length >= this.options.maxLength && this.options.onComplete) {
       this.options.onComplete(this.currentValue, this);
     }
@@ -242,7 +242,7 @@ export class VirtualPinPad {
       this.currentValue = this.currentValue.slice(0, -1);
       this.updateDisplay();
       this.updateInput();
-      
+
       if (this.options.onInput) {
         this.options.onInput(this.currentValue, this);
       }
@@ -256,7 +256,7 @@ export class VirtualPinPad {
     this.currentValue = '';
     this.updateDisplay();
     this.updateInput();
-    
+
     if (this.options.onInput) {
       this.options.onInput(this.currentValue, this);
     }

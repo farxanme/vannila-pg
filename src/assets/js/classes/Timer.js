@@ -14,7 +14,7 @@ export class Timer {
     this.isRunning = false;
     this.startTime = null;
     this.pausedTime = 0;
-    
+
     // Callback thresholds
     this.oneThirdCalled = false;
     this.twoThirdCalled = false;
@@ -25,34 +25,34 @@ export class Timer {
    */
   start() {
     if (this.isRunning) return;
-    
+
     this.isRunning = true;
-    this.startTime = Date.now() - (this.pausedTime * 1000);
-    
+    this.startTime = Date.now() - this.pausedTime * 1000;
+
     this.intervalId = setInterval(() => {
       const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
       this.remaining = Math.max(0, this.duration - elapsed);
-      
+
       // Check thresholds
       const progress = elapsed / this.duration;
-      
-      if (!this.twoThirdCalled && progress >= 2/3) {
+
+      if (!this.twoThirdCalled && progress >= 2 / 3) {
         this.twoThirdCalled = true;
         if (this.onTwoThird) {
           this.onTwoThird(this.remaining);
         }
-      } else if (!this.oneThirdCalled && progress >= 1/3) {
+      } else if (!this.oneThirdCalled && progress >= 1 / 3) {
         this.oneThirdCalled = true;
         if (this.onOneThird) {
           this.onOneThird(this.remaining);
         }
       }
-      
+
       // Call tick callback
       if (this.onTick) {
         this.onTick(this.remaining);
       }
-      
+
       // Check if finished
       if (this.remaining <= 0) {
         this.stop();
@@ -80,7 +80,7 @@ export class Timer {
    */
   pause() {
     if (!this.isRunning) return;
-    
+
     this.stop();
     const elapsed = Math.floor((Date.now() - this.startTime) / 1000);
     this.pausedTime = elapsed;
@@ -91,7 +91,7 @@ export class Timer {
    */
   resume() {
     if (this.isRunning) return;
-    
+
     this.start();
   }
 

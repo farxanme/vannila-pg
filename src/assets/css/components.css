@@ -93,9 +93,15 @@
   margin-right: var(--spacing-3);
 }
 
-[dir="rtl"] .card-bank-logo {
+[dir='ltr'] .card-bank-logo {
   margin-right: 0;
   margin-left: var(--spacing-3);
+}
+
+.card-bank-logo img {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
+  object-fit: contain;
 }
 
 .card-bank-logo.hidden {
@@ -114,7 +120,7 @@
   padding-left: 0;
 }
 
-[dir="rtl"] .input-right-container {
+[dir='rtl'] .input-right-container {
   padding-right: 0;
   padding-left: var(--spacing-3);
 }
@@ -164,7 +170,7 @@
 .input-error {
   margin-top: var(--spacing-xs);
   font-size: var(--font-size-xs);
-  color: var(--color-danger);
+  color: var(--color-error);
   display: none;
 }
 

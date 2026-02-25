@@ -18,7 +18,7 @@ export async function copyToClipboard(text) {
       document.body.appendChild(textArea);
       textArea.focus();
       textArea.select();
-      
+
       try {
         const successful = document.execCommand('copy');
         document.body.removeChild(textArea);

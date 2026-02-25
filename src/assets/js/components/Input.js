@@ -30,9 +30,9 @@ export class Input {
       maxLength: options.maxLength || null,
       requiredMessage: options.requiredMessage || 'This field is required',
       clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
-      ...options
+      ...options,
     };
-    
+
     this.isValid = true;
     this.errorMessage = '';
     this.element = null;
@@ -111,17 +111,17 @@ export class Input {
     input.value = this.options.value;
     input.disabled = this.options.disabled;
     input.required = this.options.required;
-    
+
     if (this.options.inputMode) {
       input.inputMode = this.options.inputMode;
     } else if (isPasswordType) {
       input.inputMode = 'tel';
     }
-    
+
     if (this.options.pattern) {
       input.pattern = this.options.pattern;
     }
-    
+
     if (this.options.maxLength) {
       input.maxLength = this.options.maxLength;
     }
@@ -241,7 +241,8 @@ export class Input {
    */
   updateClearButton() {
     if (this.clearButton) {
-      this.clearButton.style.display = this.element.value && !this.options.disabled ? 'block' : 'none';
+      this.clearButton.style.display =
+        this.element.value && !this.options.disabled ? 'block' : 'none';
     }
   }
 
@@ -319,6 +320,10 @@ export class Input {
    */
   clear() {
     this.setValue('');
+    // Dispatch native input event so external listeners (like page logic)
+    // can react to the cleared value (e.g. hide bank logo)
+    const event = new Event('input', { bubbles: true });
+    this.element.dispatchEvent(event);
     this.element.focus();
   }
 
@@ -331,7 +336,7 @@ export class Input {
     this.wrapper.classList.remove('disabled');
     if (this.inputContainer) this.inputContainer.classList.remove('disabled');
     const actionButtons = this.wrapper.querySelectorAll('.input-action');
-    actionButtons.forEach(btn => btn.disabled = false);
+    actionButtons.forEach((btn) => (btn.disabled = false));
   }
 
   /**
@@ -343,7 +348,7 @@ export class Input {
     this.wrapper.classList.add('disabled');
     if (this.inputContainer) this.inputContainer.classList.add('disabled');
     const actionButtons = this.wrapper.querySelectorAll('.input-action');
-    actionButtons.forEach(btn => btn.disabled = true);
+    actionButtons.forEach((btn) => (btn.disabled = true));
     this.updateClearButton();
   }
 

@@ -43,7 +43,7 @@ class SoundManager {
    */
   play(name, volume = 0.5) {
     if (!this.enabled) return;
-    
+
     const url = this.sounds.get(name);
     if (!url) {
       console.warn(`Sound "${name}" not found`);
@@ -52,7 +52,7 @@ class SoundManager {
 
     const audio = new Audio(url);
     audio.volume = volume;
-    audio.play().catch(err => {
+    audio.play().catch((err) => {
       console.warn('Sound play failed:', err);
     });
   }
@@ -75,7 +75,10 @@ class SoundManager {
     oscillator.type = 'sine';
 
     gainNode.gain.setValueAtTime(0.3, this.audioContext.currentTime);
-    gainNode.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + duration / 1000);
+    gainNode.gain.exponentialRampToValueAtTime(
+      0.01,
+      this.audioContext.currentTime + duration / 1000
+    );
 
     oscillator.start(this.audioContext.currentTime);
     oscillator.stop(this.audioContext.currentTime + duration / 1000);

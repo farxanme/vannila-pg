@@ -5,7 +5,8 @@
 class I18n {
   constructor() {
     const savedLang = localStorage.getItem('app_language');
-    this.currentLang = savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
+    this.currentLang =
+      savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
     this.translations = {};
     this.readyPromise = this.loadTranslations();
   }
@@ -20,15 +21,15 @@ class I18n {
         import('../locales/en.js'),
         import('../locales/tr.js'),
         import('../locales/ar.js'),
-        import('../locales/ru.js')
+        import('../locales/ru.js'),
       ]);
-      
+
       this.translations = {
         fa: fa.default || {},
         en: en.default || {},
         tr: tr.default || {},
         ar: ar.default || {},
-        ru: ru.default || {}
+        ru: ru.default || {},
       };
     } catch (err) {
       console.warn('Failed to load translations:', err);
@@ -37,7 +38,7 @@ class I18n {
         en: {},
         tr: {},
         ar: {},
-        ru: {}
+        ru: {},
       };
     }
   }
@@ -92,13 +93,13 @@ class I18n {
    */
   t(key, params = {}) {
     const translation = this.translations[this.currentLang]?.[key] || key;
-    
+
     // Replace parameters
     let result = translation;
-    Object.keys(params).forEach(param => {
+    Object.keys(params).forEach((param) => {
       result = result.replace(new RegExp(`{{${param}}}`, 'g'), params[param]);
     });
-    
+
     return result;
   }
 
@@ -116,7 +117,7 @@ class I18n {
    */
   triggerLanguageChange() {
     const event = new CustomEvent('languageChange', {
-      detail: { lang: this.currentLang }
+      detail: { lang: this.currentLang },
     });
     document.dispatchEvent(event);
   }
@@ -131,7 +132,7 @@ class I18n {
       { code: 'en', name: 'English', nativeName: 'English' },
       { code: 'tr', name: 'Turkish', nativeName: 'Türkçe' },
       { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
-      { code: 'ru', name: 'Russian', nativeName: 'Русский' }
+      { code: 'ru', name: 'Russian', nativeName: 'Русский' },
     ];
   }
 }

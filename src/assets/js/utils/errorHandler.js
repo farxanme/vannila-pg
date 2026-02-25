@@ -41,7 +41,7 @@ class ErrorHandler {
       elementId = null,
       targetElement = null,
       duration = 5000,
-      type = 'error'
+      type = 'error',
     } = options;
 
     switch (mode) {
@@ -74,7 +74,7 @@ class ErrorHandler {
     toast.className = `error-toast error-toast-${type}`;
     toast.setAttribute('role', 'alert');
     toast.textContent = message;
-    
+
     // Add close button
     const closeBtn = document.createElement('button');
     closeBtn.className = 'error-toast-close';
@@ -82,14 +82,14 @@ class ErrorHandler {
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.onclick = () => this.removeToast(toast);
     toast.appendChild(closeBtn);
-    
+
     this.toastContainer.appendChild(toast);
-    
+
     // Trigger animation
     setTimeout(() => {
       toast.classList.add('show');
     }, 10);
-    
+
     // Auto remove
     if (duration > 0) {
       setTimeout(() => {
@@ -136,7 +136,7 @@ class ErrorHandler {
     errorElement.className = `error-message error-message-${type}`;
     errorElement.setAttribute('role', 'alert');
     errorElement.textContent = message;
-    
+
     element.appendChild(errorElement);
   }
 
@@ -165,7 +165,7 @@ class ErrorHandler {
 
     // Clear element errors
     const errorElements = document.querySelectorAll('.error-message');
-    errorElements.forEach(el => el.remove());
+    errorElements.forEach((el) => el.remove());
   }
 }
 

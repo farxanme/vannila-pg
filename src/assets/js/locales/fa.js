@@ -28,12 +28,14 @@ export default {
 
   // Form
   'form.cardNumber': 'شماره کارت',
+  'form.cardNumber.selectCard': 'انتخاب کارت',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
   'form.cardNumber.required': 'شماره کارت الزامی است',
   'form.cardNumber.invalid': 'شماره کارت نامعتبر است',
   'form.cvv2': 'CVV2',
-  'form.cvv2.placeholder': '123',
+  'form.cvv2.placeholder': '●●●',
   'form.cvv2.required': 'CVV2 الزامی است',
+  'form.cvv2.hint': 'کد ۳ یا ۴ رقمی پشت کارت',
   'form.expiryDate': 'تاریخ انقضا',
   'form.expiryMonth': 'ماه',
   'form.expiryYear': 'سال',
@@ -41,8 +43,8 @@ export default {
   'form.expiryDate.invalid': 'تاریخ انقضا نامعتبر است',
   'form.securityCode': 'کد امنیتی',
   'form.securityCode.required': 'کد امنیتی الزامی است',
-  'form.otp': 'رمز دوم پویا',
-  'form.otp.placeholder': '123456',
+  'form.otp': 'رمز پویا',
+  'form.otp.placeholder': 'رمز یک‌بارمصرف',
   'form.otp.required': 'رمز دوم پویا الزامی است',
   'form.mobile': 'شماره موبایل',
   'form.mobile.placeholder': '09123456789',
@@ -54,6 +56,9 @@ export default {
   'form.email.invalid': 'ایمیل نامعتبر است',
   'form.saveCard': 'ذخیره کارت در درگاه سِپ',
   'form.pay': 'پرداخت',
+  'form.pay.securePrefix': 'پرداخت امن',
+  'form.pay.disabled': 'لطفاً اطلاعات را کامل وارد کنید',
+  'form.pay.processing': 'در حال اتصال به بانک...',
   'form.cancel': 'انصراف',
   'form.showReceipt': 'نمایش رسید',
   'form.title': 'اطلاعات پرداخت',
@@ -69,6 +74,8 @@ export default {
   'form.captchaImageAlt': 'کد امنیتی',
   'form.captchaAudio': 'پخش صدای کد امنیتی',
   'form.audioPlay': 'پخش صوتی',
+  'form.showReceiptToggle': 'ایمیل یا شماره همراه برای ارسال رسید پرداخت (اختیاری)',
+  'form.giftCardNotice': 'این کارت هدیه است',
   'form.confirmCancel': 'آیا از انصراف اطمینان دارید؟',
   'form.expiryPlaceholder': 'ماه/سال',
 
@@ -123,5 +130,5 @@ export default {
   // Errors
   'error.network': 'خطا در ارتباط با سرور',
   'error.invalidData': 'اطلاعات نامعتبر',
-  'error.unknown': 'خطای ناشناخته'
+  'error.unknown': 'خطای ناشناخته',
 };

@@ -1,120 +1,145 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="fa" dir="rtl">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="theme-color" content="#007bff">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <title>درگاه پرداخت</title>
-  
-  <!-- Favicons -->
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png">
-  
-  <!-- Styles -->
-  <link rel="stylesheet" href="/assets/css/base.css">
-  <link rel="stylesheet" href="/assets/css/components.css">
-  <link rel="stylesheet" href="/assets/css/layout.css">
-  <link rel="stylesheet" href="/assets/css/pages/index.css">
-</head>
-<body>
-  <div id="app">
-    <!-- Header will be inserted here -->
-    
-    <main class="main-content">
-      <div class="container">
-        <div class="grid grid-2-col">
-          <!-- Large Card (2/3) -->
-          <div class="card card-large">
-            <div class="card-header">
-              <h2 class="card-title" data-i18n="form.title">اطلاعات پرداخت</h2>
-            </div>
-            
-            <form id="payment-form" class="payment-form">
-              <!-- Card Number -->
-              <div class="form-group">
-                <div id="card-number-input-container"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <meta name="theme-color" content="#007bff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <title>درگاه پرداخت</title>
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicons/favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicons/favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="/assets/css/base.css" />
+    <link rel="stylesheet" href="/assets/css/components.css" />
+    <link rel="stylesheet" href="/assets/css/layout.css" />
+    <link rel="stylesheet" href="/assets/css/pages/index.css" />
+  </head>
+  <body>
+    <div id="app">
+      <!-- Header will be inserted here -->
+
+      <main class="main-content">
+        <div class="container">
+          <div class="grid grid-2-col">
+            <!-- Large Card (2/3) -->
+            <div class="card card-large">
+              <div class="card-header">
+                <h2 class="card-title" data-i18n="form.title">اطلاعات پرداخت</h2>
               </div>
-              
-              <!-- CVV2 and Expiry Date -->
-              <div class="form-group">
-                <div class="form-row">
-                  <div id="cvv2-input-container"></div>
-                  <div id="expiry-date-container"></div>
-                </div>
-              </div>
-              
-              <!-- Security Code (Captcha) -->
-              <div class="form-group">
-                <div id="captcha-container" class="captcha-container"></div>
-              </div>
-              
-              <!-- OTP -->
-              <div class="form-group">
-                <div id="otp-input-container" class="otp-input-container"></div>
-              </div>
-              
-              <!-- Save Card Checkbox -->
-              <div class="form-group">
-                <label class="checkbox-label">
-                  <input type="checkbox" id="save-card-checkbox">
-                  <span data-i18n="form.saveCard">شماره کارت در درگاه‌های سِپ ذخیره شود</span>
-                </label>
-              </div>
-              
-              <!-- Form Actions -->
-              <div class="form-actions">
-                <button type="submit" class="btn btn-success" id="pay-button" data-i18n="form.pay">پرداخت</button>
-                <button type="button" class="btn btn-primary btn-bordered" id="cancel-button" data-i18n="form.cancel">انصراف</button>
-              </div>
-              
-              <!-- Show Receipt -->
-              <div class="form-group show-receipt-wrapper">
-                <button type="button" class="btn btn-primary btn-bordered show-receipt-button" id="show-receipt-button" data-i18n="form.showReceipt">نمایش رسید</button>
-              </div>
-              
-              <!-- Receipt Fields (Hidden initially) -->
-              <div id="receipt-fields" class="receipt-fields">
+
+              <form id="payment-form" class="payment-form">
+                <!-- Card Number -->
                 <div class="form-group">
-                  <div id="mobile-input-container"></div>
+                  <div id="card-number-input-container"></div>
                 </div>
+
+                <!-- CVV2 and Expiry Date -->
                 <div class="form-group">
-                  <div id="email-input-container"></div>
+                  <div class="form-row">
+                    <div id="cvv2-input-container"></div>
+                    <div id="expiry-date-container"></div>
+                  </div>
+                </div>
+
+                <!-- Security Code (Captcha) -->
+                <div class="form-group">
+                  <div id="captcha-container" class="captcha-container"></div>
+                </div>
+
+                <!-- OTP -->
+                <div class="form-group">
+                  <div id="otp-input-container" class="otp-input-container"></div>
+                </div>
+
+                <!-- Save Card Checkbox -->
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" id="save-card-checkbox" />
+                    <span data-i18n="form.saveCard">شماره کارت در درگاه‌های سِپ ذخیره شود</span>
+                  </label>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="form-actions">
+                  <button
+                    type="submit"
+                    class="btn btn-success"
+                    id="pay-button"
+                    data-i18n="form.pay"
+                  >
+                    پرداخت
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-primary btn-bordered"
+                    id="cancel-button"
+                    data-i18n="form.cancel"
+                  >
+                    انصراف
+                  </button>
+                </div>
+
+                <!-- Show Receipt -->
+                <div class="form-group show-receipt-wrapper">
+                  <label class="show-receipt-toggle">
+                    <input type="checkbox" id="show-receipt-toggle" class="show-receipt-checkbox" />
+                    <span class="show-receipt-icon" aria-hidden="true">
+                      <img src="/assets/images/icons/icn-square-plus.svg" alt="" />
+                    </span>
+                    <span class="show-receipt-text" data-i18n="form.showReceiptToggle">
+                      ایمیل یا شماره همراه برای ارسال رسید پرداخت (اختیاری)
+                    </span>
+                  </label>
+                </div>
+
+                <!-- Receipt Fields (Hidden initially) -->
+                <div id="receipt-fields" class="receipt-fields">
+                  <div class="form-group">
+                    <div id="mobile-input-container"></div>
+                  </div>
+                  <div class="form-group">
+                    <div id="email-input-container"></div>
+                  </div>
+                </div>
+              </form>
+            </div>
+
+            <!-- Small Card (1/3) -->
+            <div class="card card-small">
+              <div class="card-header" id="timer-header">
+                <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
+                <div id="timer-container" class="timer">
+                  <div class="timer-value">15:00</div>
                 </div>
               </div>
-            </form>
-          </div>
-          
-          <!-- Small Card (1/3) -->
-          <div class="card card-small">
-            <div class="card-header" id="timer-header">
-              <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
-              <div id="timer-container" class="timer">
-                <div class="timer-value">15:00</div>
+
+              <div id="partner-logos-section" class="partner-logos-section">
+                <div id="partner-logos" class="partner-logos">
+                  <!-- Partner logos will be inserted here -->
+                </div>
               </div>
-            </div>
-            
-            <div id="partner-logos-section" class="partner-logos-section">
-              <div id="partner-logos" class="partner-logos">
-                <!-- Partner logos will be inserted here -->
+
+              <div id="transaction-info" class="transaction-info">
+                <!-- Transaction info will be inserted here -->
               </div>
-            </div>
-            
-            <div id="transaction-info" class="transaction-info">
-              <!-- Transaction info will be inserted here -->
             </div>
           </div>
         </div>
-      </div>
-    </main>
-    
-    <!-- Footer will be inserted here -->
-  </div>
-  
-  <!-- Scripts -->
-  <script type="module" src="/assets/js/main.js"></script>
-  <script type="module" src="/assets/js/pages/index.js"></script>
-</body>
+      </main>
+
+      <!-- Footer will be inserted here -->
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/assets/js/main.js"></script>
+    <script type="module" src="/assets/js/pages/index.js"></script>
+  </body>
 </html>

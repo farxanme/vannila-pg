@@ -17,7 +17,7 @@ class CardService {
 
       // Real API call
       const response = await apiService.get('/api/cards', {
-        background: true
+        background: true,
       });
 
       return response;
@@ -35,7 +35,8 @@ class CardService {
   isMockMode() {
     // Check for mock flag in localStorage or URL params
     const urlParams = new URLSearchParams(window.location.search);
-    const useMock = urlParams.get('mock') === 'true' || localStorage.getItem('useMockCards') === 'true';
+    const useMock =
+      urlParams.get('mock') === 'true' || localStorage.getItem('useMockCards') === 'true';
     return useMock || !apiService.baseURL; // Use mock if no base URL is set
   }
 
@@ -50,105 +51,105 @@ class CardService {
         resolve({
           Data: [
             {
-              SecurePan: "621986######5273",
+              SecurePan: '621986######5273',
               SubscriberCardId: 280907372,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک سامان",
+              BankName: 'بانک سامان',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "621986######1630",
+              SecurePan: '621986######1630',
               SubscriberCardId: 191030028,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک سامان",
+              BankName: 'بانک سامان',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "502229######9053",
+              SecurePan: '502229######9053',
               SubscriberCardId: 368937351,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک پاسارگاد",
+              BankName: 'بانک پاسارگاد',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "621986######4430",
+              SecurePan: '621986######4430',
               SubscriberCardId: 363588257,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک سامان",
+              BankName: 'بانک سامان',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "636214######5307",
+              SecurePan: '636214######5307',
               SubscriberCardId: 315500287,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک آینده (تات)",
+              BankName: 'بانک آینده (تات)',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "621986######1013",
+              SecurePan: '621986######1013',
               SubscriberCardId: 67021321,
               IsGiftCard: true,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک سامان",
+              BankName: 'بانک سامان',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "621986######2497",
+              SecurePan: '621986######2497',
               SubscriberCardId: 23647809,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: false,
               Selected: false,
-              BankName: "بانک سامان",
+              BankName: 'بانک سامان',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "504172######1195",
+              SecurePan: '504172######1195',
               SubscriberCardId: 266139817,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک قرض الحسنه رسالت",
+              BankName: 'بانک قرض الحسنه رسالت',
               CanDeActive: true,
-              IsLimited: false
+              IsLimited: false,
             },
             {
-              SecurePan: "502229######3373",
+              SecurePan: '502229######3373',
               SubscriberCardId: 247204029,
               IsGiftCard: false,
               CardOwner: 1,
               HasValidExpiredDate: true,
               Selected: false,
-              BankName: "بانک پاسارگاد",
+              BankName: 'بانک پاسارگاد',
               CanDeActive: true,
-              IsLimited: false
-            }
-          ]
+              IsLimited: false,
+            },
+          ],
         });
       }, 300); // Simulate 300ms delay
     });
@@ -162,7 +163,7 @@ class CardService {
   convertCardFormat(apiCard) {
     // Extract only digits from SecurePan (remove # symbols)
     const cardNumber = apiCard.SecurePan.replace(/[^0-9]/g, '');
-    
+
     return {
       number: cardNumber,
       securePan: apiCard.SecurePan,
@@ -173,7 +174,7 @@ class CardService {
       selected: apiCard.Selected,
       canDeActive: apiCard.CanDeActive,
       isLimited: apiCard.IsLimited,
-      pinned: false // Default pinned state
+      pinned: false, // Default pinned state
     };
   }
 }

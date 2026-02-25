@@ -8,13 +8,13 @@
 }
 
 /* RTL: small card on LEFT, large card on RIGHT */
-[dir="rtl"] .grid.grid-2-col>.card-small {
+[dir='rtl'] .grid.grid-2-col > .card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir="rtl"] .grid.grid-2-col>.card-large {
+[dir='rtl'] .grid.grid-2-col > .card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -22,13 +22,13 @@
 }
 
 /* LTR: small card on RIGHT, large card on LEFT */
-[dir="ltr"] .grid.grid-2-col>.card-small {
+[dir='ltr'] .grid.grid-2-col > .card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir="ltr"] .grid.grid-2-col>.card-large {
+[dir='ltr'] .grid.grid-2-col > .card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -41,14 +41,14 @@
   }
 
   /* Mobile: small card first, large card second */
-  .grid.grid-2-col>.card-small {
+  .grid.grid-2-col > .card-small {
     order: 1;
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
   }
 
-  .grid.grid-2-col>.card-large {
+  .grid.grid-2-col > .card-large {
     order: 2;
     flex: 0 0 auto;
     width: 100%;
@@ -101,7 +101,7 @@
   cursor: pointer;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;
@@ -118,7 +118,7 @@
   flex-direction: column;
 }
 
-.otp-input-container>.input-label {
+.otp-input-container > .input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -167,7 +167,7 @@
   flex-direction: column;
 }
 
-.captcha-container>.input-label {
+.captcha-container > .input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -184,7 +184,7 @@
 }
 
 /* RTL: move gap to right side */
-[dir="rtl"] .captcha-container .captcha-input-row .captcha-audio-btn {
+[dir='rtl'] .captcha-container .captcha-input-row .captcha-audio-btn {
   margin-left: 0;
   margin-right: var(--spacing-md);
 }
@@ -211,7 +211,7 @@
 }
 
 /* RTL: Input container on right side */
-[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper .input-container {
+[dir='rtl'] .captcha-container .captcha-input-row .input-wrapper .input-container {
   border-right: 1px solid var(--color-stroke);
   border-left: none;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
@@ -234,34 +234,45 @@
 }
 
 /* RTL: Captcha image on left side */
-[dir="rtl"] .captcha-container .captcha-image {
+[dir='rtl'] .captcha-container .captcha-image {
   border-right: none;
   border-left: 1px solid var(--color-stroke);
   border-radius: var(--radius-md) 0 0 var(--radius-md);
 }
 
 /* Update captcha image border when input is focused */
-.captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused)~.captcha-image {
+.captcha-container
+  .captcha-input-row
+  .input-wrapper:has(.input-container.focused)
+  ~ .captcha-image {
   border-top-color: var(--color-primary);
   border-bottom-color: var(--color-primary);
   border-right-color: var(--color-primary);
 }
 
 /* RTL: Update left border instead of right */
-[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused)~.captcha-image {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-row
+  .input-wrapper:has(.input-container.focused)
+  ~ .captcha-image {
   border-left-color: var(--color-primary);
   border-right-color: var(--color-stroke);
 }
 
 /* Update captcha image border when input has error */
-.captcha-container .captcha-input-row .input-wrapper:has(.input-container.error)~.captcha-image {
+.captcha-container .captcha-input-row .input-wrapper:has(.input-container.error) ~ .captcha-image {
   border-top-color: var(--color-danger);
   border-bottom-color: var(--color-danger);
   border-right-color: var(--color-danger);
 }
 
 /* RTL: Update left border instead of right */
-[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.error)~.captcha-image {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-row
+  .input-wrapper:has(.input-container.error)
+  ~ .captcha-image {
   border-left-color: var(--color-danger);
   border-right-color: var(--color-stroke);
 }
@@ -300,8 +311,28 @@
   margin-top: var(--spacing-md);
 }
 
-.show-receipt-button {
-  width: 100%;
+.show-receipt-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-2);
+  cursor: pointer;
+  user-select: none;
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-gray-700);
+}
+
+.show-receipt-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.show-receipt-icon img {
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
 }
 
 /* Dropdown card item styles */

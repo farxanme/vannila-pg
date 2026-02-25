@@ -6,9 +6,9 @@ export class Footer {
     this.options = {
       logo: options.logo || null,
       copyright: options.copyright || '',
-      ...options
+      ...options,
     };
-    
+
     this.init();
   }
 

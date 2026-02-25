@@ -34,6 +34,7 @@ export default {
   'form.cvv2': 'CVV2',
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 обязателен',
+  'form.cvv2.hint': '3- или 4-значный код на обороте карты',
   'form.expiryDate': 'Срок действия',
   'form.expiryMonth': 'Месяц',
   'form.expiryYear': 'Год',
@@ -54,6 +55,9 @@ export default {
   'form.email.invalid': 'Неверная электронная почта',
   'form.saveCard': 'Сохранить карту в шлюзе SEP',
   'form.pay': 'Оплатить',
+  'form.pay.securePrefix': 'Безопасная оплата',
+  'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
+  'form.pay.processing': 'Подключение к банку...',
   'form.cancel': 'Отмена',
   'form.showReceipt': 'Показать квитанцию',
   'form.title': 'Информация об оплате',
@@ -84,7 +88,7 @@ export default {
   'cardList.delete': 'Удалить',
   'cardList.deleteConfirm': 'Вы уверены, что хотите удалить эту карту?',
   'cardList.empty': 'Нет зарегистрированных карт',
-  
+
   // Receipt
   'receipt.success': 'Транзакция успешна',
   'receipt.failed': 'Транзакция не удалась',
@@ -111,17 +115,17 @@ export default {
   'transaction.showLess': 'Показать меньше',
   'transaction.rial': 'Риал',
   'transaction.toman': 'Томан',
-  
+
   // Pin Pad
   'pinPad.title': 'Введите PIN',
   'pinPad.clear': 'Очистить',
-  
+
   // Timer
   'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
-  
+
   // Errors
   'error.network': 'Ошибка сети',
   'error.invalidData': 'Неверные данные',
-  'error.unknown': 'Неизвестная ошибка'
+  'error.unknown': 'Неизвестная ошибка',
 };

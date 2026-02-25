@@ -34,6 +34,7 @@ export default {
   'form.cvv2': 'CVV2',
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 is required',
+  'form.cvv2.hint': '3 or 4 digit code on the back of the card',
   'form.expiryDate': 'Expiry Date',
   'form.expiryMonth': 'Month',
   'form.expiryYear': 'Year',
@@ -54,6 +55,9 @@ export default {
   'form.email.invalid': 'Invalid email',
   'form.saveCard': 'Save card in SEP gateway',
   'form.pay': 'Pay',
+  'form.pay.securePrefix': 'Secure payment',
+  'form.pay.disabled': 'Please complete all information',
+  'form.pay.processing': 'Connecting to bank...',
   'form.cancel': 'Cancel',
   'form.showReceipt': 'Show Receipt',
   'form.title': 'Payment Information',
@@ -84,7 +88,7 @@ export default {
   'cardList.delete': 'Delete',
   'cardList.deleteConfirm': 'Are you sure you want to delete this card?',
   'cardList.empty': 'No cards registered',
-  
+
   // Receipt
   'receipt.success': 'Transaction Successful',
   'receipt.failed': 'Transaction Failed',
@@ -111,17 +115,20 @@ export default {
   'transaction.showLess': 'Show Less',
   'transaction.rial': 'Rial',
   'transaction.toman': 'Toman',
-  
+
   // Pin Pad
   'pinPad.title': 'Enter PIN',
   'pinPad.clear': 'Clear',
-  
+
   // Timer
   'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
-  
+
+  // Receipt toggle
+  'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
+
   // Errors
   'error.network': 'Network error',
   'error.invalidData': 'Invalid data',
-  'error.unknown': 'Unknown error'
+  'error.unknown': 'Unknown error',
 };

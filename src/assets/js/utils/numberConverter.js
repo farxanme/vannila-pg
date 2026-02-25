@@ -5,23 +5,23 @@
  */
 export function convertToEnglishNumbers(str) {
   if (!str) return '';
-  
+
   const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   const arabicNumbers = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
   const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  
+
   let result = str.toString();
-  
+
   // Convert Persian numbers
   for (let i = 0; i < 10; i++) {
     result = result.replace(new RegExp(persianNumbers[i], 'g'), englishNumbers[i]);
   }
-  
+
   // Convert Arabic numbers
   for (let i = 0; i < 10; i++) {
     result = result.replace(new RegExp(arabicNumbers[i], 'g'), englishNumbers[i]);
   }
-  
+
   return result;
 }
 
@@ -32,16 +32,16 @@ export function convertToEnglishNumbers(str) {
  */
 export function convertToPersianNumbers(str) {
   if (!str) return '';
-  
+
   const persianNumbers = ['۰', '۱', '۲', '۳', '۴', '۵', '۶', '۷', '۸', '۹'];
   const englishNumbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
-  
+
   let result = str.toString();
-  
+
   for (let i = 0; i < 10; i++) {
     result = result.replace(new RegExp(englishNumbers[i], 'g'), persianNumbers[i]);
   }
-  
+
   return result;
 }
 
@@ -63,8 +63,30 @@ export function extractNumbers(str) {
 export function numberToPersianWords(num) {
   const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
   const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
-  const hundreds = ['', 'یکصد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
-  const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
+  const hundreds = [
+    '',
+    'یکصد',
+    'دویست',
+    'سیصد',
+    'چهارصد',
+    'پانصد',
+    'ششصد',
+    'هفتصد',
+    'هشتصد',
+    'نهصد',
+  ];
+  const teens = [
+    'ده',
+    'یازده',
+    'دوازده',
+    'سیزده',
+    'چهارده',
+    'پانزده',
+    'شانزده',
+    'هفده',
+    'هجده',
+    'نوزده',
+  ];
 
   if (num === 0) return 'صفر';
   if (num < 10) return ones[num];
@@ -82,12 +104,20 @@ export function numberToPersianWords(num) {
   if (num < 1000000) {
     const thousand = Math.floor(num / 1000);
     const remainder = num % 1000;
-    return numberToPersianWords(thousand) + ' هزار' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
+    return (
+      numberToPersianWords(thousand) +
+      ' هزار' +
+      (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '')
+    );
   }
   if (num < 1000000000) {
     const million = Math.floor(num / 1000000);
     const remainder = num % 1000000;
-    return numberToPersianWords(million) + ' میلیون' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
+    return (
+      numberToPersianWords(million) +
+      ' میلیون' +
+      (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '')
+    );
   }
   return num.toString();
 }

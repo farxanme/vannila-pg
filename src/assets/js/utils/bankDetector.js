@@ -1,3 +1,5 @@
+import { extractNumbers } from './numberConverter.js';
+
 /**
  * Bank BIN Detection Utility
  */
@@ -53,7 +55,13 @@ const panBins = [
   { bin: '502908', bankName: 'Tosee Taavon', bankCode: '022' },
   { bin: '502938', bankName: 'Dey', bankCode: '066' },
   { bin: '502229', bankName: 'Pasargad', bankCode: '057' },
-  { bin: '450905', bankName: 'Unknown', bankCode: '' }
+  { bin: '450905', bankName: 'Unknown', bankCode: '' },
+];
+
+// Neo-bank BINs that require extended (8+ digit) matching
+const neoBins = [
+  // Blu Bank – identified by first 8 digits of PAN
+  { bin: '62198619', bankName: 'Blu', bankCode: '' },
 ];
 
 /**
@@ -64,22 +72,39 @@ const panBins = [
 export function detectBank(cardNumber) {
   if (!cardNumber) return null;
 
-  // Extract only numbers
-  const numbers = cardNumber.replace(/\D/g, '');
+  // Extract only numbers (supports Persian/Arabic/English digits)
+  const numbers = extractNumbers(cardNumber);
+  const plain = cardNumber.replace(/\s/g, '');
 
   if (numbers.length < 6) return null;
 
-  // Get first 6 digits (BIN)
-  const bin = numbers.substring(0, 6);
+  // 1) Check extended BINs (neo banks) first
+  const neoBank = neoBins.find((neo) => {
+    if (numbers.length < neo.bin.length) return false;
+    const firstSegment = plain.slice(0, neo.bin.length);
+    // Require full, unmasked digits (no '#') for the extended BIN
+    if (firstSegment.length !== neo.bin.length) return false;
+    if (firstSegment.includes('#')) return false;
+    return numbers.startsWith(neo.bin);
+  });
 
-  // Find matching bank
-  const bank = panBins.find(b => b.bin === bin);
+  if (neoBank) {
+    return {
+      name: neoBank.bankName,
+      code: neoBank.bankCode,
+      bin: neoBank.bin,
+    };
+  }
+
+  // 2) Fallback to standard 6–digit BINs
+  const bin = numbers.substring(0, 6);
+  const bank = panBins.find((b) => b.bin === bin);
 
   if (bank && bank.bankName !== 'Unknown') {
     return {
       name: bank.bankName,
       code: bank.bankCode,
-      bin: bin
+      bin: bin,
     };
   }
 
@@ -92,26 +117,127 @@ export function detectBank(cardNumber) {
  * @returns {string} - Logo path
  */
 export function getBankLogo(bankName) {
-  if (!bankName) return null;
+  if (!bankName) {
+    return '/assets/images/icons/icn-square-info.svg';
+  }
 
-  // Normalize bank name for file path
-  const normalized = bankName.toLowerCase().replace(/\s+/g, '-');
+  const originalName = bankName.trim();
+  // Normalize (Latin) bank name for file path
+  const normalized = originalName.toLowerCase().replace(/\s+/g, '-');
 
-  // Map some known names to existing SVGs, fallback to default
+  // Explicit overrides where normalized name does NOT match file name
   const map = {
-    'melli': 'melli',
     'melli-iran': 'melli',
-    'saderat': 'saderat',
-    'mellat': 'mellat',
-    'parsian': 'parsian',
-    'saman': 'saman',
-    'tejarat': 'tejarat',
-    'pasargad': 'pasargad',
-    'keshavarzi': 'keshavarzi'
+    'industry-&-mine': 'sanat-madan',
+    'kar-afarin': 'karafarin',
+    post: 'post-bank',
+    central: 'central-bank',
+    'iri-central': 'central-bank',
+    'export-development': 'tosee-saderat',
+    sarmayeh: 'sarmaye',
+    mehr: 'mehr-eghtesad',
+    'mehr-iran': 'mehr-eghtesad',
+    'gharzolhasaneh-resalat': 'gharzolhasaneh-resalat',
+    'gharzolhasaneh-mehr': 'gharzolhasaneh-mehr',
+    noor: 'noor',
+    sep: 'shaparak',
   };
 
-  const key = map[normalized] || 'default';
-  return `/assets/images/banks/${key}.svg`;
+  // Handle common Persian bank names coming from API
+  const persianMap = [
+    { keyword: 'سامان', key: 'saman' },
+    { keyword: 'پاسارگاد', key: 'pasargad' },
+    { keyword: 'آینده', key: 'ayandeh' },
+    { keyword: 'قرض الحسنه رسالت', key: 'gharzolhasaneh-resalat' },
+    { keyword: 'رسالت', key: 'gharzolhasaneh-resalat' },
+    { keyword: 'ملی', key: 'melli' },
+    { keyword: 'ملت', key: 'mellat' },
+    { keyword: 'صادرات', key: 'saderat' },
+    { keyword: 'کشاورزی', key: 'keshavarzi' },
+    { keyword: 'تجارت', key: 'tejarat' },
+    { keyword: 'مسکن', key: 'maskan' },
+    { keyword: 'صنعت و معدن', key: 'sanat-madan' },
+    { keyword: 'شهر', key: 'shahr' },
+    { keyword: 'اقتصاد نوین', key: 'eghtesad-novin' },
+    { keyword: 'سینا', key: 'sina' },
+    { keyword: 'رفاه', key: 'refah' },
+    { keyword: 'سپه', key: 'sepah' },
+    { keyword: 'آینده', key: 'ayandeh' },
+    { keyword: 'ایران زمین', key: 'iran-zamin' },
+    { keyword: 'انصار', key: 'ansar' },
+    { keyword: 'قوامین', key: 'ghavamin' },
+  ];
+
+  // All available bank SVG icon filenames (without extension)
+  const availableIcons = [
+    'gharzolhasaneh-resalat',
+    'ansar',
+    'ghavamin',
+    'khavarmiane',
+    'central-bank',
+    'gharzolhasaneh-mehr',
+    'gardeshgari',
+    'melli',
+    'iran-venezuela',
+    'parsian',
+    'ayandeh',
+    'hekmat',
+    'post-bank',
+    'tosee-saderat',
+    'future',
+    'taavon-eslami',
+    'kosar',
+    'karafarin',
+    'day',
+    'keshavarzi',
+    'mellat',
+    'saman',
+    'maskan',
+    'noor',
+    'sarmaye',
+    'mellal',
+    'pasargad',
+    'shaparak',
+    'saderat',
+    'blu',
+    'tejarat',
+    'sina',
+    'shahr',
+    'wepod',
+    'tat',
+    'iran-zamin',
+    'abank',
+    'sanat-madan',
+    'sepah',
+    'refah',
+    'tosee-taavon',
+    'mehr-eghtesad',
+    'tosee',
+    'bankino',
+    'eghtesad-novin',
+    'farda',
+    'iran-europe',
+  ];
+
+  // Try Persian mapping first
+  let mappedKey = null;
+  for (const item of persianMap) {
+    if (originalName.includes(item.keyword)) {
+      mappedKey = item.key;
+      break;
+    }
+  }
+
+  // Fallback to Latin/normalized mapping
+  if (!mappedKey) {
+    mappedKey = map[normalized] || normalized;
+  }
+
+  if (!availableIcons.includes(mappedKey)) {
+    return '/assets/images/icons/icn-square-info.svg';
+  }
+
+  return `/assets/images/banks/${mappedKey}.svg`;
 }
 
 /**

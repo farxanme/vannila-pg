@@ -67,7 +67,7 @@
   z-index: calc(var(--z-fixed) + 1);
 }
 
-[dir="rtl"] .header-lang-dropdown {
+[dir='rtl'] .header-lang-dropdown {
   right: auto;
   left: var(--spacing-md);
 }
@@ -99,7 +99,7 @@
   overflow: hidden;
 }
 
-[dir="rtl"] .lang-dropdown-menu {
+[dir='rtl'] .lang-dropdown-menu {
   right: auto;
   left: 0;
 }
@@ -115,7 +115,7 @@
   transition: background var(--transition-base);
 }
 
-[dir="ltr"] .lang-dropdown-item {
+[dir='ltr'] .lang-dropdown-item {
   text-align: left;
 }
 

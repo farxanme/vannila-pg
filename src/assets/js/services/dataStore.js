@@ -98,7 +98,7 @@ class DataStore {
   clear() {
     try {
       const keys = Object.keys(localStorage);
-      keys.forEach(key => {
+      keys.forEach((key) => {
         if (key.startsWith('pg_')) {
           localStorage.removeItem(key);
         }

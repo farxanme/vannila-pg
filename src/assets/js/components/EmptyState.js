@@ -9,9 +9,9 @@ export class EmptyState {
       title: options.title || '',
       description: options.description || '',
       buttons: options.buttons || [],
-      ...options
+      ...options,
     };
-    
+
     this.init();
   }
 
@@ -58,29 +58,29 @@ export class EmptyState {
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'empty-state-buttons';
-      
-      this.options.buttons.forEach((button, index) => {
+
+      this.options.buttons.forEach((button, _index) => {
         const btn = document.createElement('button');
         btn.type = 'button';
         btn.className = `btn btn-${button.type || 'primary'}`;
         btn.textContent = button.text || '';
-        
+
         if (button.icon) {
           const icon = document.createElement('span');
           icon.className = 'btn-icon';
           icon.innerHTML = button.icon;
           btn.insertBefore(icon, btn.firstChild);
         }
-        
+
         btn.onclick = () => {
           if (button.onClick) {
             button.onClick(this);
           }
         };
-        
+
         buttonsContainer.appendChild(btn);
       });
-      
+
       emptyState.appendChild(buttonsContainer);
     }
 
@@ -99,7 +99,7 @@ export class EmptyState {
         titleEl.textContent = options.title;
       }
     }
-    
+
     if (options.description !== undefined) {
       const descEl = this.element.querySelector('.empty-state-description');
       if (descEl) {
