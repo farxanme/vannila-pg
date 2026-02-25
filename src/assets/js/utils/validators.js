@@ -10,6 +10,13 @@ import { extractNumbers } from './numberConverter.js';
  * @returns {Object} - { valid: boolean, message: string }
  */
 export function validateCardNumber(cardNumber) {
+  // Accept masked saved-card format: 6 digits, 6 mask chars (# or •), 4 digits
+  const raw = (cardNumber || '').replace(/\s/g, '');
+  const maskedPattern = /^(\d{6})[#●]{6}\d{4}$/;
+  if (maskedPattern.test(raw)) {
+    return { valid: true, message: '' };
+  }
+
   const numbers = extractNumbers(cardNumber);
   
   if (!numbers || numbers.length === 0) {

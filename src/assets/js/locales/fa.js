@@ -58,7 +58,6 @@ export default {
   'form.showReceipt': 'نمایش رسید',
   'form.title': 'اطلاعات پرداخت',
   'form.submit': 'ارسال',
-  'form.partnerLogos': 'لوگوهای پذیرنده',
   'form.captcha': 'کد امنیتی',
   'form.captcha.placeholder': 'کد را وارد کنید',
   'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
@@ -69,6 +68,7 @@ export default {
   'form.getOtpSuccess': 'رمز پویا ارسال شد',
   'form.captchaImageAlt': 'کد امنیتی',
   'form.captchaAudio': 'پخش صدای کد امنیتی',
+  'form.audioPlay': 'پخش صوتی',
   'form.confirmCancel': 'آیا از انصراف اطمینان دارید؟',
   'form.expiryPlaceholder': 'ماه/سال',
 

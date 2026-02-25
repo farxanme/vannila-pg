@@ -58,7 +58,6 @@ export default {
   'form.showReceipt': 'Show Receipt',
   'form.title': 'Payment Information',
   'form.submit': 'Submit',
-  'form.partnerLogos': 'Partner Logos',
   'form.captcha': 'Security Code',
   'form.captcha.placeholder': 'Enter code',
   'form.validation.error': 'Please fill all fields correctly',
@@ -69,6 +68,7 @@ export default {
   'form.getOtpSuccess': 'OTP sent successfully',
   'form.captchaImageAlt': 'Security code',
   'form.captchaAudio': 'Play captcha audio',
+  'form.audioPlay': 'Play audio',
   'form.confirmCancel': 'Are you sure you want to cancel?',
   'form.expiryPlaceholder': 'MM/YY',
 

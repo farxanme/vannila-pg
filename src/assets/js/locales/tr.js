@@ -58,7 +58,6 @@ export default {
   'form.showReceipt': 'Fişi Göster',
   'form.title': 'Ödeme Bilgileri',
   'form.submit': 'Gönder',
-  'form.partnerLogos': 'Ortak Logoları',
   'form.captcha': 'Güvenlik Kodu',
   'form.captcha.placeholder': 'Kodu girin',
   'form.validation.error': 'Lütfen tüm alanları doğru şekilde doldurun',
@@ -69,6 +68,7 @@ export default {
   'form.getOtpSuccess': 'OTP başarıyla gönderildi',
   'form.captchaImageAlt': 'Güvenlik kodu',
   'form.captchaAudio': 'Doğrulama kodu sesini çal',
+  'form.audioPlay': 'Sesi oynat',
   'form.confirmCancel': 'İptal etmek istediğinize emin misiniz?',
   'form.expiryPlaceholder': 'AA/YY',
 

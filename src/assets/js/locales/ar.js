@@ -58,7 +58,6 @@ export default {
   'form.showReceipt': 'عرض الإيصال',
   'form.title': 'معلومات الدفع',
   'form.submit': 'إرسال',
-  'form.partnerLogos': 'شعارات الشريك',
   'form.captcha': 'رمز الأمان',
   'form.captcha.placeholder': 'أدخل الرمز',
   'form.validation.error': 'يرجى ملء جميع الحقول بشكل صحيح',
@@ -69,6 +68,7 @@ export default {
   'form.getOtpSuccess': 'تم إرسال OTP بنجاح',
   'form.captchaImageAlt': 'رمز الأمان',
   'form.captchaAudio': 'تشغيل صوت رمز التحقق',
+  'form.audioPlay': 'تشغيل الصوت',
   'form.confirmCancel': 'هل أنت متأكد من الإلغاء؟',
   'form.expiryPlaceholder': 'شهر/سنة',
 

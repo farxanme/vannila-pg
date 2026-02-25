@@ -10,7 +10,7 @@ import { Timer } from '../classes/Timer.js';
 import { Modal } from '../components/Modal.js';
 import { LoadingScreen } from '../components/LoadingScreen.js';
 import { validateCardNumber, validateCVV2, validateExpiryDate, validateMobile, validateEmail, validateOTP } from '../utils/validators.js';
-import { detectBank, formatCardNumber } from '../utils/bankDetector.js';
+import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
 import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
@@ -99,6 +99,7 @@ async function initializePage() {
 
 function initializeTimer() {
   const timerContainer = document.getElementById('timer-container');
+  const timerHeader = document.getElementById('timer-header');
   const timerValue = timerContainer.querySelector('.timer-value');
 
   timer = new Timer({
@@ -108,20 +109,22 @@ function initializeTimer() {
       const seconds = remaining % 60;
       timerValue.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
 
-      // Update timer class based on progress
-      timerContainer.classList.remove('warning', 'danger');
+      // Update timer header style based on progress
+      if (timerHeader) {
+        timerHeader.classList.remove('warning', 'danger');
+      }
       const progress = remaining / 900;
       if (progress <= 1 / 3) {
-        timerContainer.classList.add('danger');
+        if (timerHeader) timerHeader.classList.add('danger');
       } else if (progress <= 2 / 3) {
-        timerContainer.classList.add('warning');
+        if (timerHeader) timerHeader.classList.add('warning');
       }
     },
     onOneThird: () => {
-      timerContainer.classList.add('warning');
+      if (timerHeader) timerHeader.classList.add('warning');
     },
     onTwoThird: () => {
-      timerContainer.classList.add('danger');
+      if (timerHeader) timerHeader.classList.add('danger');
     },
     onEnd: () => {
       errorHandler.show({
@@ -205,25 +208,45 @@ function initializeFormInputs() {
     }
   });
 
+  function getMaskedDisplayPan(securePan) {
+    if (!securePan) return '';
+    const raw = securePan.replace(/\s/g, '').replace(/#/g, '●');
+    const parts = [];
+    for (let i = 0; i < raw.length; i += 4) {
+      parts.push(raw.substring(i, i + 4));
+    }
+    return parts.join(' ');
+  }
+
   // Create card dropdown if cards exist
   if (cardList.length > 0) {
     cardDropdown = new Dropdown(cardNumberInput.element, {
       items: cardList.map(card => ({
-        text: formatCardNumber(card.number),
+        text: getMaskedDisplayPan(card.securePan),
         value: card.number,
-        html: `
-          <div class="dropdown-card-item">
-            <span>${card.bankName || ''}</span>
-            <span class="dropdown-card-number">${formatCardNumber(card.number)}</span>
-            ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
-          </div>
-        `
+        html: (() => {
+          const logoPath = getBankLogo(card.bankName);
+          const bankName = card.bankName || '';
+          const maskedPan = getMaskedDisplayPan(card.securePan);
+          return `
+            <div class="dropdown-card-item">
+              <div class="dropdown-card-bank">
+                ${logoPath ? `<img class="dropdown-card-bank-logo" src="${logoPath}" alt="${bankName}" />` : ''}
+                <span class="dropdown-card-bank-name">${bankName}</span>
+              </div>
+              <div class="dropdown-card-meta">
+                <span class="dropdown-card-number">${maskedPan}</span>
+                ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
+              </div>
+            </div>
+          `;
+        })()
       })),
       onSelect: (item) => {
         const card = cardList.find(c => c.number === item.value);
         if (card) {
-          cardNumberInput.setValue(formatCardNumber(card.number));
-          updateBankLogo(detectBank(card.number));
+          cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
+          updateBankLogo(detectBank(card.securePan));
         }
       }
     });
@@ -363,9 +386,14 @@ function initializeFormInputs() {
   // Create audio button (outside input, like OTP button)
   const captchaAudio = document.createElement('button');
   captchaAudio.type = 'button';
-  captchaAudio.className = 'btn btn-secondary captcha-audio-btn';
+  captchaAudio.className = 'btn btn-primary btn-bordered captcha-audio-btn';
   captchaAudio.setAttribute('aria-label', i18n.t('form.captchaAudio'));
-  captchaAudio.innerHTML = '🔊';
+  captchaAudio.innerHTML = `
+    <span data-i18n="form.audioPlay">${i18n.t('form.audioPlay')}</span>
+    <span class="btn-icon" aria-hidden="true">
+      <img src="/assets/images/icons/icn-volume.svg" alt="" />
+    </span>
+  `;
   captchaAudio.onclick = () => {
     const audio = new Audio('/api/captcha/audio');
     audio.play();
@@ -471,8 +499,38 @@ function initializeFormInputs() {
 }
 
 function updateBankLogo(bank) {
-  // This would update a bank logo element if it exists
-  // Implementation depends on where the logo should be displayed
+  if (!cardNumberInput || !cardNumberInput.element) {
+    return;
+  }
+
+  const wrapper = cardNumberInput.element.closest('.input-wrapper');
+  if (!wrapper) return;
+
+  const container = wrapper.querySelector('.input-container');
+  if (!container) return;
+
+  let logoWrapper = container.querySelector('.card-bank-logo');
+  if (!logoWrapper) {
+    logoWrapper = document.createElement('div');
+    logoWrapper.className = 'card-bank-logo';
+    container.insertBefore(logoWrapper, container.firstChild);
+  }
+
+  if (!bank || !bank.name) {
+    logoWrapper.innerHTML = '';
+    logoWrapper.classList.add('hidden');
+    return;
+  }
+
+  const logoPath = getBankLogo(bank.name);
+  if (!logoPath) {
+    logoWrapper.innerHTML = '';
+    logoWrapper.classList.add('hidden');
+    return;
+  }
+
+  logoWrapper.innerHTML = `<img src="${logoPath}" alt="${bank.name}" />`;
+  logoWrapper.classList.remove('hidden');
 }
 
 function toggleCardList() {
@@ -497,36 +555,46 @@ function initializeTransactionInfo() {
   const amountInWords = numberToPersianWords(amountInTomans);
 
   container.innerHTML = `
-    <div class="transaction-info-item">
-      <div class="transaction-info-icon">🏪</div>
-      <div class="transaction-info-content">
-        <div class="transaction-info-label">${i18n.t('transaction.merchant')}</div>
-        <div class="transaction-info-value">${transactionData.merchant}</div>
-      </div>
-    </div>
-    <div class="transaction-info-item">
-      <div class="transaction-info-icon">💰</div>
-      <div class="transaction-info-content">
-        <div class="transaction-info-label">${i18n.t('transaction.amount')}</div>
-        <div class="transaction-info-value">
-          <div class="transaction-amount-rial">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
-          <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
-        </div>
-      </div>
-    </div>
     <div class="more-content" id="more-transaction-info">
       <div class="transaction-info-item">
-        <div class="transaction-info-icon">🔢</div>
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-shop.svg" alt="" aria-hidden="true" />
+        </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label">${i18n.t('transaction.terminal')}</div>
           <div class="transaction-info-value">${transactionData.terminal}</div>
         </div>
       </div>
       <div class="transaction-info-item">
-        <div class="transaction-info-icon">🌐</div>
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-world.svg" alt="" aria-hidden="true" />
+        </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label">${i18n.t('transaction.site')}</div>
           <div class="transaction-info-value">${transactionData.site}</div>
+        </div>
+      </div>
+    </div>
+    <div class="transaction-summary-card">
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-shopping-bag.svg" alt="" aria-hidden="true" />
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.merchant')}</div>
+          <div class="transaction-info-value">${transactionData.merchant}</div>
+        </div>
+      </div>
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-cash-banknote.svg" alt="" aria-hidden="true" />
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.amount')}</div>
+          <div class="transaction-info-value">
+            <div class="transaction-amount-rial">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
+            <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
+          </div>
         </div>
       </div>
     </div>
@@ -758,10 +826,6 @@ function updatePageContent() {
               }
             }
           }
-        } else if (iconText === '🔢') {
-          label.textContent = i18n.t('transaction.terminal');
-        } else if (iconText === '🌐') {
-          label.textContent = i18n.t('transaction.site');
         }
       }
     }

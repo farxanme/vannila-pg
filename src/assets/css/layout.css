@@ -193,15 +193,16 @@
 }
 
 .card-header {
-  background: #EEF4FD;
-  color: #2F77EB;
-  border-radius: 8px;
-  height: 50px;
+  background: var(--color-primary-50);
+  color: var(--color-primary-500);
+  border-radius: var(--radius-lg);
+  min-height: 50px;
   padding: 16px;
   border: none;
   margin-bottom: var(--spacing-md);
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .card-title {
@@ -282,8 +283,17 @@
 .transaction-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-7_5);
   margin-top: var(--spacing-lg);
+}
+
+.transaction-summary-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-7_5);
+  padding: var(--spacing-md);
+  background: var(--color-primary-50);
+  border-radius: var(--radius-lg) 60px var(--radius-lg) var(--radius-lg);
 }
 
 .transaction-info-item {
@@ -295,8 +305,8 @@
 .transaction-info-icon {
   font-size: var(--font-size-xl);
   flex-shrink: 0;
-  width: 32px;
-  height: 32px;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -333,10 +343,23 @@
   margin-top: var(--spacing-xs);
 }
 
+.transaction-summary-card .transaction-info-label {
+  color: var(--color-gray-600);
+}
+
+.transaction-summary-card .transaction-info-value,
+.transaction-summary-card .transaction-amount-rial {
+  color: var(--color-primary-800);
+}
+
+.transaction-summary-card .transaction-amount-toman {
+  color: var(--color-gray-500);
+}
+
 .more-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-7_5);
 }
 
 .more-toggle {
@@ -490,9 +513,6 @@
 /* Timer */
 .timer {
   text-align: center;
-  padding: var(--spacing-md);
-  background: var(--color-bg-light);
-  border-radius: var(--radius-md);
 }
 
 .timer-value {
@@ -501,12 +521,14 @@
   font-family: monospace;
 }
 
-.timer.warning {
+.timer.warning,
+.card-header.warning {
   background: rgba(255, 193, 7, 0.1);
   color: var(--color-warning);
 }
 
-.timer.danger {
+.timer.danger,
+.card-header.danger {
   background: rgba(220, 53, 69, 0.1);
   color: var(--color-danger);
 }

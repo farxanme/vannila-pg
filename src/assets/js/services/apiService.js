@@ -123,7 +123,7 @@ class ApiService {
     if (freeze) {
       body.style.pointerEvents = 'none';
       body.style.opacity = '0.7';
-      body.style.cursor = 'wait';
+      body.style.cursor = '';
     } else {
       body.style.pointerEvents = '';
       body.style.opacity = '';

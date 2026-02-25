@@ -66,13 +66,13 @@
               
               <!-- Form Actions -->
               <div class="form-actions">
-                <button type="submit" class="btn btn-primary" id="pay-button" data-i18n="form.pay">پرداخت</button>
-                <button type="button" class="btn btn-secondary" id="cancel-button" data-i18n="form.cancel">انصراف</button>
+                <button type="submit" class="btn btn-success" id="pay-button" data-i18n="form.pay">پرداخت</button>
+                <button type="button" class="btn btn-primary btn-bordered" id="cancel-button" data-i18n="form.cancel">انصراف</button>
               </div>
               
               <!-- Show Receipt -->
               <div class="form-group show-receipt-wrapper">
-                <button type="button" class="btn btn-secondary show-receipt-button" id="show-receipt-button" data-i18n="form.showReceipt">نمایش رسید</button>
+                <button type="button" class="btn btn-primary btn-bordered show-receipt-button" id="show-receipt-button" data-i18n="form.showReceipt">نمایش رسید</button>
               </div>
               
               <!-- Receipt Fields (Hidden initially) -->
@@ -89,17 +89,14 @@
           
           <!-- Small Card (1/3) -->
           <div class="card card-small">
-            <div class="card-header">
+            <div class="card-header" id="timer-header">
               <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
-            </div>
-            <div id="timer-container" class="timer">
-              <div class="timer-value">15:00</div>
+              <div id="timer-container" class="timer">
+                <div class="timer-value">15:00</div>
+              </div>
             </div>
             
             <div id="partner-logos-section" class="partner-logos-section">
-              <div class="card-header partner-logos-header">
-                <h2 class="card-title" data-i18n="form.partnerLogos">لوگوهای پذیرنده</h2>
-              </div>
               <div id="partner-logos" class="partner-logos">
                 <!-- Partner logos will be inserted here -->
               </div>

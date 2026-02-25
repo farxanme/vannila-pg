@@ -55,6 +55,16 @@
   }
 }
 
+/* Small card layout: stack content, keep transaction info at bottom */
+.card.card-small {
+  display: flex;
+  flex-direction: column;
+}
+
+.card.card-small .transaction-info {
+  margin-top: auto;
+}
+
 .partner-logos-section {
   display: block;
 }
@@ -139,9 +149,9 @@
 }
 
 .otp-input-container .otp-input-row .btn {
+  min-width: 154px;
   max-width: 154px;
   flex-shrink: 0;
-  /* Align button top with input-container top */
   margin-top: 0;
   align-self: flex-start;
   height: 48px;
@@ -169,7 +179,8 @@
 
 /* Captcha audio button spacing */
 .captcha-container .captcha-input-row .captcha-audio-btn {
-  margin-left: var(--spacing-md); /* LTR: gap on left side (between image and button) */
+  margin-left: var(--spacing-md);
+  /* LTR: gap on left side (between image and button) */
 }
 
 /* RTL: move gap to right side */
@@ -230,27 +241,27 @@
 }
 
 /* Update captcha image border when input is focused */
-.captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused) ~ .captcha-image {
+.captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused)~.captcha-image {
   border-top-color: var(--color-primary);
   border-bottom-color: var(--color-primary);
   border-right-color: var(--color-primary);
 }
 
 /* RTL: Update left border instead of right */
-[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused) ~ .captcha-image {
+[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused)~.captcha-image {
   border-left-color: var(--color-primary);
   border-right-color: var(--color-stroke);
 }
 
 /* Update captcha image border when input has error */
-.captcha-container .captcha-input-row .input-wrapper:has(.input-container.error) ~ .captcha-image {
+.captcha-container .captcha-input-row .input-wrapper:has(.input-container.error)~.captcha-image {
   border-top-color: var(--color-danger);
   border-bottom-color: var(--color-danger);
   border-right-color: var(--color-danger);
 }
 
 /* RTL: Update left border instead of right */
-[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.error) ~ .captcha-image {
+[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.error)~.captcha-image {
   border-left-color: var(--color-danger);
   border-right-color: var(--color-stroke);
 }
@@ -262,6 +273,7 @@
 
 /* Captcha audio button - same size as OTP button */
 .captcha-container .captcha-input-row .captcha-audio-btn {
+  min-width: 154px;
   max-width: 154px;
   flex-shrink: 0;
   margin-top: 0;
@@ -292,11 +304,6 @@
   width: 100%;
 }
 
-/* Partner logos header spacing */
-.partner-logos-header {
-  margin-top: var(--spacing-lg);
-}
-
 /* Dropdown card item styles */
 .dropdown-card-item {
   display: flex;
@@ -304,8 +311,31 @@
   justify-content: space-between;
 }
 
+.dropdown-card-bank {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.dropdown-card-bank-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.dropdown-card-bank-name {
+  font-size: var(--font-size-sm);
+}
+
+.dropdown-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
 .dropdown-card-number {
   font-family: monospace;
+  direction: ltr;
 }
 
 .dropdown-card-pinned {

@@ -58,7 +58,6 @@ export default {
   'form.showReceipt': 'Показать квитанцию',
   'form.title': 'Информация об оплате',
   'form.submit': 'Отправить',
-  'form.partnerLogos': 'Логотипы партнеров',
   'form.captcha': 'Код безопасности',
   'form.captcha.placeholder': 'Введите код',
   'form.validation.error': 'Пожалуйста, заполните все поля правильно',
@@ -69,6 +68,7 @@ export default {
   'form.getOtpSuccess': 'OTP успешно отправлен',
   'form.captchaImageAlt': 'Код безопасности',
   'form.captchaAudio': 'Воспроизвести аудио капчи',
+  'form.audioPlay': 'Воспроизвести аудио',
   'form.confirmCancel': 'Вы уверены, что хотите отменить?',
   'form.expiryPlaceholder': 'ММ/ГГ',
 

@@ -12,7 +12,7 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: 24px;
-  color: #40444E;
+  color: var(--color-gray-800);
 }
 
 .input-required {
@@ -23,27 +23,27 @@
   position: relative;
   display: flex;
   align-items: center;
-  border: 1px solid #E9EBEF;
-  border-radius: 12px;
-  background: #F9FAFC;
+  border: 1px solid var(--color-gray-100);
+  border-radius: var(--radius-xl);
+  background: var(--color-controller);
   transition: all var(--transition-base);
-  height: 48px;
-  min-height: 48px;
+  height: var(--height-control-md);
+  min-height: var(--height-control-md);
 }
 
 .input-container.focused {
-  border-color: #82ACEF;
-  box-shadow: 0px 0px 9px 0px #D5E3FA;
+  border-color: var(--color-primary-300);
+  box-shadow: var(--shadow-input-focus);
 }
 
 .input-container.error {
-  border-color: #FA8998;
-  box-shadow: 0px 0px 9px 0px #FDD8DD;
+  border-color: var(--color-error-300);
+  box-shadow: var(--shadow-input-error);
 }
 
 .input-container.disabled {
-  background: #E9EBEF;
-  border-color: #D3D7DF;
+  background: var(--color-gray-100);
+  border-color: var(--color-gray-200);
   opacity: 1;
   cursor: not-allowed;
 }
@@ -71,7 +71,7 @@
 
 .input-field {
   flex: 1;
-  padding: 12px;
+  padding: var(--spacing-3);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background: transparent;
@@ -82,6 +82,26 @@
   outline: none;
 }
 
+.input-password-mask {
+  -webkit-text-security: circle;
+  text-security: circle;
+}
+
+.card-bank-logo {
+  display: flex;
+  align-items: center;
+  margin-right: var(--spacing-3);
+}
+
+[dir="rtl"] .card-bank-logo {
+  margin-right: 0;
+  margin-left: var(--spacing-3);
+}
+
+.card-bank-logo.hidden {
+  display: none;
+}
+
 .input-field:disabled {
   cursor: not-allowed;
 }
@@ -90,13 +110,13 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding-right: 12px;
+  padding-right: var(--spacing-3);
   padding-left: 0;
 }
 
 [dir="rtl"] .input-right-container {
   padding-right: 0;
-  padding-left: 12px;
+  padding-left: var(--spacing-3);
 }
 
 .input-action {
@@ -323,8 +343,8 @@
   position: absolute;
   top: var(--spacing-md);
   right: var(--spacing-md);
-  width: 32px;
-  height: 32px;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
   border: none;
   background: transparent;
   font-size: var(--font-size-xl);
@@ -523,15 +543,18 @@
 }
 
 @keyframes bluebar {
-  0%, 10% {
+  0%,
+  10% {
     width: 15%;
     left: 0;
   }
-  40%, 60% {
+  40%,
+  60% {
     width: 100%;
     left: 0;
   }
-  90%, 100% {
+  90%,
+  100% {
     width: 15%;
     left: 85%;
   }
@@ -555,8 +578,8 @@
   justify-content: center;
   gap: var(--spacing-xs);
   border: none;
-  height: 48px;
-  min-height: 48px;
+  height: var(--height-control-md);
+  min-height: var(--height-control-md);
   box-sizing: border-box;
 }
 
@@ -567,20 +590,11 @@
 
 .btn-primary {
   background: var(--color-primary);
-  color: white;
+  color: var(--color-bg-white);
 }
 
 .btn-primary:hover:not(:disabled) {
   background: var(--color-primary-hover);
-}
-
-.btn-secondary {
-  background: var(--color-secondary);
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  opacity: 0.9;
 }
 
 .btn-danger {
@@ -640,19 +654,9 @@
   border-right-color: white;
 }
 
-.btn-secondary.loading::after {
-  border-color: rgba(255, 255, 255, 0.4);
-  border-right-color: white;
-}
-
 .btn-primary.btn-bordered.loading::after {
   border-color: rgba(0, 123, 255, 0.25);
   border-right-color: var(--color-primary);
-}
-
-.btn-secondary.btn-bordered.loading::after {
-  border-color: rgba(108, 117, 125, 0.25);
-  border-right-color: var(--color-secondary);
 }
 
 .btn-success.btn-bordered.loading::after {
@@ -689,15 +693,6 @@
 
 .btn-primary.btn-bordered:focus-visible {
   box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-.btn-secondary.btn-bordered {
-  color: var(--color-secondary);
-  border-color: var(--color-secondary);
-}
-
-.btn-secondary.btn-bordered:hover:not(:disabled) {
-  background: rgba(108, 117, 125, 0.08);
 }
 
 .btn-success.btn-bordered {

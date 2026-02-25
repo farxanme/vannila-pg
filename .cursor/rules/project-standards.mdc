@@ -55,6 +55,14 @@ let userName = '';
 
 - Write all code comments in **English** (file headers, block comments, and inline comments).
 
+## 7. Remove orphaned code
+
+- When you remove a feature, HTML block, or component, also remove its unused dependencies:
+  - Related CSS selectors and styles
+  - Related JS handlers, imports, and utilities
+  - Related i18n keys in locale files
+- Only keep code if it is clearly reused somewhere else.
+
 ---
 
-**Summary**: For every prompt, first consider naming, clean code, reusability, accessibility, i18n, and English-only comments, then apply changes accordingly.
+**Summary**: For every prompt, first consider naming, clean code, reusability, accessibility, i18n, English-only comments, and cleaning up unused dependencies, then apply changes accordingly.

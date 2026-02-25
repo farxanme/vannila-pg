@@ -102,7 +102,8 @@ export class Input {
 
     // Input element
     const input = document.createElement('input');
-    input.type = this.options.type === 'password' ? 'password' : this.options.type;
+    const isPasswordType = this.options.type === 'password';
+    input.type = isPasswordType ? 'tel' : this.options.type;
     input.id = this.options.id;
     input.name = this.options.name || this.options.id;
     input.className = 'input-field';
@@ -113,6 +114,8 @@ export class Input {
     
     if (this.options.inputMode) {
       input.inputMode = this.options.inputMode;
+    } else if (isPasswordType) {
+      input.inputMode = 'tel';
     }
     
     if (this.options.pattern) {
@@ -122,11 +125,8 @@ export class Input {
     if (this.options.maxLength) {
       input.maxLength = this.options.maxLength;
     }
-
-    // For password type inputs that should look like numbers
-    if (this.options.type === 'password' && this.options.inputMode === 'numeric') {
-      input.style.fontFamily = 'monospace';
-      input.style.letterSpacing = '2px';
+    if (isPasswordType) {
+      input.classList.add('input-password-mask');
     }
 
     inputContainer.appendChild(input);
