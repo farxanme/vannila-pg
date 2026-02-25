@@ -52,7 +52,7 @@ async function initializePage() {
   await i18n.readyPromise;
 
   const loadingScreen = new LoadingScreen({
-    logo: '/assets/images/logo.svg',
+    logo: '/assets/images/logo-full.svg',
     text: i18n.t('common.loading'),
     showProgressBar: true,
   });

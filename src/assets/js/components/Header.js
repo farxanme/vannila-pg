@@ -6,7 +6,6 @@ export class Header {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
-      // Secondary logo on the other side of the header (replaces card)
       secondaryLogo: options.secondaryLogo || null,
       title: options.title || '',
       showCard: options.showCard !== false,
