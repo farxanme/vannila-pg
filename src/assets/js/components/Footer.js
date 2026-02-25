@@ -5,7 +5,7 @@ export class Footer {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
-      copyright: options.copyright || '© 2024 All rights reserved',
+      copyright: options.copyright || '',
       ...options
     };
     

@@ -8,26 +8,30 @@
 }
 
 /* RTL: small card on LEFT, large card on RIGHT */
-[dir="rtl"] .grid.grid-2-col > .card-small {
+[dir="rtl"] .grid.grid-2-col>.card-small {
   order: 2;
-  flex: 0 0 320px; /* fixed 320px column */
+  flex: 0 0 320px;
+  /* fixed 320px column */
 }
 
-[dir="rtl"] .grid.grid-2-col > .card-large {
+[dir="rtl"] .grid.grid-2-col>.card-large {
   order: 1;
-  flex: 1 1 auto; /* take remaining space */
+  flex: 1 1 auto;
+  /* take remaining space */
   min-width: 0;
 }
 
 /* LTR: small card on RIGHT, large card on LEFT */
-[dir="ltr"] .grid.grid-2-col > .card-small {
+[dir="ltr"] .grid.grid-2-col>.card-small {
   order: 2;
-  flex: 0 0 320px; /* fixed 320px column */
+  flex: 0 0 320px;
+  /* fixed 320px column */
 }
 
-[dir="ltr"] .grid.grid-2-col > .card-large {
+[dir="ltr"] .grid.grid-2-col>.card-large {
   order: 1;
-  flex: 1 1 auto; /* take remaining space */
+  flex: 1 1 auto;
+  /* take remaining space */
   min-width: 0;
 }
 
@@ -37,14 +41,14 @@
   }
 
   /* Mobile: small card first, large card second */
-  .grid.grid-2-col > .card-small {
+  .grid.grid-2-col>.card-small {
     order: 1;
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
   }
 
-  .grid.grid-2-col > .card-large {
+  .grid.grid-2-col>.card-large {
     order: 2;
     flex: 0 0 auto;
     width: 100%;
@@ -99,34 +103,34 @@
 }
 
 /* OTP Input Container Styles */
-#otp-input-container {
+.otp-input-container {
   display: flex;
   flex-direction: column;
 }
 
-#otp-input-container > .input-label {
+.otp-input-container>.input-label {
   margin-bottom: var(--spacing-xs);
 }
 
-#otp-input-container .otp-input-row {
+.otp-input-container .otp-input-row {
   display: flex;
-  gap: var(--spacing-sm);
+  gap: var(--spacing-md);
   align-items: stretch;
 }
 
-#otp-input-container .otp-input-row .input-wrapper {
+.otp-input-container .otp-input-row .input-wrapper {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
-#otp-input-container .otp-input-row .input-wrapper .input-label {
+.otp-input-container .otp-input-row .input-wrapper .input-label {
   display: none;
 }
 
 /* Align button with input-container */
-#otp-input-container .otp-input-row .input-wrapper .input-container {
+.otp-input-container .otp-input-row .input-wrapper .input-container {
   display: flex;
   align-items: center;
   flex: 0 0 auto;
@@ -134,7 +138,7 @@
   min-height: 48px;
 }
 
-#otp-input-container .otp-input-row .btn {
+.otp-input-container .otp-input-row .btn {
   max-width: 154px;
   flex-shrink: 0;
   /* Align button top with input-container top */
@@ -145,4 +149,170 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Captcha Input Container Styles */
+.captcha-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.captcha-container>.input-label {
+  margin-bottom: var(--spacing-xs);
+}
+
+.captcha-container .captcha-input-row {
+  display: flex;
+  gap: 0;
+  align-items: stretch;
+}
+
+/* Captcha audio button spacing */
+.captcha-container .captcha-input-row .captcha-audio-btn {
+  margin-left: var(--spacing-md); /* LTR: gap on left side (between image and button) */
+}
+
+/* RTL: move gap to right side */
+[dir="rtl"] .captcha-container .captcha-input-row .captcha-audio-btn {
+  margin-left: 0;
+  margin-right: var(--spacing-md);
+}
+
+/* Captcha input wrapper */
+.captcha-container .captcha-input-row .input-wrapper {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.captcha-container .captcha-input-row .input-wrapper .input-label {
+  display: none;
+}
+
+/* Captcha input container - first in row, attached to image */
+.captcha-container .captcha-input-row .input-wrapper .input-container {
+  border: 1px solid var(--color-stroke);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  height: 48px;
+  min-height: 48px;
+}
+
+/* RTL: Input container on right side */
+[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper .input-container {
+  border-right: 1px solid var(--color-stroke);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+/* Captcha image attached after input - borders match input container */
+.captcha-container .captcha-image {
+  border-top: 1px solid var(--color-stroke);
+  border-bottom: 1px solid var(--color-stroke);
+  border-right: 1px solid var(--color-stroke);
+  border-left: none;
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  padding: var(--spacing-xs);
+  cursor: pointer;
+  height: 48px;
+  width: auto;
+  object-fit: contain;
+  background: var(--color-bg-white);
+  flex-shrink: 0;
+}
+
+/* RTL: Captcha image on left side */
+[dir="rtl"] .captcha-container .captcha-image {
+  border-right: none;
+  border-left: 1px solid var(--color-stroke);
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+}
+
+/* Update captcha image border when input is focused */
+.captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused) ~ .captcha-image {
+  border-top-color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+}
+
+/* RTL: Update left border instead of right */
+[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.focused) ~ .captcha-image {
+  border-left-color: var(--color-primary);
+  border-right-color: var(--color-stroke);
+}
+
+/* Update captcha image border when input has error */
+.captcha-container .captcha-input-row .input-wrapper:has(.input-container.error) ~ .captcha-image {
+  border-top-color: var(--color-danger);
+  border-bottom-color: var(--color-danger);
+  border-right-color: var(--color-danger);
+}
+
+/* RTL: Update left border instead of right */
+[dir="rtl"] .captcha-container .captcha-input-row .input-wrapper:has(.input-container.error) ~ .captcha-image {
+  border-left-color: var(--color-danger);
+  border-right-color: var(--color-stroke);
+}
+
+/* When image is clicked, add visual feedback */
+.captcha-container .captcha-image:active {
+  opacity: 0.7;
+}
+
+/* Captcha audio button - same size as OTP button */
+.captcha-container .captcha-input-row .captcha-audio-btn {
+  max-width: 154px;
+  flex-shrink: 0;
+  margin-top: 0;
+  margin-right: var(--spacing-md);
+  height: 48px;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  align-self: flex-start;
+}
+
+/* Receipt fields hidden by default */
+.receipt-fields {
+  display: none;
+}
+
+.receipt-fields.show {
+  display: block;
+}
+
+/* Show receipt button wrapper */
+.show-receipt-wrapper {
+  margin-top: var(--spacing-md);
+}
+
+.show-receipt-button {
+  width: 100%;
+}
+
+/* Partner logos header spacing */
+.partner-logos-header {
+  margin-top: var(--spacing-lg);
+}
+
+/* Dropdown card item styles */
+.dropdown-card-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dropdown-card-number {
+  font-family: monospace;
+}
+
+.dropdown-card-pinned {
+  color: var(--color-primary);
+}
+
+/* Partner logo hidden */
+.partner-logo.hidden {
+  display: none;
 }

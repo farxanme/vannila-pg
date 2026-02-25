@@ -7,6 +7,7 @@ export class LoadingScreen {
       logo: options.logo || null,
       text: options.text || '',
       showProgressBar: options.showProgressBar !== false,
+      ariaLabel: options.ariaLabel || options.text || 'Loading',
       ...options
     };
     
@@ -28,7 +29,7 @@ export class LoadingScreen {
     loading.className = 'loading-screen';
     loading.setAttribute('role', 'status');
     loading.setAttribute('aria-live', 'polite');
-    loading.setAttribute('aria-label', 'Loading');
+    loading.setAttribute('aria-label', this.options.ariaLabel);
 
     const container = document.createElement('div');
     container.className = 'loading-container';

@@ -13,10 +13,19 @@ export default {
   'common.loading': 'Loading...',
   'common.error': 'Error',
   'common.success': 'Success',
-  
+  'common.clear': 'Clear',
+  'common.required': 'This field is required',
+  'common.processing': 'Processing...',
+
+  // Redirect
+  'redirect.loading': 'Redirecting...',
+
   // Header
   'header.title': 'Payment Gateway',
-  
+
+  // Footer
+  'footer.copyright': '© 2024 All rights reserved',
+
   // Form
   'form.cardNumber': 'Card Number',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
@@ -53,7 +62,20 @@ export default {
   'form.captcha': 'Security Code',
   'form.captcha.placeholder': 'Enter code',
   'form.validation.error': 'Please fill all fields correctly',
-  
+  'form.showCards': 'Show cards',
+  'form.virtualPinPad': 'Virtual PIN pad',
+  'form.reloadCaptcha': 'Reload captcha',
+  'form.getOtp': 'Get OTP',
+  'form.getOtpSuccess': 'OTP sent successfully',
+  'form.captchaImageAlt': 'Security code',
+  'form.captchaAudio': 'Play captcha audio',
+  'form.confirmCancel': 'Are you sure you want to cancel?',
+  'form.expiryPlaceholder': 'MM/YY',
+
+  // Accessibility
+  'accessibility.selectLanguage': 'Select language',
+  'accessibility.partnerLogo': 'Partner logo',
+
   // Card List
   'cardList.addNew': 'Add New Card',
   'cardList.manage': 'Manage Cards',
@@ -74,7 +96,12 @@ export default {
   'receipt.site': 'Merchant Site',
   'receipt.share': 'Share',
   'receipt.save': 'Save to Gallery',
-  
+  'receipt.paymentSuccessDesc': 'Payment completed successfully',
+  'receipt.paymentFailedDesc': 'Payment failed',
+  'receipt.copied': 'Receipt text copied',
+  'receipt.saveError': 'Error saving receipt',
+  'receipt.shareText': 'Transaction receipt',
+
   // Transaction
   'transaction.merchant': 'Merchant',
   'transaction.amount': 'Amount',

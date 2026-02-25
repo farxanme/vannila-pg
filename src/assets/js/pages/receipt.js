@@ -14,24 +14,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializePage() {
-  // Initialize header
+  await i18n.readyPromise;
+
   header = new Header({
     title: i18n.t('header.title'),
-    logo: '/assets/images/logo.svg',
+    logo: '/assets/images/logo-shaparak.svg',
+    secondaryLogo: '/assets/images/logo.svg',
     showCard: false
   });
 
-  // Initialize footer
   footer = new Footer({
-    logo: '/assets/images/logo-small.svg',
-    copyright: '© 2024 All rights reserved'
+    logo: '/assets/images/logo.svg',
+    copyright: i18n.t('footer.copyright')
   });
 
   // Load receipt data from URL params or storage
   const urlParams = new URLSearchParams(window.location.search);
   const transactionId = urlParams.get('id') || '123456789';
   const status = urlParams.get('status') || 'success';
-  
+
   // Update receipt content
   updateReceiptContent({
     id: transactionId,
@@ -43,8 +44,26 @@ async function initializePage() {
     type: 'خرید'
   });
 
-  // Attach events
   attachEvents();
+  updateReceiptLanguage();
+  document.addEventListener('languageChange', updateReceiptLanguage);
+}
+
+function updateReceiptLanguage() {
+  if (header) {
+    header.updateTitle(i18n.t('header.title'));
+  }
+  if (footer) {
+    footer.updateCopyright(i18n.t('footer.copyright'));
+  }
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (key) el.textContent = i18n.t(key);
+  });
+  const shareBtn = document.getElementById('share-button');
+  const saveBtn = document.getElementById('save-button');
+  if (shareBtn) shareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
+  if (saveBtn) saveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
 }
 
 function updateReceiptContent(data) {
@@ -61,10 +80,10 @@ function updateReceiptContent(data) {
   // Update status
   statusBadge.className = `badge badge-${data.status === 'success' ? 'success' : 'danger'}`;
   statusBadge.textContent = data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
-  
+
   title.textContent = data.status === 'success' ? i18n.t('receipt.success') : i18n.t('receipt.failed');
-  subtitle.textContent = data.status === 'success' ? 'پرداخت با موفقیت انجام شد' : 'پرداخت ناموفق بود';
-  
+  subtitle.textContent = data.status === 'success' ? i18n.t('receipt.paymentSuccessDesc') : i18n.t('receipt.paymentFailedDesc');
+
   amount.textContent = `${data.amount.toLocaleString()} ریال`;
   type.textContent = data.type;
   transactionId.textContent = data.id;
@@ -83,23 +102,22 @@ function attachEvents() {
     const success = await shareContent({
       text: receiptText
     });
-    
+
     if (!success) {
-      // Fallback: copy to clipboard
       const { copyToClipboard } = await import('../utils/clipboard.js');
       await copyToClipboard(receiptText);
-      alert('متن رسید کپی شد');
+      alert(i18n.t('receipt.copied'));
     }
   });
 
   saveButton.addEventListener('click', async () => {
     const success = await shareContent({
       element: receiptCard,
-      text: 'رسید تراکنش'
+      text: i18n.t('receipt.shareText')
     });
-    
+
     if (!success) {
-      alert('خطا در ذخیره رسید');
+      alert(i18n.t('receipt.saveError'));
     }
   });
 }
@@ -110,7 +128,7 @@ function generateReceiptText() {
   const merchant = document.getElementById('merchant-name').textContent;
   const transactionId = document.getElementById('transaction-id').textContent;
   const date = document.getElementById('transaction-date').textContent;
-  
+
   return `
 ${title}
 مبلغ: ${amount}

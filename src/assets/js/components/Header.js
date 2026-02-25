@@ -6,7 +6,7 @@ export class Header {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
-      // لوگوی دوم برای سمت دیگر هدر (به جای کارت)
+      // Secondary logo on the other side of the header (replaces card)
       secondaryLogo: options.secondaryLogo || null,
       title: options.title || '',
       showCard: options.showCard !== false,
@@ -14,7 +14,7 @@ export class Header {
       onLanguageChange: options.onLanguageChange || null,
       ...options
     };
-    
+
     this.init();
   }
 
@@ -74,7 +74,7 @@ export class Header {
     // Secondary logo (to replace header card)
     if (this.options.secondaryLogo) {
       const secondary = document.createElement('div');
-      secondary.className = 'header-secondary-logo';
+      secondary.className = 'header-shaparak-logo';
       if (typeof this.options.secondaryLogo === 'string') {
         const img = document.createElement('img');
         img.src = this.options.secondaryLogo;
@@ -88,7 +88,7 @@ export class Header {
 
     container.appendChild(innerContainer);
     header.appendChild(container);
-    
+
     this.element = header;
     document.body.insertBefore(header, document.body.firstChild);
   }
@@ -99,23 +99,23 @@ export class Header {
    */
   async createLanguageDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
-    
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'lang-dropdown-btn';
-    button.setAttribute('aria-label', 'Select language');
+    button.setAttribute('aria-label', i18n.t('accessibility.selectLanguage'));
     button.setAttribute('aria-haspopup', 'true');
     button.setAttribute('aria-expanded', 'false');
-    
+
     const currentLang = i18n.getLanguage();
     const languages = i18n.getAvailableLanguages();
     const currentLangObj = languages.find(l => l.code === currentLang);
     button.textContent = currentLangObj?.nativeName || currentLang.toUpperCase();
-    
+
     const dropdown = document.createElement('div');
     dropdown.className = 'lang-dropdown-menu';
     dropdown.style.display = 'none';
-    
+
     languages.forEach(lang => {
       const item = document.createElement('button');
       item.type = 'button';
@@ -126,24 +126,24 @@ export class Header {
         button.textContent = lang.nativeName;
         dropdown.style.display = 'none';
         button.setAttribute('aria-expanded', 'false');
-        
+
         if (this.options.onLanguageChange) {
           this.options.onLanguageChange(lang.code);
         }
       };
       dropdown.appendChild(item);
     });
-    
+
     button.onclick = (e) => {
       e.stopPropagation();
       const isOpen = dropdown.style.display === 'block';
       dropdown.style.display = isOpen ? 'none' : 'block';
       button.setAttribute('aria-expanded', !isOpen);
     };
-    
+
     container.appendChild(button);
     container.appendChild(dropdown);
-    
+
     // Close on outside click
     document.addEventListener('click', (e) => {
       if (!container.contains(e.target)) {
@@ -151,7 +151,7 @@ export class Header {
         button.setAttribute('aria-expanded', 'false');
       }
     });
-    
+
     this.langDropdown = container;
   }
 
@@ -186,11 +186,11 @@ export class Header {
    */
   handleResize() {
     let lastScrollY = window.scrollY;
-    
+
     window.addEventListener('scroll', () => {
       const currentScrollY = window.scrollY;
       const header = this.element;
-      
+
       if (window.innerWidth <= 768) {
         if (currentScrollY > lastScrollY && currentScrollY > 50) {
           header.classList.add('scrolled');
@@ -198,7 +198,7 @@ export class Header {
           header.classList.remove('scrolled');
         }
       }
-      
+
       lastScrollY = currentScrollY;
     });
   }

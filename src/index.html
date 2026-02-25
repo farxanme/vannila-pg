@@ -48,12 +48,12 @@
               
               <!-- Security Code (Captcha) -->
               <div class="form-group">
-                <div id="captcha-container"></div>
+                <div id="captcha-container" class="captcha-container"></div>
               </div>
               
               <!-- OTP -->
               <div class="form-group">
-                <div id="otp-input-container"></div>
+                <div id="otp-input-container" class="otp-input-container"></div>
               </div>
               
               <!-- Save Card Checkbox -->
@@ -71,12 +71,12 @@
               </div>
               
               <!-- Show Receipt -->
-              <div class="form-group" style="margin-top: var(--spacing-md);">
-                <button type="button" class="btn btn-secondary" id="show-receipt-button" style="width: 100%;" data-i18n="form.showReceipt">نمایش رسید</button>
+              <div class="form-group show-receipt-wrapper">
+                <button type="button" class="btn btn-secondary show-receipt-button" id="show-receipt-button" data-i18n="form.showReceipt">نمایش رسید</button>
               </div>
               
               <!-- Receipt Fields (Hidden initially) -->
-              <div id="receipt-fields" style="display: none;">
+              <div id="receipt-fields" class="receipt-fields">
                 <div class="form-group">
                   <div id="mobile-input-container"></div>
                 </div>
@@ -97,7 +97,7 @@
             </div>
             
             <div id="partner-logos-section" class="partner-logos-section">
-              <div class="card-header" style="margin-top: var(--spacing-lg);">
+              <div class="card-header partner-logos-header">
                 <h2 class="card-title" data-i18n="form.partnerLogos">لوگوهای پذیرنده</h2>
               </div>
               <div id="partner-logos" class="partner-logos">

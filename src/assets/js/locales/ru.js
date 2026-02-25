@@ -13,10 +13,19 @@ export default {
   'common.loading': 'Загрузка...',
   'common.error': 'Ошибка',
   'common.success': 'Успешно',
-  
+  'common.clear': 'Очистить',
+  'common.required': 'Обязательное поле',
+  'common.processing': 'Обработка...',
+
+  // Redirect
+  'redirect.loading': 'Перенаправление...',
+
   // Header
   'header.title': 'Платежный шлюз',
-  
+
+  // Footer
+  'footer.copyright': '© 2024 Все права защищены',
+
   // Form
   'form.cardNumber': 'Номер карты',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
@@ -53,7 +62,20 @@ export default {
   'form.captcha': 'Код безопасности',
   'form.captcha.placeholder': 'Введите код',
   'form.validation.error': 'Пожалуйста, заполните все поля правильно',
-  
+  'form.showCards': 'Показать карты',
+  'form.virtualPinPad': 'Виртуальная клавиатура PIN',
+  'form.reloadCaptcha': 'Обновить капчу',
+  'form.getOtp': 'Получить OTP',
+  'form.getOtpSuccess': 'OTP успешно отправлен',
+  'form.captchaImageAlt': 'Код безопасности',
+  'form.captchaAudio': 'Воспроизвести аудио капчи',
+  'form.confirmCancel': 'Вы уверены, что хотите отменить?',
+  'form.expiryPlaceholder': 'ММ/ГГ',
+
+  // Accessibility
+  'accessibility.selectLanguage': 'Выбрать язык',
+  'accessibility.partnerLogo': 'Логотип партнера',
+
   // Card List
   'cardList.addNew': 'Добавить новую карту',
   'cardList.manage': 'Управление картами',
@@ -74,7 +96,12 @@ export default {
   'receipt.site': 'Сайт торговца',
   'receipt.share': 'Поделиться',
   'receipt.save': 'Сохранить в галерею',
-  
+  'receipt.paymentSuccessDesc': 'Оплата успешно завершена',
+  'receipt.paymentFailedDesc': 'Оплата не удалась',
+  'receipt.copied': 'Текст квитанции скопирован',
+  'receipt.saveError': 'Ошибка сохранения квитанции',
+  'receipt.shareText': 'Квитанция транзакции',
+
   // Transaction
   'transaction.merchant': 'Торговец',
   'transaction.amount': 'Сумма',

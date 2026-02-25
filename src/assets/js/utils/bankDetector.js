@@ -13,7 +13,7 @@ const panBins = [
   { bin: '606373', bankName: 'Mehr Iran', bankCode: '060' },
   { bin: '601287', bankName: 'Unknown', bankCode: '' },
   { bin: '603799', bankName: 'Melli', bankCode: '017' },
-  { bin: '603769', bankName: 'Saderat', bankCode: 'صادرات' },
+  { bin: '603769', bankName: 'Saderat', bankCode: '' },
   { bin: '603770', bankName: 'Keshavarzi', bankCode: '016' },
   { bin: '628023', bankName: 'Maskan', bankCode: '014' },
   { bin: '628157', bankName: 'Credit Istitute for Development', bankCode: '051' },
@@ -63,18 +63,18 @@ const panBins = [
  */
 export function detectBank(cardNumber) {
   if (!cardNumber) return null;
-  
+
   // Extract only numbers
   const numbers = cardNumber.replace(/\D/g, '');
-  
+
   if (numbers.length < 6) return null;
-  
+
   // Get first 6 digits (BIN)
   const bin = numbers.substring(0, 6);
-  
+
   // Find matching bank
   const bank = panBins.find(b => b.bin === bin);
-  
+
   if (bank && bank.bankName !== 'Unknown') {
     return {
       name: bank.bankName,
@@ -82,7 +82,7 @@ export function detectBank(cardNumber) {
       bin: bin
     };
   }
-  
+
   return null;
 }
 
@@ -93,7 +93,7 @@ export function detectBank(cardNumber) {
  */
 export function getBankLogo(bankName) {
   if (!bankName) return null;
-  
+
   // Normalize bank name for file path
   const normalized = bankName.toLowerCase().replace(/\s+/g, '-');
 
@@ -121,13 +121,13 @@ export function getBankLogo(bankName) {
  */
 export function formatCardNumber(cardNumber) {
   if (!cardNumber) return '';
-  
+
   const numbers = cardNumber.replace(/\D/g, '');
   const parts = [];
-  
+
   for (let i = 0; i < numbers.length; i += 4) {
     parts.push(numbers.substring(i, i + 4));
   }
-  
+
   return parts.join(' ');
 }

@@ -10,8 +10,8 @@ import { Timer } from '../classes/Timer.js';
 import { Modal } from '../components/Modal.js';
 import { LoadingScreen } from '../components/LoadingScreen.js';
 import { validateCardNumber, validateCVV2, validateExpiryDate, validateMobile, validateEmail, validateOTP } from '../utils/validators.js';
-import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
-import { convertToEnglishNumbers, extractNumbers } from '../utils/numberConverter.js';
+import { detectBank, formatCardNumber } from '../utils/bankDetector.js';
+import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
 import { i18n } from '../main.js';
@@ -25,8 +25,8 @@ soundManager.init();
 let header, footer, timer, cardNumberInput, cvv2Input, expiryDateInput, captchaInput, otpInput, mobileInput, emailInput;
 let cardDropdown, cvv2PinPad, otpPinPad;
 let cardList = [];
-let isManagingCards = false;
 let otpLabelElement = null;
+let captchaLabelElement = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -34,9 +34,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 async function initializePage() {
-  // Show loading screen
+  await i18n.readyPromise;
+
   const loadingScreen = new LoadingScreen({
-    text: i18n.t('common.loading')
+    logo: '/assets/images/logo.svg',
+    text: i18n.t('common.loading'),
+    showProgressBar: true
   });
   loadingScreen.show();
 
@@ -44,15 +47,15 @@ async function initializePage() {
     // Initialize header
     header = new Header({
       title: i18n.t('header.title'),
-      logo: '/assets/images/logo-sep.svg',
-      secondaryLogo: '/assets/images/logo-shaparak.svg',
+      logo: '/assets/images/logo-shaparak.svg',
+      secondaryLogo: '/assets/images/logo.svg',
       showCard: false
     });
 
     // Initialize footer
     footer = new Footer({
-      logo: '/assets/images/logo-small.svg',
-      copyright: '© 2024 All rights reserved'
+      logo: '/assets/images/logo.svg',
+      copyright: i18n.t('footer.copyright')
     });
 
     // Load saved cards from API
@@ -108,9 +111,9 @@ function initializeTimer() {
       // Update timer class based on progress
       timerContainer.classList.remove('warning', 'danger');
       const progress = remaining / 900;
-      if (progress <= 1/3) {
+      if (progress <= 1 / 3) {
         timerContainer.classList.add('danger');
-      } else if (progress <= 2/3) {
+      } else if (progress <= 2 / 3) {
         timerContainer.classList.add('warning');
       }
     },
@@ -166,11 +169,13 @@ function initializeFormInputs() {
     label: i18n.t('form.cardNumber'),
     placeholder: i18n.t('form.cardNumber.placeholder'),
     required: true,
+    requiredMessage: i18n.t('common.required'),
+    clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCardNumber,
     maxLength: 19, // 16 digits + 3 spaces
     rightAction: cardList.length > 0 ? {
-      icon: '▼',
-      label: 'Show cards',
+      icon: '<img src=\"/assets/images/icons/icn-credit-card.svg\" alt=\"\" aria-hidden=\"true\" />',
+      label: i18n.t('form.showCards'),
       onClick: () => toggleCardList()
     } : null,
     onInput: (value) => {
@@ -207,10 +212,10 @@ function initializeFormInputs() {
         text: formatCardNumber(card.number),
         value: card.number,
         html: `
-          <div style="display: flex; align-items: center; justify-content: space-between;">
+          <div class="dropdown-card-item">
             <span>${card.bankName || ''}</span>
-            <span style="font-family: monospace;">${formatCardNumber(card.number)}</span>
-            ${card.pinned ? '<span style="color: var(--color-primary);">📌</span>' : ''}
+            <span class="dropdown-card-number">${formatCardNumber(card.number)}</span>
+            ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
           </div>
         `
       })),
@@ -233,12 +238,14 @@ function initializeFormInputs() {
     label: i18n.t('form.cvv2'),
     placeholder: i18n.t('form.cvv2.placeholder'),
     required: true,
+    requiredMessage: i18n.t('common.required'),
+    clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCVV2,
     inputMode: 'numeric',
     maxLength: 4,
     rightAction: {
-      icon: '🔢',
-      label: 'Virtual PIN pad',
+      icon: '<img src=\"/assets/images/icons/icn-pinpad.svg\" alt=\"\" aria-hidden=\"true\" />',
+      label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!cvv2PinPad) {
           cvv2PinPad = new VirtualPinPad(cvv2Input.element, {
@@ -260,8 +267,10 @@ function initializeFormInputs() {
     name: 'expiryDate',
     type: 'password',
     label: i18n.t('form.expiryDate'),
-    placeholder: 'MM/YY',
+    placeholder: i18n.t('form.expiryPlaceholder'),
     required: true,
+    requiredMessage: i18n.t('common.required'),
+    clearButtonAriaLabel: i18n.t('common.clear'),
     inputMode: 'numeric',
     maxLength: 5,
     onInput: (value) => {
@@ -298,71 +307,103 @@ function initializeFormInputs() {
 
   // Captcha Input
   const captchaContainer = document.getElementById('captcha-container');
-  const captchaWrapper = document.createElement('div');
-  captchaWrapper.className = 'captcha-container';
 
-  captchaInput = new Input(captchaWrapper, {
+  // Create label separately (outside flex container)
+  captchaLabelElement = document.createElement('label');
+  captchaLabelElement.className = 'input-label';
+  captchaLabelElement.setAttribute('for', 'captcha');
+  captchaLabelElement.innerHTML = i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+  captchaContainer.appendChild(captchaLabelElement);
+
+  // Create flex wrapper for image and input
+  const captchaRow = document.createElement('div');
+  captchaRow.className = 'captcha-input-row';
+
+  // Create input without label, with reload action inside (first in row)
+  captchaInput = new Input(captchaRow, {
     id: 'captcha',
     name: 'captcha',
     type: 'text',
-    label: i18n.t('form.securityCode'),
-    placeholder: 'Enter code',
+    label: '',
+    placeholder: i18n.t('form.captcha.placeholder'),
     required: true,
-    maxLength: 6
+    requiredMessage: i18n.t('common.required'),
+    clearButtonAriaLabel: i18n.t('common.clear'),
+    maxLength: 6,
+    rightAction: {
+      icon: '<img src=\"/assets/images/icons/icn-refresh.svg\" alt=\"\" aria-hidden=\"true\" />',
+      label: i18n.t('form.reloadCaptcha'),
+      onClick: () => {
+        captchaImage.src = '/api/captcha/image?' + Date.now();
+      }
+    }
   });
 
+  // Hide the label inside input-wrapper since we have it separately
+  const captchaInputWrapper = captchaRow.querySelector('.input-wrapper');
+  if (captchaInputWrapper) {
+    const innerLabel = captchaInputWrapper.querySelector('.input-label');
+    if (innerLabel) {
+      innerLabel.style.display = 'none';
+    }
+  }
+
+  // Create captcha image (will be attached after input visually)
   const captchaImage = document.createElement('img');
   captchaImage.src = '/api/captcha/image';
   captchaImage.className = 'captcha-image';
-  captchaImage.alt = 'Captcha';
+  captchaImage.alt = i18n.t('form.captchaImageAlt');
   captchaImage.onclick = () => {
     captchaImage.src = '/api/captcha/image?' + Date.now();
   };
 
+  // Append image after input wrapper (visually attached)
+  captchaRow.appendChild(captchaImage);
+
+  // Create audio button (outside input, like OTP button)
   const captchaAudio = document.createElement('button');
   captchaAudio.type = 'button';
-  captchaAudio.className = 'captcha-audio';
+  captchaAudio.className = 'btn btn-secondary captcha-audio-btn';
+  captchaAudio.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   captchaAudio.innerHTML = '🔊';
   captchaAudio.onclick = () => {
     const audio = new Audio('/api/captcha/audio');
     audio.play();
   };
 
-  captchaWrapper.appendChild(captchaImage);
-  captchaWrapper.appendChild(captchaAudio);
-  captchaContainer.appendChild(captchaWrapper);
+  captchaRow.appendChild(captchaAudio);
+  captchaContainer.appendChild(captchaRow);
 
   // OTP Input
   const otpContainer = document.getElementById('otp-input-container');
-  
+
   // Create label separately (outside flex container)
   otpLabelElement = document.createElement('label');
   otpLabelElement.className = 'input-label';
   otpLabelElement.setAttribute('for', 'otp');
   otpLabelElement.innerHTML = i18n.t('form.otp') + ' <span class="input-required">*</span>';
   otpContainer.appendChild(otpLabelElement);
-  
+
   // Create flex wrapper for input and button
   const otpWrapper = document.createElement('div');
   otpWrapper.className = 'otp-input-row';
-  otpWrapper.style.display = 'flex';
-  otpWrapper.style.gap = 'var(--spacing-sm)';
-  otpWrapper.style.alignItems = 'flex-start';
-  
+
   // Create input without label
   otpInput = new Input(otpWrapper, {
     id: 'otp',
     name: 'otp',
     type: 'password',
-    label: '', // No label, we created it separately
+    label: '',
     placeholder: i18n.t('form.otp.placeholder'),
     required: true,
+    requiredMessage: i18n.t('common.required'),
+    clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateOTP,
     inputMode: 'numeric',
     maxLength: 6,
     rightAction: {
-      icon: '🔢',
-      label: 'Virtual PIN pad',
+      icon: '<img src=\"/assets/images/icons/icn-pinpad.svg\" alt=\"\" aria-hidden=\"true\" />',
+      label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!otpPinPad) {
           otpPinPad = new VirtualPinPad(otpInput.element, {
@@ -379,46 +420,31 @@ function initializeFormInputs() {
       }
     }
   });
-  
+
   // Make OTP input wrapper flex to fill remaining space
   const otpInputWrapper = otpWrapper.querySelector('.input-wrapper');
   if (otpInputWrapper) {
-    otpInputWrapper.style.flex = '1 1 auto';
-    otpInputWrapper.style.minWidth = '0';
     // Hide the label inside input-wrapper since we have it separately
     const innerLabel = otpInputWrapper.querySelector('.input-label');
     if (innerLabel) {
       innerLabel.style.display = 'none';
     }
   }
-  
+
   const getOtpButton = document.createElement('button');
   getOtpButton.type = 'button';
-  getOtpButton.className = 'btn btn-secondary';
-  getOtpButton.textContent = 'دریافت رمز پویا';
-  getOtpButton.style.maxWidth = '154px';
-  getOtpButton.style.flexShrink = '0';
-  getOtpButton.style.alignSelf = 'flex-start';
-  getOtpButton.style.marginTop = '0';
+  getOtpButton.id = 'get-otp-button';
+  getOtpButton.className = 'btn btn-success btn-bordered';
+  getOtpButton.textContent = i18n.t('form.getOtp');
   getOtpButton.onclick = () => {
-    // Request OTP
     errorHandler.show({
-      message: 'رمز پویا ارسال شد',
+      message: i18n.t('form.getOtpSuccess'),
       mode: 'toast',
       type: 'success'
     });
   };
   otpWrapper.appendChild(getOtpButton);
   otpContainer.appendChild(otpWrapper);
-  
-  // Move error message outside of flex container
-  const otpInputWrapperForError = otpWrapper.querySelector('.input-wrapper');
-  if (otpInputWrapperForError) {
-    const errorElement = otpInputWrapperForError.querySelector('.input-error');
-    if (errorElement) {
-      // Keep error inside wrapper but adjust positioning via CSS
-    }
-  }
 
   // Mobile Input (hidden initially)
   const mobileContainer = document.getElementById('mobile-input-container');
@@ -453,41 +479,6 @@ function toggleCardList() {
   if (cardDropdown) {
     cardDropdown.toggle();
   }
-}
-
-/**
- * Convert number to Persian words (simplified version)
- */
-function numberToPersianWords(num) {
-  const ones = ['', 'یک', 'دو', 'سه', 'چهار', 'پنج', 'شش', 'هفت', 'هشت', 'نه'];
-  const tens = ['', '', 'بیست', 'سی', 'چهل', 'پنجاه', 'شصت', 'هفتاد', 'هشتاد', 'نود'];
-  const hundreds = ['', 'یکصد', 'دویست', 'سیصد', 'چهارصد', 'پانصد', 'ششصد', 'هفتصد', 'هشتصد', 'نهصد'];
-  const teens = ['ده', 'یازده', 'دوازده', 'سیزده', 'چهارده', 'پانزده', 'شانزده', 'هفده', 'هجده', 'نوزده'];
-
-  if (num === 0) return 'صفر';
-  if (num < 10) return ones[num];
-  if (num < 20) return teens[num - 10];
-  if (num < 100) {
-    const ten = Math.floor(num / 10);
-    const one = num % 10;
-    return tens[ten] + (one > 0 ? ' و ' + ones[one] : '');
-  }
-  if (num < 1000) {
-    const hundred = Math.floor(num / 100);
-    const remainder = num % 100;
-    return hundreds[hundred] + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
-  }
-  if (num < 1000000) {
-    const thousand = Math.floor(num / 1000);
-    const remainder = num % 1000;
-    return numberToPersianWords(thousand) + ' هزار' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
-  }
-  if (num < 1000000000) {
-    const million = Math.floor(num / 1000000);
-    const remainder = num % 1000000;
-    return numberToPersianWords(million) + ' میلیون' + (remainder > 0 ? ' و ' + numberToPersianWords(remainder) : '');
-  }
-  return num.toString();
 }
 
 function initializeTransactionInfo() {
@@ -590,16 +581,16 @@ function initializePartnerLogos() {
     const img = document.createElement('img');
     img.src = src;
     img.className = 'partner-logo';
-    img.alt = 'Partner logo';
+    img.alt = i18n.t('accessibility.partnerLogo');
     img.onerror = () => {
       // Hide image if it fails to load
-      img.style.display = 'none';
+      img.classList.add('hidden');
     };
     container.appendChild(img);
   });
 
   // Hide section if no valid logos were added
-  const visibleLogos = Array.from(container.children).filter(img => img.style.display !== 'none');
+  const visibleLogos = Array.from(container.children).filter(img => !img.classList.contains('hidden'));
   if (visibleLogos.length === 0) {
     if (section) {
       section.classList.add('hidden');
@@ -645,21 +636,24 @@ function attachFormEvents() {
     // This would call the payment API
     soundManager.beep();
     errorHandler.show({
-      message: 'در حال پردازش...',
+      message: i18n.t('common.processing'),
       mode: 'toast',
       type: 'info'
     });
   });
 
   showReceiptButton.addEventListener('click', () => {
-    receiptFields.style.display = receiptFields.style.display === 'none' ? 'block' : 'none';
-    if (receiptFields.style.display === 'block') {
-      showReceiptButton.style.display = 'none';
+    const isShowing = receiptFields.classList.contains('show');
+    if (isShowing) {
+      receiptFields.classList.remove('show');
+    } else {
+      receiptFields.classList.add('show');
+      showReceiptButton.classList.add('hidden');
     }
   });
 
   document.getElementById('cancel-button').addEventListener('click', () => {
-    if (confirm('آیا از انصراف اطمینان دارید؟')) {
+    if (confirm(i18n.t('form.confirmCancel'))) {
       window.location.href = '/';
     }
   });
@@ -676,12 +670,17 @@ function handleLanguageChange(event) {
  * Update page content after language change
  */
 function updatePageContent() {
-  // Update header title
   if (header) {
     header.updateTitle(i18n.t('header.title'));
   }
+  if (footer) {
+    footer.updateCopyright(i18n.t('footer.copyright'));
+  }
+  const getOtpBtn = document.getElementById('get-otp-button');
+  if (getOtpBtn) {
+    getOtpBtn.textContent = i18n.t('form.getOtp');
+  }
 
-  // Update all elements with data-i18n attribute
   const i18nElements = document.querySelectorAll('[data-i18n]');
   i18nElements.forEach(element => {
     const key = element.getAttribute('data-i18n');
@@ -701,12 +700,18 @@ function updatePageContent() {
   }
   if (expiryDateInput) {
     expiryDateInput.setLabel(i18n.t('form.expiryDate'));
-    expiryDateInput.setPlaceholder('MM/YY');
+    expiryDateInput.setPlaceholder(i18n.t('form.expiryPlaceholder'));
   }
   if (captchaInput) {
-    captchaInput.setLabel(i18n.t('form.captcha'));
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
+    if (captchaLabelElement) {
+      captchaLabelElement.innerHTML = i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+    }
   }
+  const captchaImg = document.querySelector('.captcha-image');
+  if (captchaImg) captchaImg.setAttribute('alt', i18n.t('form.captchaImageAlt'));
+  const captchaAudioBtn = document.querySelector('.captcha-audio-btn');
+  if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
     otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
     // Update separate OTP label

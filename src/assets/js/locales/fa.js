@@ -13,9 +13,18 @@ export default {
   'common.loading': 'در حال بارگذاری...',
   'common.error': 'خطا',
   'common.success': 'موفق',
+  'common.clear': 'پاک کردن',
+  'common.required': 'این فیلد الزامی است',
+  'common.processing': 'در حال پردازش...',
+
+  // Redirect
+  'redirect.loading': 'در حال انتقال...',
 
   // Header
   'header.title': 'درگاه پرداخت اینترنتی سِپ',
+
+  // Footer
+  'footer.copyright': '© 2024 تمامی حقوق محفوظ است',
 
   // Form
   'form.cardNumber': 'شماره کارت',
@@ -53,6 +62,19 @@ export default {
   'form.captcha': 'کد امنیتی',
   'form.captcha.placeholder': 'کد را وارد کنید',
   'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
+  'form.showCards': 'نمایش کارت‌ها',
+  'form.virtualPinPad': 'صفحه کلید مجازی',
+  'form.reloadCaptcha': 'بارگذاری مجدد کد امنیتی',
+  'form.getOtp': 'دریافت رمز پویا',
+  'form.getOtpSuccess': 'رمز پویا ارسال شد',
+  'form.captchaImageAlt': 'کد امنیتی',
+  'form.captchaAudio': 'پخش صدای کد امنیتی',
+  'form.confirmCancel': 'آیا از انصراف اطمینان دارید؟',
+  'form.expiryPlaceholder': 'ماه/سال',
+
+  // Accessibility
+  'accessibility.selectLanguage': 'انتخاب زبان',
+  'accessibility.partnerLogo': 'لوگوی همکار',
 
   // Card List
   'cardList.addNew': 'افزودن کارت جدید',
@@ -74,6 +96,11 @@ export default {
   'receipt.site': 'سایت پذیرنده',
   'receipt.share': 'اشتراک‌گذاری',
   'receipt.save': 'ذخیره در گالری',
+  'receipt.paymentSuccessDesc': 'پرداخت با موفقیت انجام شد',
+  'receipt.paymentFailedDesc': 'پرداخت ناموفق بود',
+  'receipt.copied': 'متن رسید کپی شد',
+  'receipt.saveError': 'خطا در ذخیره رسید',
+  'receipt.shareText': 'رسید تراکنش',
 
   // Transaction
   'transaction.merchant': 'پذیرنده',

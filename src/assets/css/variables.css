@@ -19,6 +19,7 @@
   
   --color-error: #dc3545;
   --color-error-light: #f8d7da;
+  --color-success-light: #d4edda;
   
   /* Spacing */
   --spacing-xs: 4px;
@@ -28,10 +29,10 @@
   --spacing-xl: 32px;
   
   /* Typography */
-  --font-family-base: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  --font-family-base: 'IRANYekan', 'IRAN Yekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
-  --font-size-base: 16px;
+  --font-size-base: 14px;
   --font-size-lg: 18px;
   --font-size-xl: 20px;
   --font-size-2xl: 24px;

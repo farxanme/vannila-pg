@@ -61,3 +61,7 @@
   padding-top: var(--spacing-lg);
   border-top: 1px dashed var(--color-stroke);
 }
+
+.receipt-logo img {
+  height: 40px;
+}

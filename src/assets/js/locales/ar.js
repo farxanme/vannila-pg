@@ -13,10 +13,19 @@ export default {
   'common.loading': 'جاري التحميل...',
   'common.error': 'خطأ',
   'common.success': 'نجح',
-  
+  'common.clear': 'مسح',
+  'common.required': 'هذا الحقل مطلوب',
+  'common.processing': 'جاري المعالجة...',
+
+  // Redirect
+  'redirect.loading': 'جاري التحويل...',
+
   // Header
   'header.title': 'بوابة الدفع',
-  
+
+  // Footer
+  'footer.copyright': '© 2024 جميع الحقوق محفوظة',
+
   // Form
   'form.cardNumber': 'رقم البطاقة',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
@@ -53,7 +62,20 @@ export default {
   'form.captcha': 'رمز الأمان',
   'form.captcha.placeholder': 'أدخل الرمز',
   'form.validation.error': 'يرجى ملء جميع الحقول بشكل صحيح',
-  
+  'form.showCards': 'عرض البطاقات',
+  'form.virtualPinPad': 'لوحة PIN الافتراضية',
+  'form.reloadCaptcha': 'إعادة تحميل رمز التحقق',
+  'form.getOtp': 'الحصول على OTP',
+  'form.getOtpSuccess': 'تم إرسال OTP بنجاح',
+  'form.captchaImageAlt': 'رمز الأمان',
+  'form.captchaAudio': 'تشغيل صوت رمز التحقق',
+  'form.confirmCancel': 'هل أنت متأكد من الإلغاء؟',
+  'form.expiryPlaceholder': 'شهر/سنة',
+
+  // Accessibility
+  'accessibility.selectLanguage': 'اختيار اللغة',
+  'accessibility.partnerLogo': 'شعار الشريك',
+
   // Card List
   'cardList.addNew': 'إضافة بطاقة جديدة',
   'cardList.manage': 'إدارة البطاقات',
@@ -74,7 +96,12 @@ export default {
   'receipt.site': 'موقع التاجر',
   'receipt.share': 'مشاركة',
   'receipt.save': 'حفظ في المعرض',
-  
+  'receipt.paymentSuccessDesc': 'تم الدفع بنجاح',
+  'receipt.paymentFailedDesc': 'فشل الدفع',
+  'receipt.copied': 'تم نسخ نص الإيصال',
+  'receipt.saveError': 'خطأ في حفظ الإيصال',
+  'receipt.shareText': 'إيصال المعاملة',
+
   // Transaction
   'transaction.merchant': 'التاجر',
   'transaction.amount': 'المبلغ',

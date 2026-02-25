@@ -1,15 +1,25 @@
 /**
  * Redirect Page Script
+ * Uses same LoadingScreen as index: logo, progress bar, description
  */
-document.addEventListener('DOMContentLoaded', () => {
+import { i18n } from '../main.js';
+import { LoadingScreen } from '../components/LoadingScreen.js';
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await i18n.readyPromise;
+
+  const loadingScreen = new LoadingScreen({
+    logo: '/assets/images/logo-full.svg',
+    text: i18n.t('redirect.loading'),
+    showProgressBar: true
+  });
+  loadingScreen.show();
+
   const form = document.getElementById('redirect-form');
   const urlParams = new URLSearchParams(window.location.search);
-  
-  // Get redirect URL and data from URL params
   const redirectUrl = urlParams.get('url') || '/';
   const data = urlParams.get('data');
-  
-  // Parse data if provided
+
   let formData = {};
   if (data) {
     try {
@@ -18,11 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Failed to parse redirect data:', e);
     }
   }
-  
-  // Set form action
+
   form.action = redirectUrl;
-  
-  // Add form fields
   Object.keys(formData).forEach(key => {
     const input = document.createElement('input');
     input.type = 'hidden';
@@ -30,9 +37,10 @@ document.addEventListener('DOMContentLoaded', () => {
     input.value = formData[key];
     form.appendChild(input);
   });
-  
-  // Auto-submit form after short delay
+
   setTimeout(() => {
+    loadingScreen.hide();
+    loadingScreen.destroy();
     form.submit();
   }, 1000);
 });

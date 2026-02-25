@@ -13,10 +13,19 @@ export default {
   'common.loading': 'Yükleniyor...',
   'common.error': 'Hata',
   'common.success': 'Başarılı',
-  
+  'common.clear': 'Temizle',
+  'common.required': 'Bu alan zorunludur',
+  'common.processing': 'İşleniyor...',
+
+  // Redirect
+  'redirect.loading': 'Yönlendiriliyor...',
+
   // Header
   'header.title': 'Ödeme Ağ Geçidi',
-  
+
+  // Footer
+  'footer.copyright': '© 2024 Tüm hakları saklıdır',
+
   // Form
   'form.cardNumber': 'Kart Numarası',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
@@ -53,7 +62,20 @@ export default {
   'form.captcha': 'Güvenlik Kodu',
   'form.captcha.placeholder': 'Kodu girin',
   'form.validation.error': 'Lütfen tüm alanları doğru şekilde doldurun',
-  
+  'form.showCards': 'Kartları göster',
+  'form.virtualPinPad': 'Sanal PIN pad',
+  'form.reloadCaptcha': 'Doğrulama kodunu yenile',
+  'form.getOtp': 'OTP al',
+  'form.getOtpSuccess': 'OTP başarıyla gönderildi',
+  'form.captchaImageAlt': 'Güvenlik kodu',
+  'form.captchaAudio': 'Doğrulama kodu sesini çal',
+  'form.confirmCancel': 'İptal etmek istediğinize emin misiniz?',
+  'form.expiryPlaceholder': 'AA/YY',
+
+  // Accessibility
+  'accessibility.selectLanguage': 'Dil seçin',
+  'accessibility.partnerLogo': 'İş ortağı logosu',
+
   // Card List
   'cardList.addNew': 'Yeni Kart Ekle',
   'cardList.manage': 'Kartları Yönet',
@@ -74,7 +96,12 @@ export default {
   'receipt.site': 'Satıcı Sitesi',
   'receipt.share': 'Paylaş',
   'receipt.save': 'Galeriye Kaydet',
-  
+  'receipt.paymentSuccessDesc': 'Ödeme başarıyla tamamlandı',
+  'receipt.paymentFailedDesc': 'Ödeme başarısız',
+  'receipt.copied': 'Fiş metni kopyalandı',
+  'receipt.saveError': 'Fiş kaydedilirken hata',
+  'receipt.shareText': 'İşlem fişi',
+
   // Transaction
   'transaction.merchant': 'Satıcı',
   'transaction.amount': 'Tutar',

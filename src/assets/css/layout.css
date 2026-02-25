@@ -31,24 +31,17 @@
   flex: 1;
 }
 
-.header-logo {
+.header-logo,
+.header-shaparak-logo {
   display: flex;
   align-items: center;
 }
 
-.header-logo img {
-  height: 40px;
+.header-logo img,
+.header-shaparak-logo img {
+  height: 68px;
   width: auto;
-}
-
-.header-secondary-logo {
-  display: flex;
-  align-items: center;
-}
-
-.header-secondary-logo img {
-  height: 40px;
-  width: auto;
+  object-fit: contain;
 }
 
 .header-title {
@@ -148,10 +141,6 @@
     font-size: var(--font-size-xs);
     padding: var(--spacing-xs) var(--spacing-sm);
   }
-
-  .header-logo img {
-    height: 32px;
-  }
 }
 
 /* Footer */
@@ -204,9 +193,15 @@
 }
 
 .card-header {
-  padding-bottom: var(--spacing-md);
+  background: #EEF4FD;
+  color: #2F77EB;
+  border-radius: 8px;
+  height: 50px;
+  padding: 16px;
+  border: none;
   margin-bottom: var(--spacing-md);
-  border-bottom: 1px solid var(--color-stroke);
+  display: flex;
+  align-items: center;
 }
 
 .card-title {
@@ -366,7 +361,7 @@
   .more-content {
     display: flex !important;
   }
-  
+
   .more-toggle {
     display: none;
   }
@@ -377,11 +372,11 @@
   .more-content {
     display: none;
   }
-  
+
   .more-content.show {
     display: flex;
   }
-  
+
   .more-toggle {
     display: block;
   }
@@ -490,28 +485,6 @@
 
 .card-list-item-action:hover {
   background: var(--color-bg-light);
-}
-
-/* Captcha */
-.captcha-container {
-  display: flex;
-  gap: var(--spacing-sm);
-  align-items: center;
-}
-
-.captcha-image {
-  border: 1px solid var(--color-stroke);
-  border-radius: var(--radius-md);
-  padding: var(--spacing-xs);
-  cursor: pointer;
-}
-
-.captcha-audio {
-  padding: var(--spacing-sm);
-  border: 1px solid var(--color-stroke);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-white);
-  cursor: pointer;
 }
 
 /* Timer */

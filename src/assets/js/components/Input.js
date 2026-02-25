@@ -28,6 +28,8 @@ export class Input {
       inputMode: options.inputMode || null,
       pattern: options.pattern || null,
       maxLength: options.maxLength || null,
+      requiredMessage: options.requiredMessage || 'This field is required',
+      clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
       ...options
     };
     
@@ -35,6 +37,7 @@ export class Input {
     this.errorMessage = '';
     this.element = null;
     this.labelElement = null;
+    this.inputContainer = null;
     this.init();
   }
 
@@ -72,9 +75,11 @@ export class Input {
       wrapper.appendChild(this.labelElement);
     }
 
-    // Input container
+    // Input container (state classes: focused, error, disabled, bordered)
     const inputContainer = document.createElement('div');
-    inputContainer.className = 'input-container';
+    inputContainer.className = 'input-container' + (this.options.bordered ? ' bordered' : '');
+    if (this.options.disabled) inputContainer.classList.add('disabled');
+    this.inputContainer = inputContainer;
 
     // Left action button
     if (this.options.leftAction) {
@@ -136,8 +141,8 @@ export class Input {
       const clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'input-clear';
-      clearBtn.innerHTML = '×';
-      clearBtn.setAttribute('aria-label', 'Clear');
+      clearBtn.innerHTML = '<img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />';
+      clearBtn.setAttribute('aria-label', this.options.clearButtonAriaLabel);
       clearBtn.style.display = 'none';
       clearBtn.onclick = (e) => {
         e.stopPropagation();
@@ -215,7 +220,7 @@ export class Input {
 
     // Focus event
     this.element.addEventListener('focus', (e) => {
-      this.wrapper.classList.add('focused');
+      if (this.inputContainer) this.inputContainer.classList.add('focused');
       if (this.options.onFocus) {
         this.options.onFocus(e, this);
       }
@@ -223,7 +228,7 @@ export class Input {
 
     // Blur event
     this.element.addEventListener('blur', (e) => {
-      this.wrapper.classList.remove('focused');
+      if (this.inputContainer) this.inputContainer.classList.remove('focused');
       if (this.options.onBlur) {
         this.options.onBlur(e, this);
       }
@@ -248,9 +253,8 @@ export class Input {
     const value = this.getValue();
     let validationResult = { valid: true, message: '' };
 
-    // Required check
     if (this.options.required && !value) {
-      validationResult = { valid: false, message: 'This field is required' };
+      validationResult = { valid: false, message: this.options.requiredMessage };
     }
     // Custom validator
     else if (this.options.validator && value) {
@@ -275,14 +279,15 @@ export class Input {
   updateValidationState() {
     if (this.isValid) {
       this.wrapper.classList.remove('error');
+      if (this.inputContainer) this.inputContainer.classList.remove('error');
       this.errorElement.textContent = '';
       this.errorElement.style.display = 'none';
     } else {
       this.wrapper.classList.add('error');
+      if (this.inputContainer) this.inputContainer.classList.add('error');
       this.errorElement.textContent = this.errorMessage;
       this.errorElement.style.display = 'block';
-      
-      // Vibration feedback
+
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
@@ -324,6 +329,7 @@ export class Input {
     this.options.disabled = false;
     this.element.disabled = false;
     this.wrapper.classList.remove('disabled');
+    if (this.inputContainer) this.inputContainer.classList.remove('disabled');
     const actionButtons = this.wrapper.querySelectorAll('.input-action');
     actionButtons.forEach(btn => btn.disabled = false);
   }
@@ -335,6 +341,7 @@ export class Input {
     this.options.disabled = true;
     this.element.disabled = true;
     this.wrapper.classList.add('disabled');
+    if (this.inputContainer) this.inputContainer.classList.add('disabled');
     const actionButtons = this.wrapper.querySelectorAll('.input-action');
     actionButtons.forEach(btn => btn.disabled = true);
     this.updateClearButton();

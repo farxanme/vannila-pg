@@ -4,11 +4,10 @@
  */
 class I18n {
   constructor() {
-    // Load language from localStorage or use default
     const savedLang = localStorage.getItem('app_language');
     this.currentLang = savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
     this.translations = {};
-    this.loadTranslations();
+    this.readyPromise = this.loadTranslations();
   }
 
   /**
