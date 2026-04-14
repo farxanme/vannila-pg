@@ -1,183 +1,92 @@
 /**
- * Card Service - Handle card-related API calls
+ * Card Service — saved cards from IPG /user/cards
  */
-import { apiService } from './apiService.js';
+import { useIpgMock, getIpgBaseUrl } from '../config/env.js';
+import { getUserCards } from './ipgService.js';
+import { detectBank, detectBankFromMaskedPan } from '../utils/bankDetector.js';
 
 class CardService {
   /**
-   * Get user's saved cards
-   * @returns {Promise<Object>} - Cards response with Data array
+   * Get user's saved cards for current session
+   * @returns {Promise<{ Data: object[] }>}
    */
   async getCards() {
     try {
-      // Mock data for development
-      if (this.isMockMode()) {
-        return this.getMockCards();
+      if (useIpgMock()) {
+        const res = await getUserCards();
+        const list = res.data?.userCards ?? [];
+        return { Data: list.map((c) => this.convertCardFormat(c)).filter(Boolean) };
       }
 
-      // Real API call
-      const response = await apiService.get('/api/cards', {
-        background: true,
-      });
+      const base = getIpgBaseUrl();
+      if (!base) {
+        return { Data: [] };
+      }
 
-      return response;
+      const res = await getUserCards();
+      const list = res.data?.userCards ?? [];
+      return { Data: list.map((c) => this.convertCardFormat(c)).filter(Boolean) };
     } catch (error) {
       console.error('Failed to fetch cards:', error);
-      // Return empty data on error
       return { Data: [] };
     }
   }
 
   /**
-   * Check if mock mode is enabled
-   * @returns {boolean}
-   */
-  isMockMode() {
-    // Check for mock flag in localStorage or URL params
-    const urlParams = new URLSearchParams(window.location.search);
-    const useMock =
-      urlParams.get('mock') === 'true' || localStorage.getItem('useMockCards') === 'true';
-    return useMock || !apiService.baseURL; // Use mock if no base URL is set
-  }
-
-  /**
-   * Get mock cards data
-   * @returns {Object} - Mock cards response
-   */
-  getMockCards() {
-    // Simulate API delay
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({
-          Data: [
-            {
-              SecurePan: '621986######5273',
-              SubscriberCardId: 280907372,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک سامان',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '621986######1630',
-              SubscriberCardId: 191030028,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک سامان',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '502229######9053',
-              SubscriberCardId: 368937351,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک پاسارگاد',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '621986######4430',
-              SubscriberCardId: 363588257,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک سامان',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '636214######5307',
-              SubscriberCardId: 315500287,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک آینده (تات)',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '621986######1013',
-              SubscriberCardId: 67021321,
-              IsGiftCard: true,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک سامان',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '621986######2497',
-              SubscriberCardId: 23647809,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: false,
-              Selected: false,
-              BankName: 'بانک سامان',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '504172######1195',
-              SubscriberCardId: 266139817,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک قرض الحسنه رسالت',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-            {
-              SecurePan: '502229######3373',
-              SubscriberCardId: 247204029,
-              IsGiftCard: false,
-              CardOwner: 1,
-              HasValidExpiredDate: true,
-              Selected: false,
-              BankName: 'بانک پاسارگاد',
-              CanDeActive: true,
-              IsLimited: false,
-            },
-          ],
-        });
-      }, 300); // Simulate 300ms delay
-    });
-  }
-
-  /**
-   * Convert API card format to internal format
-   * @param {Object} apiCard - Card from API
-   * @returns {Object} - Internal card format
+   * Convert API card to internal format (legacy SecurePan or IPG userCards item).
+   * @param {object} apiCard - Card from API
+   * @returns {object} - Internal card format
    */
   convertCardFormat(apiCard) {
-    // Extract only digits from SecurePan (remove # symbols)
-    const cardNumber = apiCard.SecurePan.replace(/[^0-9]/g, '');
+    if (apiCard == null || typeof apiCard !== 'object') {
+      return null;
+    }
 
-    return {
-      number: cardNumber,
-      securePan: apiCard.SecurePan,
-      subscriberCardId: apiCard.SubscriberCardId,
-      bankName: apiCard.BankName,
-      isGiftCard: apiCard.IsGiftCard,
-      hasValidExpiredDate: apiCard.HasValidExpiredDate,
-      selected: apiCard.Selected,
-      canDeActive: apiCard.CanDeActive,
-      isLimited: apiCard.IsLimited,
-      pinned: false, // Default pinned state
-    };
+    // IPG userCards: maskedPan (null means use legacy or skip)
+    if (apiCard.maskedPan != null && String(apiCard.maskedPan).trim() !== '') {
+      const masked = String(apiCard.maskedPan);
+      const bank = detectBankFromMaskedPan(masked);
+      const digitsFromMasked = masked.replace(/\D/g, '');
+      const bin6FromBank = bank?.bin ? String(bank.bin).replace(/\D/g, '').slice(0, 6) : '';
+      const paddedPan = bin6FromBank
+        ? (bin6FromBank + '0000000000').slice(0, 16)
+        : (digitsFromMasked + '0000000000000000').slice(0, 16);
+      const cardIdNum = Number(apiCard.cardId);
+      return {
+        number: paddedPan,
+        securePan: masked,
+        subscriberCardId: Number.isNaN(cardIdNum) ? apiCard.cardId : cardIdNum,
+        bankName: bank?.name || '',
+        isGiftCard: Boolean(apiCard.isGiftCard),
+        hasValidExpiredDate: apiCard.expireDate != null,
+        selected: Boolean(apiCard.selected),
+        canDeActive: true,
+        isLimited: Boolean(apiCard.isLimited),
+        pinned: false,
+        cardRegisteredType: apiCard.cardRegisteredType,
+      };
+    }
+
+    // Legacy SEP card shape
+    if (apiCard.SecurePan != null && String(apiCard.SecurePan).trim() !== '') {
+      const secure = String(apiCard.SecurePan);
+      const cardNumber = secure.replace(/[^0-9]/g, '');
+      return {
+        number: cardNumber,
+        securePan: secure,
+        subscriberCardId: apiCard.SubscriberCardId,
+        bankName: apiCard.BankName,
+        isGiftCard: apiCard.IsGiftCard,
+        hasValidExpiredDate: apiCard.HasValidExpiredDate,
+        selected: apiCard.Selected,
+        canDeActive: apiCard.CanDeActive,
+        isLimited: apiCard.IsLimited,
+        pinned: false,
+      };
+    }
+
+    return null;
   }
 }
 
-// Export singleton instance
 export const cardService = new CardService();

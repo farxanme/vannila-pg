@@ -5,15 +5,34 @@ import { extractNumbers } from './numberConverter.js';
  */
 
 /**
+ * Saved-card masked PAN (no spaces): full 16 chars, middle hidden with # / • / *.
+ * Examples: 621986######5273, 62198●●●●●●8080 (from API 62198*******8080 shown as •).
+ */
+function isMaskedSavedCardPan(raw) {
+  if (!raw || raw.length !== 16) return false;
+
+  // Legacy: 6 digits + 6 mask (# or •) + 4 digits
+  if (/^(\d{6})[#●]{6}\d{4}$/.test(raw)) return true;
+
+  // IPG-style: 4–6 leading digits + mask run + last 4 (e.g. 62198*******8080)
+  const m = raw.match(/^(\d{4,6})([#●*]+)(\d{4})$/);
+  if (!m) return false;
+  const lead = m[1];
+  const mid = m[2];
+  const tail = m[3];
+  if (lead.length + mid.length + tail.length !== 16) return false;
+  if (!/^[#●*]+$/.test(mid)) return false;
+  return true;
+}
+
+/**
  * Validate card number (16 digits)
  * @param {string} cardNumber - Card number
  * @returns {Object} - { valid: boolean, message: string }
  */
 export function validateCardNumber(cardNumber) {
-  // Accept masked saved-card format: 6 digits, 6 mask chars (# or •), 4 digits
   const raw = (cardNumber || '').replace(/\s/g, '');
-  const maskedPattern = /^(\d{6})[#●]{6}\d{4}$/;
-  if (maskedPattern.test(raw)) {
+  if (isMaskedSavedCardPan(raw)) {
     return { valid: true, message: '' };
   }
 

@@ -58,6 +58,8 @@ export default {
   'form.pay.securePrefix': 'Secure payment',
   'form.pay.disabled': 'Please complete all information',
   'form.pay.processing': 'Connecting to bank...',
+  'form.pay.success': 'Payment completed successfully',
+  'form.captchaAudioUnavailable': 'Captcha audio is not available in this build',
   'form.cancel': 'Cancel',
   'form.showReceipt': 'Show Receipt',
   'form.title': 'Payment Information',
@@ -75,6 +77,11 @@ export default {
   'form.audioPlay': 'Play audio',
   'form.confirmCancel': 'Are you sure you want to cancel?',
   'form.expiryPlaceholder': 'MM/YY',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'Cannot start payment',
+  'paymentInit.error.description':
+    'Payment session data is missing or invalid. Please use the correct link to open the gateway or try again later.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Select language',

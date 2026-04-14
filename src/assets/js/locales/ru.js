@@ -58,6 +58,8 @@ export default {
   'form.pay.securePrefix': 'Безопасная оплата',
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
   'form.pay.processing': 'Подключение к банку...',
+  'form.pay.success': 'Платёж успешно выполнен',
+  'form.captchaAudioUnavailable': 'Аудио капчи недоступно в этой сборке',
   'form.cancel': 'Отмена',
   'form.showReceipt': 'Показать квитанцию',
   'form.title': 'Информация об оплате',
@@ -123,6 +125,11 @@ export default {
   // Timer
   'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'Невозможно начать оплату',
+  'paymentInit.error.description':
+    'Данные платёжной сессии отсутствуют или недействительны. Откройте шлюз по правильной ссылке или повторите попытку позже.',
 
   // Errors
   'error.network': 'Ошибка сети',

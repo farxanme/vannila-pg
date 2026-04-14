@@ -59,6 +59,8 @@ export default {
   'form.pay.securePrefix': 'پرداخت امن',
   'form.pay.disabled': 'لطفاً اطلاعات را کامل وارد کنید',
   'form.pay.processing': 'در حال اتصال به بانک...',
+  'form.pay.success': 'پرداخت با موفقیت ثبت شد',
+  'form.captchaAudioUnavailable': 'پخش صوتی کپچا در این نسخه در دسترس نیست',
   'form.cancel': 'انصراف',
   'form.showReceipt': 'نمایش رسید',
   'form.title': 'اطلاعات پرداخت',
@@ -126,6 +128,11 @@ export default {
   // Timer
   'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'خطا در شروع پرداخت',
+  'paymentInit.error.description':
+    'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفاً از مسیر صحیح وارد درگاه شوید یا بعداً دوباره تلاش کنید.',
 
   // Errors
   'error.network': 'خطا در ارتباط با سرور',

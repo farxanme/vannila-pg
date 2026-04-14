@@ -1,88 +1,139 @@
 :root {
-  /* Colors (from design tokens) */
+  /*
+   * Design tokens aligned with sep.mysep.merchantportal (Tailwind extend / shared-ui palette).
+   * Use CSS variables below in components; avoid hardcoding hex in feature CSS.
+   */
+
   /* Primary */
-  --color-primary-50: #eef4fd;
-  --color-primary-100: #d5e3fa;
-  --color-primary-200: #abc7f5;
-  --color-primary-300: #82acef;
-  --color-primary-400: #5890ea;
-  --color-primary-500: #2e74e5;
-  --color-primary-600: #255db7;
-  --color-primary-700: #1c4689;
-  --color-primary-800: #122e5c;
-  --color-primary-900: #09172e;
+  --color-primary-default: #007dff;
+  --color-primary-light: #aad4ff;
+  --color-primary-dark: #0059b5;
+
+  /* Numbered scale (compat with existing selectors + focus rings) */
+  --color-primary-50: #e6f4ff;
+  --color-primary-100: #aad4ff;
+  --color-primary-200: #66b3ff;
+  --color-primary-300: #007dff;
+  --color-primary-400: #007dff;
+  --color-primary-500: #007dff;
+  --color-primary-600: #006dde;
+  --color-primary-700: #0059b5;
+  --color-primary-800: #003d7a;
+  --color-primary-900: #002647;
 
   --color-primary: var(--color-primary-500);
   --color-primary-hover: var(--color-primary-600);
-  --color-primary-light: var(--color-primary-50);
 
-  /* Gray */
-  --color-gray-50: #f4f5f7;
-  --color-gray-100: #e9ebef;
-  --color-gray-200: #d3d7df;
-  --color-gray-300: #bdc2cf;
-  --color-gray-400: #a7aebf;
-  --color-gray-500: #919aaf;
-  --color-gray-600: #767d8f;
-  --color-gray-700: #5b616f;
-  --color-gray-800: #40444e;
-  --color-gray-900: #25282e;
+  /* Gray (1–10 from portal) */
+  --color-gray-1: #ffffff;
+  --color-gray-2: #f5f6f8;
+  --color-gray-3: #eaedf0;
+  --color-gray-4: #e2e5e8;
+  --color-gray-5: #c4cfd9;
+  --color-gray-6: #a0acb7;
+  --color-gray-7: #7a8996;
+  --color-gray-8: #5c677e;
+  --color-gray-9: #3f4a5b;
+  --color-gray-10: #011526;
 
-  /* Semantic aliases */
-  --color-text-primary: var(--color-gray-800);
-  --color-text-secondary: var(--color-gray-600);
-  --color-text-muted: var(--color-gray-400);
+  /* Legacy gray scale → portal grays */
+  --color-gray-50: var(--color-gray-2);
+  --color-gray-100: var(--color-gray-3);
+  --color-gray-200: var(--color-gray-4);
+  --color-gray-300: var(--color-gray-5);
+  --color-gray-400: var(--color-gray-6);
+  --color-gray-500: var(--color-gray-6);
+  --color-gray-600: var(--color-gray-7);
+  --color-gray-700: var(--color-gray-7);
+  --color-gray-800: var(--color-gray-8);
+  --color-gray-900: var(--color-gray-9);
 
-  --color-bg-light: #f8f9fa;
+  /* Base text (portal gray-10 / Tailwind text-gray-10) */
+  --color-text-primary: rgb(1 21 38 / var(--text-opacity, 1));
+  --color-text-secondary: var(--color-gray-7);
+  --color-text-muted: var(--color-gray-6);
+
+  --color-light: #f5f7fa;
+  --color-bg-light: var(--color-light);
   --color-bg-white: #ffffff;
-  --color-stroke: var(--color-gray-200);
+  --color-stroke: #e5e7eb;
 
   /* Error */
-  --color-error-50: #feebee;
-  --color-error-100: #fdd8dd;
-  --color-error-200: #fbb0ba;
-  --color-error-300: #fa8998;
-  --color-error-400: #f86175;
-  --color-error-500: #f63a53;
-  --color-error-600: #c62e43;
-  --color-error-700: #972332;
-  --color-error-800: #671722;
-  --color-error-900: #380c11;
+  --color-error-default: #ff3651;
+  --color-error-light: #ff808e;
+  --color-error-dark: #cd002e;
+
+  --color-error-50: #fef2f2;
+  --color-error-100: #fecaca;
+  --color-error-200: #fecaca;
+  --color-error-300: #ff3651;
+  --color-error-400: #ff3651;
+  --color-error-500: #ff3651;
+  --color-error-600: #dc2626;
+  --color-error-700: #cd002e;
+  --color-error-800: #991b1b;
+  --color-error-900: #7f1d1d;
 
   --color-error: var(--color-error-500);
-  --color-error-light: var(--color-error-100);
+
+  /* Semantic alias (used in components) */
+  --color-danger: var(--color-error);
 
   /* Success */
-  --color-success-50: #ebfffa;
-  --color-success-100: #bcf3e5;
-  --color-success-200: #8de7d0;
-  --color-success-300: #5edabb;
-  --color-success-400: #2fcea6;
+  --color-success-default: #00c291;
+  --color-success-light: #6be9b9;
+  --color-success-dark: #038f6c;
+
+  --color-success-50: #f0fdf4;
+  --color-success-100: #bbf7d0;
+  --color-success-200: #bbf7d0;
+  --color-success-300: #6be9b9;
+  --color-success-400: #00c291;
   --color-success-500: #00c291;
-  --color-success-600: #009b74;
-  --color-success-700: #007457;
-  --color-success-800: #004e3a;
-  --color-success-900: #00271d;
+  --color-success-600: #16a34a;
+  --color-success-700: #038f6c;
+  --color-success-800: #166534;
+  --color-success-900: #14532d;
 
   --color-success: var(--color-success-500);
-  --color-success-light: var(--color-success-100);
 
   /* Warning */
-  --color-warning-50: #fff2e5;
-  --color-warning-100: #ffe6cc;
-  --color-warning-200: #ffcc99;
-  --color-warning-300: #ffb366;
-  --color-warning-400: #ff9933;
-  --color-warning-500: #ff8000;
-  --color-warning-600: #cc6600;
-  --color-warning-700: #994d00;
-  --color-warning-800: #663300;
-  --color-warning-900: #331a00;
+  --color-warning-default: #ff9a4b;
+  --color-warning-light: #ffbd8a;
+  --color-warning-dark: #da6000;
+
+  --color-warning-50: #fefce8;
+  --color-warning-100: #fef08a;
+  --color-warning-200: #fef08a;
+  --color-warning-300: #ffbd8a;
+  --color-warning-400: #ff9a4b;
+  --color-warning-500: #ff9a4b;
+  --color-warning-600: #ca8a04;
+  --color-warning-700: #da6000;
+  --color-warning-800: #a16207;
+  --color-warning-900: #713f12;
 
   --color-warning: var(--color-warning-500);
 
-  /* Implement / surfaces */
-  --color-controller: #f9fafc; /* Color/OldColor/Implement.Controller */
+  /* Info */
+  --color-info-default: #01b4dd;
+  --color-info-light: #7be6ff;
+  --color-info-dark: #008eae;
+
+  --color-info-50: #eff6ff;
+  --color-info-200: #bfdbfe;
+  --color-info-600: #2563eb;
+
+  --color-info: var(--color-info-default);
+
+  /* Accent (portal) */
+  --color-secondary: #16dbcc;
+  --color-third: #fcaa0b;
+  --color-pink: #ff6b9d;
+  --color-purple: #6840c6;
+
+  /* Surfaces */
+  --color-controller: var(--color-gray-2);
 
   /* Spacing */
   --spacing-xs: 4px;
@@ -93,12 +144,15 @@
   --spacing-3: 12px;
   --spacing-7_5: 30px;
 
-  /* Typography */
-  --font-family-base:
-    'IRANYekan', 'IRAN Yekan', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  /* Typography — self-hosted via src/assets/css/fonts/*-font-face.css (base.css) */
+  --font-family-vazirmatn: 'Vazirmatn', system-ui, -apple-system, sans-serif;
+  --font-family-vazirmatn-fd: 'VazirmatnFD', 'Vazirmatn', system-ui, -apple-system, sans-serif;
+  --font-family-base: var(--font-family-vazirmatn-fd);
+
+  --font-size-xxs: 10px;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
-  --font-size-base: 14px;
+  --font-size-base: 16px;
   --font-size-lg: 18px;
   --font-size-xl: 20px;
   --font-size-2xl: 24px;
@@ -120,13 +174,18 @@
   --size-icon-md: 24px;
   --size-icon-lg: 32px;
 
-  /* Shadows */
+  /* Shadows (portal / Tailwind default card shadow) */
+  --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
+  --shadow-color: rgba(0, 0, 0, 0.05);
+  --shadow-colored: 0 20px 27px 0 var(--shadow-color);
+
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --shadow-default: var(--shadow);
 
-  --shadow-input-focus: 0 0 9px 0 var(--color-primary-100);
-  --shadow-input-error: 0 0 9px 0 var(--color-error-100);
+  --shadow-input-focus: 0 0 9px 0 rgba(0, 125, 255, 0.35);
+  --shadow-input-error: 0 0 9px 0 rgba(255, 54, 81, 0.35);
 
   /* Transitions */
   --transition-base: 0.2s ease;

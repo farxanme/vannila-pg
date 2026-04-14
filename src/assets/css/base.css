@@ -1,4 +1,6 @@
 @import './variables.css';
+@import './fonts/vazirmatn-font-face.css';
+@import './fonts/vazirmatn-fd-font-face.css';
 @import './reset.css';
 
 .container {
@@ -87,6 +89,13 @@
 
 .text-left {
   text-align: left;
+}
+
+/* Card shadow (portal shadow-default / Tailwind shadow) */
+.shadow-default {
+  --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
+  --shadow-colored: 0 20px 27px 0 var(--shadow-color);
+  box-shadow: var(--shadow);
 }
 
 /* Loading Animation */

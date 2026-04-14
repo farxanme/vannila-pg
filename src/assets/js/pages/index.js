@@ -8,6 +8,7 @@ import { Dropdown } from '../components/Dropdown.js';
 import { VirtualPinPad } from '../components/VirtualPinPad.js';
 import { Timer } from '../classes/Timer.js';
 import { LoadingScreen } from '../components/LoadingScreen.js';
+import { PaymentInitErrorScreen } from '../components/PaymentInitErrorScreen.js';
 import {
   validateCardNumber,
   validateCVV2,
@@ -19,6 +20,10 @@ import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector
 import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
+import { getPaymentInitData, validatePaymentInitData } from '../services/paymentInitData.js';
+import { fetchCaptcha, fetchCaptchaAudio } from '../services/captchaService.js';
+import * as ipgService from '../services/ipgService.js';
+import { getIpgBaseUrl } from '../config/env.js';
 import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
@@ -43,20 +48,160 @@ let otpLabelElement = null;
 let captchaLabelElement = null;
 let isCurrentGiftCard = false;
 
+/** When user picks a saved card from dropdown, used for OTP/pay cardId vs pan */
+let selectedSavedCardForApi = null;
+
+let captchaTokenKey = null;
+
+let paymentInitErrorScreen = null;
+
+/**
+ * Reveal main content after loading and all setup (success, error, or failure paths).
+ */
+function markAppReady() {
+  const root = document.documentElement;
+  root.classList.remove('app-booting');
+  root.classList.add('app-ready');
+}
+
+function parseTimeSpanToSeconds(timeSpan) {
+  if (!timeSpan || typeof timeSpan !== 'string') return 900;
+  const parts = timeSpan.split(':').map((p) => parseInt(p, 10));
+  if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
+    return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  }
+  return 900;
+}
+
+function resolveMerchantLogoUrl(uri) {
+  if (!uri) return null;
+  if (uri.startsWith('http')) return uri;
+  const base = getIpgBaseUrl();
+  if (!base) return null;
+  return `${base}${uri.startsWith('/') ? '' : '/'}${uri}`;
+}
+
+async function loadCaptchaImage(captchaImageEl) {
+  try {
+    const captcha = await fetchCaptcha();
+    captchaTokenKey = captcha.captchaKey;
+    captchaImageEl.src = captcha.imageDataUrl;
+  } catch (err) {
+    console.error(err);
+    captchaTokenKey = null;
+    errorHandler.show({
+      message: i18n.t('error.network'),
+      mode: 'toast',
+      type: 'error',
+    });
+  }
+}
+
+/**
+ * Card fields for OTP / pay (IPG expects pan or cardId).
+ * @returns {{ cardId: string | null, pan: string | null, bill: null, cardRegisteredType: number } | null}
+ */
+function buildCardPayloadForIpg() {
+  const pan = extractNumbers(cardNumberInput.getValue());
+  if (pan.length === 16) {
+    return { cardId: null, pan, bill: null, cardRegisteredType: 0 };
+  }
+  if (selectedSavedCardForApi) {
+    return {
+      cardId: String(selectedSavedCardForApi.subscriberCardId),
+      pan: null,
+      bill: null,
+      cardRegisteredType: selectedSavedCardForApi.cardRegisteredType ?? 1,
+    };
+  }
+  return null;
+}
+
+function getExpiryDateForApi() {
+  const n = extractNumbers(expiryDateInput.getValue());
+  return n.length === 4 ? n : '';
+}
+
+function handlePaymentInitLanguageChange() {
+  if (!paymentInitErrorScreen) return;
+  paymentInitErrorScreen.updateTexts({
+    title: i18n.t('paymentInit.error.title'),
+    description: i18n.t('paymentInit.error.description'),
+  });
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
   await initializePage();
 });
 
 async function initializePage() {
-  await i18n.readyPromise;
-
   const loadingScreen = new LoadingScreen({
     logo: '/assets/images/logo-full.svg',
-    text: i18n.t('common.loading'),
+    // Non-empty so .loading-text exists for updateText() after i18n is ready
+    text: '\u00A0',
     showProgressBar: true,
+    ariaLabel: 'Loading',
   });
   loadingScreen.show();
+
+  await i18n.readyPromise;
+  loadingScreen.updateText(i18n.t('common.loading'));
+  if (loadingScreen.element) {
+    loadingScreen.element.setAttribute('aria-label', i18n.t('common.loading'));
+  }
+
+  const paymentInitCheck = validatePaymentInitData();
+  if (!paymentInitCheck.valid) {
+    const initErrorRoot = document.getElementById('payment-init-error-root');
+    const initErrorSection = document.getElementById('payment-init-error-section');
+    const paymentFlowSection = document.getElementById('payment-flow-section');
+    if (!initErrorRoot || !initErrorSection || !paymentFlowSection) {
+      loadingScreen.hide();
+      loadingScreen.destroy();
+      markAppReady();
+      errorHandler.show({
+        message: i18n.t('error.unknown'),
+        mode: 'toast',
+        type: 'error',
+      });
+      return;
+    }
+
+    try {
+      header = new Header({
+        title: i18n.t('header.title'),
+        logo: '/assets/images/logo-shaparak.svg',
+        secondaryLogo: '/assets/images/logo.svg',
+        showCard: false,
+      });
+
+      footer = new Footer({
+        logo: '/assets/images/logo.svg',
+        copyright: i18n.t('footer.copyright'),
+      });
+
+      paymentFlowSection.setAttribute('hidden', '');
+      initErrorSection.removeAttribute('hidden');
+
+      paymentInitErrorScreen = new PaymentInitErrorScreen({
+        container: initErrorRoot,
+        image: '/assets/images/icons/icn-x.svg',
+        title: i18n.t('paymentInit.error.title'),
+        description: i18n.t('paymentInit.error.description'),
+        ariaLabel: i18n.t('paymentInit.error.title'),
+      });
+
+      updatePageContent();
+      document.addEventListener('languageChange', handleLanguageChange);
+      document.addEventListener('languageChange', handlePaymentInitLanguageChange);
+    } finally {
+      loadingScreen.hide();
+      loadingScreen.destroy();
+      markAppReady();
+    }
+    return;
+  }
 
   try {
     // Initialize header
@@ -76,17 +221,16 @@ async function initializePage() {
     // Load saved cards from API
     await loadCards();
 
-    // Initialize timer
-    initializeTimer();
+    const txUi = await initializeTransactionInfo();
+
+    // Initialize timer (duration from transaction appSettings when available)
+    initializeTimer(txUi?.durationSeconds ?? 900);
 
     // Initialize form inputs
     initializeFormInputs();
 
-    // Initialize transaction info
-    initializeTransactionInfo();
-
-    // Initialize partner logos
-    initializePartnerLogos();
+    // Initialize partner logos (merchant logo from transaction when available)
+    initializePartnerLogos(txUi?.merchantLogoUrl ?? null);
 
     // Attach form events
     attachFormEvents();
@@ -100,6 +244,7 @@ async function initializePage() {
     // Hide loading screen
     loadingScreen.hide();
     loadingScreen.destroy();
+    markAppReady();
   } catch (error) {
     console.error('Initialization error:', error);
     errorHandler.show({
@@ -109,16 +254,18 @@ async function initializePage() {
     });
     loadingScreen.hide();
     loadingScreen.destroy();
+    markAppReady();
   }
 }
 
-function initializeTimer() {
+function initializeTimer(durationSeconds = 900) {
   const timerContainer = document.getElementById('timer-container');
   const timerHeader = document.getElementById('timer-header');
   const timerValue = timerContainer.querySelector('.timer-value');
+  const total = Math.max(1, durationSeconds);
 
   timer = new Timer({
-    duration: 900, // 15 minutes
+    duration: total,
     onTick: (remaining) => {
       const minutes = Math.floor(remaining / 60);
       const seconds = remaining % 60;
@@ -128,7 +275,7 @@ function initializeTimer() {
       if (timerHeader) {
         timerHeader.classList.remove('warning', 'danger');
       }
-      const progress = remaining / 900;
+      const progress = remaining / total;
       if (progress <= 1 / 3) {
         if (timerHeader) timerHeader.classList.add('danger');
       } else if (progress <= 2 / 3) {
@@ -161,8 +308,8 @@ async function loadCards() {
     const response = await cardService.getCards();
 
     if (response && response.Data && Array.isArray(response.Data)) {
-      // Convert API format to internal format
-      cardList = response.Data.map((card) => cardService.convertCardFormat(card));
+      // cardService.getCards() already maps API → internal format; do not convert again
+      cardList = response.Data.filter((card) => card != null);
 
       // Also save to localStorage for offline access
       dataStore.set('savedCards', cardList);
@@ -203,6 +350,8 @@ function initializeFormInputs() {
         }
       : null,
     onInput: (value) => {
+      selectedSavedCardForApi = null;
+
       // Format card number (4-4-4-4)
       const formatted = formatCardNumber(value);
       if (formatted !== value) {
@@ -234,7 +383,7 @@ function initializeFormInputs() {
 
   function getMaskedDisplayPan(securePan) {
     if (!securePan) return '';
-    const raw = securePan.replace(/\s/g, '').replace(/#/g, '●');
+    const raw = securePan.replace(/\s/g, '').replace(/#/g, '●').replace(/\*/g, '●');
     const parts = [];
     for (let i = 0; i < raw.length; i += 4) {
       parts.push(raw.substring(i, i + 4));
@@ -269,6 +418,7 @@ function initializeFormInputs() {
       onSelect: (item) => {
         const card = cardList.find((c) => c.number === item.value);
         if (card) {
+          selectedSavedCardForApi = card;
           cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
           // Use API bank name (Persian) for logo to avoid any BIN masking issues
           updateBankLogo({ name: card.bankName });
@@ -409,12 +559,16 @@ function initializeFormInputs() {
     i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
   captchaContainer.appendChild(captchaLabelElement);
 
-  // Create flex wrapper for image and input
+  // Flex row: [ input + captcha image ] | audio — cluster keeps field + image aligned
   const captchaRow = document.createElement('div');
   captchaRow.className = 'captcha-input-row';
 
+  const captchaCluster = document.createElement('div');
+  captchaCluster.className = 'captcha-input-cluster';
+  captchaRow.appendChild(captchaCluster);
+
   // Create input without label, with reload action inside (first in row)
-  captchaInput = new Input(captchaRow, {
+  captchaInput = new Input(captchaCluster, {
     id: 'captcha',
     name: 'captcha',
     type: 'text',
@@ -435,13 +589,13 @@ function initializeFormInputs() {
       icon: '<img src="/assets/images/icons/icn-refresh.svg" alt="" aria-hidden="true" />',
       label: i18n.t('form.reloadCaptcha'),
       onClick: () => {
-        captchaImage.src = '/api/captcha/image?' + Date.now();
+        loadCaptchaImage(captchaImage);
       },
     },
   });
 
   // Hide the label inside input-wrapper since we have it separately
-  const captchaInputWrapper = captchaRow.querySelector('.input-wrapper');
+  const captchaInputWrapper = captchaCluster.querySelector('.input-wrapper');
   if (captchaInputWrapper) {
     const innerLabel = captchaInputWrapper.querySelector('.input-label');
     if (innerLabel) {
@@ -451,15 +605,14 @@ function initializeFormInputs() {
 
   // Create captcha image (will be attached after input visually)
   const captchaImage = document.createElement('img');
-  captchaImage.src = '/api/captcha/image';
   captchaImage.className = 'captcha-image';
   captchaImage.alt = i18n.t('form.captchaImageAlt');
   captchaImage.onclick = () => {
-    captchaImage.src = '/api/captcha/image?' + Date.now();
+    loadCaptchaImage(captchaImage);
   };
 
-  // Append image after input wrapper (visually attached)
-  captchaRow.appendChild(captchaImage);
+  // Append image after input wrapper (visually attached to the same cluster)
+  captchaCluster.appendChild(captchaImage);
 
   // Create audio button (outside input, like OTP button)
   const captchaAudio = document.createElement('button');
@@ -472,13 +625,32 @@ function initializeFormInputs() {
       <img src="/assets/images/icons/icn-volume.svg" alt="" />
     </span>
   `;
-  captchaAudio.onclick = () => {
-    const audio = new Audio('/api/captcha/audio');
-    audio.play();
+  captchaAudio.onclick = async () => {
+    if (!captchaTokenKey) {
+      await loadCaptchaImage(captchaImage);
+      if (!captchaTokenKey) return;
+    }
+
+    captchaAudio.disabled = true;
+    try {
+      const captchaAudioBlob = await fetchCaptchaAudio(captchaTokenKey);
+      await soundManager.playAudioBlob(captchaAudioBlob);
+    } catch (err) {
+      console.error(err);
+      errorHandler.show({
+        message: i18n.t('error.network'),
+        mode: 'toast',
+        type: 'error',
+      });
+    } finally {
+      captchaAudio.disabled = false;
+    }
   };
 
   captchaRow.appendChild(captchaAudio);
   captchaContainer.appendChild(captchaRow);
+
+  loadCaptchaImage(captchaImage).catch(() => {});
 
   // OTP Input
   const otpContainer = document.getElementById('otp-input-container');
@@ -548,12 +720,42 @@ function initializeFormInputs() {
   getOtpButton.id = 'get-otp-button';
   getOtpButton.className = 'btn btn-success btn-bordered';
   getOtpButton.textContent = i18n.t('form.getOtp');
-  getOtpButton.onclick = () => {
-    errorHandler.show({
-      message: i18n.t('form.getOtpSuccess'),
-      mode: 'toast',
-      type: 'success',
-    });
+  getOtpButton.onclick = async () => {
+    const cardPart = buildCardPayloadForIpg();
+    if (!captchaTokenKey || !captchaInput.getValue()) {
+      errorHandler.show({
+        message: i18n.t('form.validation.error'),
+        mode: 'toast',
+        type: 'error',
+      });
+      return;
+    }
+    if (!cardPart) {
+      errorHandler.show({
+        message: i18n.t('form.validation.error'),
+        mode: 'toast',
+        type: 'error',
+      });
+      return;
+    }
+    try {
+      await ipgService.sendTransactionOtp(cardPart, {
+        captchaToken: captchaTokenKey,
+        captchaResponse: captchaInput.getValue(),
+      });
+      errorHandler.show({
+        message: i18n.t('form.getOtpSuccess'),
+        mode: 'toast',
+        type: 'success',
+      });
+    } catch (err) {
+      console.error(err);
+      errorHandler.show({
+        message: err.message || i18n.t('error.network'),
+        mode: 'toast',
+        type: 'error',
+      });
+    }
   };
   otpWrapper.appendChild(getOtpButton);
   otpContainer.appendChild(otpWrapper);
@@ -633,16 +835,30 @@ function toggleCardList() {
   }
 }
 
-function initializeTransactionInfo() {
+async function initializeTransactionInfo() {
   const container = document.getElementById('transaction-info');
 
-  // Mock transaction data
+  const init = getPaymentInitData();
+
+  let txPayload = null;
+  try {
+    const res = await ipgService.getTransaction();
+    txPayload = res?.data ?? null;
+  } catch (e) {
+    console.error('getTransaction failed:', e);
+  }
+
   const transactionData = {
-    merchant: 'فروشگاه نمونه',
-    amount: 100000, // in Rials
-    terminal: '12345678',
-    site: 'example.com',
+    merchant: txPayload?.merchant?.merchantName ?? 'فروشگاه نمونه',
+    amount: typeof txPayload?.totalAmount === 'number' ? txPayload.totalAmount : 100000,
+    terminal: init?.terminalNumber || String(txPayload?.terminalNumber ?? '12345678'),
+    site:
+      txPayload?.merchant?.merchantWebSite?.replace(/^https?:\/\//, '')?.replace(/\/$/, '') ??
+      'example.com',
   };
+
+  const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
+  const merchantLogoUrl = resolveMerchantLogoUrl(txPayload?.merchant?.merchantLogoUri);
 
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
@@ -712,6 +928,7 @@ function initializeTransactionInfo() {
   }
   // Initialize pay button label with current amount
   setPayButtonState('active');
+  return { durationSeconds, merchantLogoUrl };
 }
 
 function getTransactionAmountFromDom() {
@@ -748,12 +965,13 @@ function setPayButtonState(state) {
   }
 }
 
-function initializePartnerLogos() {
+function initializePartnerLogos(merchantLogoUrl) {
   const container = document.getElementById('partner-logos');
   const section = document.getElementById('partner-logos-section');
 
-  // Mock partner logos - can be empty array
-  const logos = ['/assets/images/partners/logo1.svg', '/assets/images/partners/logo2.svg'];
+  const logos = merchantLogoUrl
+    ? [merchantLogoUrl]
+    : ['/assets/images/partners/logo1.svg', '/assets/images/partners/logo2.svg'];
 
   // Hide section if no logos
   if (!logos || logos.length === 0) {
@@ -836,15 +1054,63 @@ function attachFormEvents() {
       return;
     }
 
-    // Submit form
-    // This would call the payment API
+    const cardPart = buildCardPayloadForIpg();
+    if (!cardPart || !captchaTokenKey) {
+      errorHandler.show({
+        message: i18n.t('form.validation.error'),
+        mode: 'toast',
+        type: 'error',
+      });
+      return;
+    }
+
     setPayButtonState('processing');
     soundManager.beep();
-    errorHandler.show({
-      message: i18n.t('form.pay.processing'),
-      mode: 'toast',
-      type: 'info',
-    });
+
+    try {
+      const saveCardEl = document.getElementById('save-card-checkbox');
+      const showReceiptEl = document.getElementById('show-receipt-toggle');
+      const receiptOpen = showReceiptEl?.checked;
+
+      const payBody = {
+        ...cardPart,
+        cvv2: extractNumbers(cvv2Input.getValue()),
+        expiryDate: getExpiryDateForApi(),
+        pin2: extractNumbers(otpInput.getValue()),
+        cellNumber:
+          receiptOpen && mobileInput ? extractNumbers(mobileInput.getValue()) || null : null,
+        email: receiptOpen && emailInput ? emailInput.getValue().trim() || null : null,
+        saveCardAfterPay: Boolean(saveCardEl?.checked),
+        bill: null,
+      };
+
+      await ipgService.payTransaction(payBody, {
+        captchaToken: captchaTokenKey,
+        captchaResponse: captchaInput.getValue(),
+      });
+
+      const redirectRes = await ipgService.getReceiptRedirectParams();
+      const redirectUrl = redirectRes?.data?.redirectUrl;
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+        return;
+      }
+
+      errorHandler.show({
+        message: i18n.t('form.pay.success'),
+        mode: 'toast',
+        type: 'success',
+      });
+    } catch (err) {
+      console.error(err);
+      errorHandler.show({
+        message: err.message || i18n.t('error.network'),
+        mode: 'toast',
+        type: 'error',
+      });
+    } finally {
+      setPayButtonState('active');
+    }
   });
 
   if (showReceiptToggle) {

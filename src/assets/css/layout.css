@@ -54,7 +54,7 @@
 
 .header-card {
   padding: var(--spacing-xs) var(--spacing-md);
-  background: var(--color-primary-light);
+  background: var(--color-primary-50);
   border-radius: var(--radius-md);
   font-size: var(--font-size-sm);
   white-space: nowrap;
@@ -124,7 +124,7 @@
 }
 
 .lang-dropdown-item.active {
-  background: var(--color-primary-light);
+  background: var(--color-primary-50);
   color: var(--color-primary);
 }
 
@@ -189,26 +189,30 @@
   border: 1px solid var(--color-stroke);
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-default);
 }
 
 .card-header {
   background: var(--color-primary-50);
   color: var(--color-primary-500);
   border-radius: var(--radius-lg);
-  min-height: 50px;
-  padding: 16px;
+  min-height: 56px;
+  padding: 0 var(--spacing-md);
+  box-sizing: border-box;
   border: none;
   margin-bottom: var(--spacing-md);
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: var(--spacing-md);
 }
 
 .card-title {
   font-size: var(--font-size-lg);
   font-weight: 600;
+  line-height: 1.25;
   margin: 0;
+  min-width: 0;
 }
 
 /* Grid Layout */
@@ -376,7 +380,7 @@
 }
 
 .more-toggle:hover {
-  background: var(--color-primary-light);
+  background: var(--color-primary-50);
 }
 
 /* Desktop: Show all content */
@@ -474,7 +478,7 @@
 }
 
 .card-list-item.pinned {
-  background: var(--color-primary-light);
+  background: var(--color-primary-50);
 }
 
 .card-list-item-info {
@@ -510,26 +514,29 @@
   background: var(--color-bg-light);
 }
 
-/* Timer */
-.timer {
-  text-align: center;
+/* Timer (inside .card-header — same strip height as payment card header) */
+.card-header .timer {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  text-align: unset;
 }
 
-.timer-value {
-  font-size: var(--font-size-2xl);
+.card-header .timer-value {
+  font-size: var(--font-size-lg);
   font-weight: 700;
-  font-family: monospace;
+  line-height: 1.25;
+  font-family: var(--font-family-base);
+  font-variant-numeric: tabular-nums;
 }
 
-.timer.warning,
 .card-header.warning {
-  background: rgba(255, 193, 7, 0.1);
+  background: var(--color-warning-50);
   color: var(--color-warning);
 }
 
-.timer.danger,
 .card-header.danger {
-  background: rgba(220, 53, 69, 0.1);
+  background: var(--color-error-50);
   color: var(--color-danger);
 }
 
@@ -547,7 +554,7 @@
 }
 
 .more-toggle:hover {
-  background: var(--color-primary-light);
+  background: var(--color-primary-50);
 }
 
 .more-content {

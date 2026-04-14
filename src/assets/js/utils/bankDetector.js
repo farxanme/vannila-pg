@@ -112,6 +112,73 @@ export function detectBank(cardNumber) {
 }
 
 /**
+ * Detect bank from masked PAN (e.g. 62198*******8080, 621986######5273).
+ * Do not concatenate all digits — that breaks BIN (e.g. 621988080 → wrong prefix).
+ * Uses leading digits before mask, then longest matching BIN in panBins / neoBins.
+ * @param {string} maskedPan - Masked PAN string
+ * @returns {Object|null} - Bank info or null
+ */
+export function detectBankFromMaskedPan(maskedPan) {
+  if (!maskedPan || typeof maskedPan !== 'string') return null;
+
+  const raw = maskedPan.replace(/\s/g, '');
+  const hasMask = /[#*●]/.test(raw);
+
+  if (!hasMask) {
+    return detectBank(raw);
+  }
+
+  const leadMatch = raw.match(/^(\d+)/);
+  if (!leadMatch) return null;
+  const lead = leadMatch[1];
+
+  if (lead.length >= 6) {
+    const padded = (lead + '0000000000').slice(0, 16);
+    const fromFull = detectBank(padded);
+    if (fromFull) return fromFull;
+  }
+
+  if (lead.length < 4) {
+    return null;
+  }
+
+  // Neo (8+ digit BIN, e.g. Blu): only when enough digits are visible — avoids Blu vs Saman on short prefixes like 62198
+  if (lead.length >= 8) {
+    const neo = neoBins.find(
+      (n) => n.bin && n.bankName && n.bin.startsWith(lead)
+    );
+    if (neo) {
+      return {
+        name: neo.bankName,
+        code: neo.bankCode,
+        bin: neo.bin,
+      };
+    }
+  }
+
+  const candidates = panBins.filter(
+    (b) =>
+      b.bin &&
+      b.bin !== 'Unknown' &&
+      b.bankName &&
+      b.bankName !== 'Unknown' &&
+      b.bin.startsWith(lead)
+  );
+
+  if (candidates.length === 0) {
+    return null;
+  }
+
+  // Prefer shortest BIN (e.g. 621986 before 62198619 when prefix is ambiguous)
+  const best = candidates.sort((a, b) => a.bin.length - b.bin.length)[0];
+  return {
+    name: best.bankName,
+    code: best.bankCode,
+    bin: best.bin,
+  };
+}
+
+/**
  * Get bank logo path
  * @param {string} bankName - Bank name
  * @returns {string} - Logo path

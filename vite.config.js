@@ -34,6 +34,15 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    hot: true
-  }
+    hot: true,
+    proxy: {
+      // auth.sep.ir captcha (CORS) — use: fetch('/sep-auth/api/v1/captcha')
+      '/sep-auth': {
+        target: 'https://auth.sep.ir',
+        changeOrigin: true,
+        secure: true,
+        rewrite: (path) => path.replace(/^\/sep-auth/, ''),
+      },
+    },
+  },
 });

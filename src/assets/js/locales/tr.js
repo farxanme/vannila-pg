@@ -58,6 +58,8 @@ export default {
   'form.pay.securePrefix': 'Güvenli ödeme',
   'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
   'form.pay.processing': 'Banka ile bağlantı kuruluyor...',
+  'form.pay.success': 'Ödeme başarıyla tamamlandı',
+  'form.captchaAudioUnavailable': 'Bu sürümde sesli captcha yok',
   'form.cancel': 'İptal',
   'form.showReceipt': 'Fişi Göster',
   'form.title': 'Ödeme Bilgileri',
@@ -123,6 +125,11 @@ export default {
   // Timer
   'timer.title': 'Kalan Süre',
   'timer.expired': 'Süre doldu',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'Ödeme başlatılamadı',
+  'paymentInit.error.description':
+    'Ödeme oturum verileri eksik veya geçersiz. Lütfen geçit için doğru bağlantıyı kullanın veya daha sonra tekrar deneyin.',
 
   // Errors
   'error.network': 'Ağ hatası',

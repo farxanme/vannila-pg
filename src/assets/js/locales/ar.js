@@ -58,6 +58,8 @@ export default {
   'form.pay.securePrefix': 'دفع آمن',
   'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
   'form.pay.processing': 'جارٍ الاتصال بالبنك...',
+  'form.pay.success': 'تم الدفع بنجاح',
+  'form.captchaAudioUnavailable': 'الصوت غير متاح لهذا الإصدار',
   'form.cancel': 'إلغاء',
   'form.showReceipt': 'عرض الإيصال',
   'form.title': 'معلومات الدفع',
@@ -123,6 +125,11 @@ export default {
   // Timer
   'timer.title': 'الوقت المتبقي',
   'timer.expired': 'انتهى الوقت',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'تعذر بدء الدفع',
+  'paymentInit.error.description':
+    'بيانات جلسة الدفع غير مكتملة أو غير صالحة. يرجى فتح البوابة عبر الرابط الصحيح أو المحاولة لاحقاً.',
 
   // Errors
   'error.network': 'خطأ في الشبكة',
