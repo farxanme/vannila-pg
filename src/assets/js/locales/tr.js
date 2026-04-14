@@ -72,10 +72,17 @@ export default {
   'form.reloadCaptcha': 'Doğrulama kodunu yenile',
   'form.getOtp': 'OTP al',
   'form.getOtpSuccess': 'OTP başarıyla gönderildi',
+  'form.getOtpExhausted': 'Bu kart için maksimum OTP isteği kullanıldı.',
+  'form.getOtpCountdownAria': 'OTP için tekrar istekte bulunmadan önce {{time}} bekleyin',
   'form.captchaImageAlt': 'Güvenlik kodu',
   'form.captchaAudio': 'Doğrulama kodu sesini çal',
   'form.audioPlay': 'Sesi oynat',
-  'form.confirmCancel': 'İptal etmek istediğinize emin misiniz?',
+  'cancelConfirm.title': 'Ödemeyi iptal etmek mi?',
+  'cancelConfirm.description':
+    'Şimdi ayrılırsanız ödemeniz tamamlanmayabilir. Emin olmak için bir seçenek seçin.',
+  'cancelConfirm.imageAlt': 'Ödemeden çıkış görseli',
+  'cancelConfirm.continuePay': 'Ödemeye devam et',
+  'cancelConfirm.confirmLeave': 'Ödemeyi iptal et',
   'form.expiryPlaceholder': 'AA/YY',
 
   // Accessibility

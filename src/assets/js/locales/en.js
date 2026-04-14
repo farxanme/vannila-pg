@@ -72,10 +72,17 @@ export default {
   'form.reloadCaptcha': 'Reload captcha',
   'form.getOtp': 'Get OTP',
   'form.getOtpSuccess': 'OTP sent successfully',
+  'form.getOtpExhausted': 'Maximum OTP requests for this card have been used.',
+  'form.getOtpCountdownAria': 'Wait {{time}} before requesting OTP again',
   'form.captchaImageAlt': 'Security code',
   'form.captchaAudio': 'Play captcha audio',
   'form.audioPlay': 'Play audio',
-  'form.confirmCancel': 'Are you sure you want to cancel?',
+  'cancelConfirm.title': 'Cancel payment?',
+  'cancelConfirm.description':
+    'If you leave now, your payment might not complete. Choose an option to be sure.',
+  'cancelConfirm.imageAlt': 'Illustration for leaving payment',
+  'cancelConfirm.continuePay': 'Continue payment',
+  'cancelConfirm.confirmLeave': 'Leave payment',
   'form.expiryPlaceholder': 'MM/YY',
 
   // Payment init (SSR session)

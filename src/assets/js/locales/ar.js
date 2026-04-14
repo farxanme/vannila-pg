@@ -72,10 +72,17 @@ export default {
   'form.reloadCaptcha': 'إعادة تحميل رمز التحقق',
   'form.getOtp': 'الحصول على OTP',
   'form.getOtpSuccess': 'تم إرسال OTP بنجاح',
+  'form.getOtpExhausted': 'تم استخدام الحد الأقصى لطلبات OTP لهذه البطاقة.',
+  'form.getOtpCountdownAria': 'انتظر {{time}} قبل طلب OTP مرة أخرى',
   'form.captchaImageAlt': 'رمز الأمان',
   'form.captchaAudio': 'تشغيل صوت رمز التحقق',
   'form.audioPlay': 'تشغيل الصوت',
-  'form.confirmCancel': 'هل أنت متأكد من الإلغاء؟',
+  'cancelConfirm.title': 'إلغاء الدفع؟',
+  'cancelConfirm.description':
+    'إذا غادرت الآن، قد لا يكتمل الدفع. اختر خياراً للتأكيد.',
+  'cancelConfirm.imageAlt': 'توضيح إلغاء الدفع',
+  'cancelConfirm.continuePay': 'متابعة الدفع',
+  'cancelConfirm.confirmLeave': 'إلغاء الدفع',
   'form.expiryPlaceholder': 'شهر/سنة',
 
   // Accessibility

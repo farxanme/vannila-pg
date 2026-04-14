@@ -27,6 +27,7 @@ import { getIpgBaseUrl } from '../config/env.js';
 import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
+import { Modal } from '../components/Modal.js';
 
 // Initialize sound manager
 soundManager.init();
@@ -54,6 +55,17 @@ let selectedSavedCardForApi = null;
 let captchaTokenKey = null;
 
 let paymentInitErrorScreen = null;
+
+/** From GET /transaction `appSettings.otpSettings` (mutable `maxTries` is tracked per card below). */
+let transactionOtpSettings = { maxTries: 5, nextTrySeconds: 120 };
+
+/** Per-card OTP tries remaining (key → count). */
+const otpTriesRemainingByCardKey = Object.create(null);
+/** Per-card cooldown end timestamp (ms) after a successful OTP request. */
+const otpCooldownUntilByCardKey = Object.create(null);
+
+let otpButtonCountdownIntervalId = null;
+let otpRequestInFlight = false;
 
 /**
  * Reveal main content after loading and all setup (success, error, or failure paths).
@@ -115,6 +127,156 @@ function buildCardPayloadForIpg() {
     };
   }
   return null;
+}
+
+/**
+ * Stable key for OTP try limits / cooldown (16-digit PAN or saved card id).
+ * @returns {string | null}
+ */
+function getOtpCardStateKey() {
+  const pan = extractNumbers(cardNumberInput.getValue());
+  if (pan.length === 16) {
+    return `pan:${pan}`;
+  }
+  if (selectedSavedCardForApi?.subscriberCardId != null) {
+    return `cardId:${selectedSavedCardForApi.subscriberCardId}`;
+  }
+  return null;
+}
+
+function ensureOtpTriesForKey(key) {
+  if (!key) return;
+  if (otpTriesRemainingByCardKey[key] === undefined) {
+    otpTriesRemainingByCardKey[key] = transactionOtpSettings.maxTries;
+  }
+}
+
+function formatSecondsAsMmSs(totalSeconds) {
+  const s = Math.max(0, Math.ceil(totalSeconds));
+  const mm = Math.floor(s / 60);
+  const ss = s % 60;
+  return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
+}
+
+function clearOtpButtonCountdownInterval() {
+  if (otpButtonCountdownIntervalId != null) {
+    clearInterval(otpButtonCountdownIntervalId);
+    otpButtonCountdownIntervalId = null;
+  }
+}
+
+function maybeStartOtpButtonCountdownTicker() {
+  clearOtpButtonCountdownInterval();
+  otpButtonCountdownIntervalId = setInterval(() => {
+    syncGetOtpButtonState();
+    const key = getOtpCardStateKey();
+    const until = key ? otpCooldownUntilByCardKey[key] : null;
+    if (until == null || Date.now() >= until) {
+      clearOtpButtonCountdownInterval();
+      syncGetOtpButtonState();
+    }
+  }, 400);
+}
+
+/**
+ * Validates only fields required for requesting OTP: card, expiry, CVV2, captcha (+ captcha token).
+ * Focuses the first invalid field and returns false if any check fails.
+ * @returns {boolean}
+ */
+function validateFieldsForOtpRequest() {
+  const order = [cardNumberInput, expiryDateInput, cvv2Input, captchaInput];
+  for (const input of order) {
+    const ok = input.validate();
+    if (!ok) {
+      input.focus();
+      errorHandler.show({
+        message: i18n.t('form.validation.error'),
+        mode: 'toast',
+        type: 'error',
+      });
+      return false;
+    }
+  }
+  if (!captchaTokenKey) {
+    captchaInput.validate();
+    captchaInput.focus();
+    errorHandler.show({
+      message: i18n.t('form.validation.error'),
+      mode: 'toast',
+      type: 'error',
+    });
+    return false;
+  }
+  if (!buildCardPayloadForIpg()) {
+    cardNumberInput.validate();
+    cardNumberInput.focus();
+    errorHandler.show({
+      message: i18n.t('form.validation.error'),
+      mode: 'toast',
+      type: 'error',
+    });
+    return false;
+  }
+  return true;
+}
+
+/**
+ * Updates OTP request button: cooldown timer, disabled state, exhausted tries.
+ */
+function syncGetOtpButtonState() {
+  const btn = document.getElementById('get-otp-button');
+  if (!btn) return;
+
+  const key = getOtpCardStateKey();
+  if (key) {
+    ensureOtpTriesForKey(key);
+  }
+
+  const triesLeft = key != null ? otpTriesRemainingByCardKey[key] : null;
+  const until = key != null ? otpCooldownUntilByCardKey[key] : null;
+  const now = Date.now();
+  const inCooldown = until != null && now < until;
+  const remainingCooldownSec = inCooldown ? (until - now) / 1000 : 0;
+  const exhausted = triesLeft !== null && triesLeft <= 0;
+  const maxTriesCfg = transactionOtpSettings.maxTries;
+
+  if (otpRequestInFlight) {
+    btn.disabled = true;
+    btn.setAttribute('aria-busy', 'true');
+    btn.textContent = i18n.t('common.processing');
+    btn.removeAttribute('aria-label');
+    return;
+  }
+  btn.removeAttribute('aria-busy');
+
+  if (maxTriesCfg <= 0) {
+    btn.disabled = true;
+    btn.textContent = i18n.t('form.getOtpExhausted');
+    btn.setAttribute('aria-label', i18n.t('form.getOtpExhausted'));
+    return;
+  }
+
+  if (exhausted) {
+    btn.disabled = true;
+    btn.textContent = i18n.t('form.getOtpExhausted');
+    btn.setAttribute('aria-label', i18n.t('form.getOtpExhausted'));
+    return;
+  }
+
+  if (inCooldown) {
+    btn.disabled = true;
+    const timeLabel = formatSecondsAsMmSs(remainingCooldownSec);
+    btn.textContent = timeLabel;
+    btn.setAttribute(
+      'aria-label',
+      i18n.t('form.getOtpCountdownAria', { time: timeLabel })
+    );
+    return;
+  }
+
+  btn.disabled = false;
+  btn.textContent = i18n.t('form.getOtp');
+  btn.removeAttribute('aria-label');
 }
 
 function getExpiryDateForApi() {
@@ -352,6 +514,8 @@ function initializeFormInputs() {
     onInput: (value) => {
       selectedSavedCardForApi = null;
 
+      syncGetOtpButtonState();
+
       // Format card number (4-4-4-4)
       const formatted = formatCardNumber(value);
       if (formatted !== value) {
@@ -423,6 +587,7 @@ function initializeFormInputs() {
           // Use API bank name (Persian) for logo to avoid any BIN masking issues
           updateBankLogo({ name: card.bankName });
           handleGiftCardNotificationFromPan(card.securePan);
+          syncGetOtpButtonState();
         }
       },
     });
@@ -721,8 +886,17 @@ function initializeFormInputs() {
   getOtpButton.className = 'btn btn-success btn-bordered';
   getOtpButton.textContent = i18n.t('form.getOtp');
   getOtpButton.onclick = async () => {
+    syncGetOtpButtonState();
+    const btn = document.getElementById('get-otp-button');
+    if (btn?.disabled) return;
+
+    if (!validateFieldsForOtpRequest()) {
+      return;
+    }
+
     const cardPart = buildCardPayloadForIpg();
-    if (!captchaTokenKey || !captchaInput.getValue()) {
+    const key = getOtpCardStateKey();
+    if (!cardPart || !key) {
       errorHandler.show({
         message: i18n.t('form.validation.error'),
         mode: 'toast',
@@ -730,24 +904,32 @@ function initializeFormInputs() {
       });
       return;
     }
-    if (!cardPart) {
-      errorHandler.show({
-        message: i18n.t('form.validation.error'),
-        mode: 'toast',
-        type: 'error',
-      });
-      return;
-    }
+
+    otpRequestInFlight = true;
+    syncGetOtpButtonState();
+
     try {
       await ipgService.sendTransactionOtp(cardPart, {
         captchaToken: captchaTokenKey,
         captchaResponse: captchaInput.getValue(),
       });
+
+      ensureOtpTriesForKey(key);
+      otpTriesRemainingByCardKey[key] = Math.max(
+        0,
+        otpTriesRemainingByCardKey[key] - 1
+      );
+      otpCooldownUntilByCardKey[key] =
+        Date.now() + Math.max(1, transactionOtpSettings.nextTrySeconds) * 1000;
+
       errorHandler.show({
         message: i18n.t('form.getOtpSuccess'),
         mode: 'toast',
         type: 'success',
       });
+
+      maybeStartOtpButtonCountdownTicker();
+      syncGetOtpButtonState();
     } catch (err) {
       console.error(err);
       errorHandler.show({
@@ -755,9 +937,13 @@ function initializeFormInputs() {
         mode: 'toast',
         type: 'error',
       });
+    } finally {
+      otpRequestInFlight = false;
+      syncGetOtpButtonState();
     }
   };
   otpWrapper.appendChild(getOtpButton);
+  syncGetOtpButtonState();
   otpContainer.appendChild(otpWrapper);
 
   // Mobile Input (hidden initially)
@@ -860,6 +1046,18 @@ async function initializeTransactionInfo() {
   const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
   const merchantLogoUrl = resolveMerchantLogoUrl(txPayload?.merchant?.merchantLogoUri);
 
+  const rawOtp = txPayload?.appSettings?.otpSettings;
+  const maxTriesFromApi =
+    rawOtp != null && typeof rawOtp.maxTries === 'number' && rawOtp.maxTries >= 0
+      ? Math.floor(rawOtp.maxTries)
+      : 5;
+  transactionOtpSettings = {
+    maxTries: maxTriesFromApi,
+    nextTrySeconds: parseTimeSpanToSeconds(
+      typeof rawOtp?.nextTryTime === 'string' ? rawOtp.nextTryTime : '00:02:00'
+    ),
+  };
+
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToPersianWords(amountInTomans);
@@ -871,7 +1069,7 @@ async function initializeTransactionInfo() {
           <img src="/assets/images/icons/icn-shop.svg" alt="" aria-hidden="true" />
         </div>
         <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.terminal')}</div>
+          <div class="transaction-info-label" data-transaction-field="terminal">${i18n.t('transaction.terminal')}</div>
           <div class="transaction-info-value">${transactionData.terminal}</div>
         </div>
       </div>
@@ -880,7 +1078,7 @@ async function initializeTransactionInfo() {
           <img src="/assets/images/icons/icn-world.svg" alt="" aria-hidden="true" />
         </div>
         <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.site')}</div>
+          <div class="transaction-info-label" data-transaction-field="site">${i18n.t('transaction.site')}</div>
           <div class="transaction-info-value">${transactionData.site}</div>
         </div>
       </div>
@@ -891,7 +1089,7 @@ async function initializeTransactionInfo() {
           <img src="/assets/images/icons/icn-shopping-bag.svg" alt="" aria-hidden="true" />
         </div>
         <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.merchant')}</div>
+          <div class="transaction-info-label" data-transaction-field="merchant">${i18n.t('transaction.merchant')}</div>
           <div class="transaction-info-value">${transactionData.merchant}</div>
         </div>
       </div>
@@ -900,7 +1098,7 @@ async function initializeTransactionInfo() {
           <img src="/assets/images/icons/icn-cash-banknote.svg" alt="" aria-hidden="true" />
         </div>
         <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.amount')}</div>
+          <div class="transaction-info-label" data-transaction-field="amount">${i18n.t('transaction.amount')}</div>
           <div class="transaction-info-value">
             <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
             <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
@@ -938,6 +1136,33 @@ function getTransactionAmountFromDom() {
   if (!amountAttr) return null;
   const amount = parseInt(amountAttr, 10);
   return Number.isNaN(amount) ? null : amount;
+}
+
+const transactionFieldToI18nKey = {
+  terminal: 'transaction.terminal',
+  site: 'transaction.site',
+  merchant: 'transaction.merchant',
+  amount: 'transaction.amount',
+};
+
+/**
+ * Re-format rial / toman lines from `data-amount` (used after language change).
+ */
+function refreshTransactionAmountValues() {
+  const amount = getTransactionAmountFromDom();
+  const rialEl = document.querySelector('.transaction-amount-rial');
+  const tomanEl = document.querySelector('.transaction-amount-toman');
+  if (!rialEl || !tomanEl) return;
+  if (typeof amount !== 'number' || Number.isNaN(amount)) return;
+
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  const locale = ['fa', 'ar'].includes(lang) ? 'fa-IR' : 'en-US';
+  rialEl.textContent = `${amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  rialEl.setAttribute('data-amount', String(amount));
+
+  const amountInTomans = Math.floor(amount / 10);
+  const amountInWords = numberToPersianWords(amountInTomans);
+  tomanEl.textContent = `${amountInWords} ${i18n.t('transaction.toman')}`;
 }
 
 function setPayButtonState(state) {
@@ -1019,6 +1244,42 @@ function initializePartnerLogos(merchantLogoUrl) {
   } else {
     container.classList.remove('single-logo');
   }
+}
+
+/** Illustration for cancel confirmation (served from Vite root `src/assets`). */
+const cancelConfirmImageUrl = '/assets/images/icons/icn-square-help.svg';
+
+/**
+ * Open cancel confirmation: desktop = modal, mobile = bottom sheet (via Modal).
+ */
+function openCancelPaymentConfirm() {
+  let modalRef = null;
+  modalRef = new Modal({
+    title: i18n.t('cancelConfirm.title'),
+    description: i18n.t('cancelConfirm.description'),
+    image: cancelConfirmImageUrl,
+    imageAlt: i18n.t('cancelConfirm.imageAlt'),
+    closeButtonAriaLabel: i18n.t('common.close'),
+    buttons: [
+      {
+        text: i18n.t('cancelConfirm.continuePay'),
+        type: 'success',
+        onClick: () => {},
+      },
+      {
+        text: i18n.t('cancelConfirm.confirmLeave'),
+        type: 'danger',
+        onClick: () => {
+          window.location.href = '/';
+        },
+      },
+    ],
+    onClose: () => {
+      modalRef?.destroy();
+      modalRef = null;
+    },
+  });
+  modalRef.open();
 }
 
 function attachFormEvents() {
@@ -1133,9 +1394,7 @@ function attachFormEvents() {
   }
 
   document.getElementById('cancel-button').addEventListener('click', () => {
-    if (confirm(i18n.t('form.confirmCancel'))) {
-      window.location.href = '/';
-    }
+    openCancelPaymentConfirm();
   });
 }
 
@@ -1156,10 +1415,7 @@ function updatePageContent() {
   if (footer) {
     footer.updateCopyright(i18n.t('footer.copyright'));
   }
-  const getOtpBtn = document.getElementById('get-otp-button');
-  if (getOtpBtn) {
-    getOtpBtn.textContent = i18n.t('form.getOtp');
-  }
+  syncGetOtpButtonState();
 
   const i18nElements = document.querySelectorAll('[data-i18n]');
   i18nElements.forEach((element) => {
@@ -1225,38 +1481,15 @@ function updatePageContent() {
 
   // Buttons are now updated via data-i18n above
 
-  // Update transaction info labels and values
-  const transactionLabels = document.querySelectorAll('.transaction-info-label');
-  transactionLabels.forEach((label) => {
-    const parentItem = label.closest('.transaction-info-item');
-    if (parentItem) {
-      const icon = parentItem.querySelector('.transaction-info-icon');
-      if (icon) {
-        const iconText = icon.textContent.trim();
-        if (iconText === '🏪') {
-          label.textContent = i18n.t('transaction.merchant');
-        } else if (iconText === '💰') {
-          label.textContent = i18n.t('transaction.amount');
-          // Update amount values (rial and toman)
-          const valueContainer = parentItem.querySelector('.transaction-info-value');
-          if (valueContainer) {
-            const rialElement = valueContainer.querySelector('.transaction-amount-rial');
-            const tomanElement = valueContainer.querySelector('.transaction-amount-toman');
-            if (rialElement && tomanElement) {
-              const amountMatch = rialElement.textContent.match(/[\d,]+/);
-              if (amountMatch) {
-                const amount = amountMatch[0].replace(/,/g, '');
-                const amountInTomans = Math.floor(parseInt(amount) / 10);
-                const amountInWords = numberToPersianWords(amountInTomans);
-                rialElement.textContent = `${parseInt(amount).toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}`;
-                tomanElement.textContent = `${amountInWords} ${i18n.t('transaction.toman')}`;
-              }
-            }
-          }
-        }
-      }
+  // Transaction summary: labels marked in HTML with `data-transaction-field` (see initializeTransactionInfo)
+  document.querySelectorAll('[data-transaction-field]').forEach((label) => {
+    const field = label.getAttribute('data-transaction-field');
+    const i18nKey = field ? transactionFieldToI18nKey[field] : null;
+    if (i18nKey) {
+      label.textContent = i18n.t(i18nKey);
     }
   });
+  refreshTransactionAmountValues();
 
   // Update more/less toggle button
   const moreToggle = document.getElementById('more-toggle');

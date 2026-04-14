@@ -73,12 +73,19 @@ export default {
   'form.reloadCaptcha': 'بارگذاری مجدد کد امنیتی',
   'form.getOtp': 'دریافت رمز پویا',
   'form.getOtpSuccess': 'رمز پویا ارسال شد',
+  'form.getOtpExhausted': 'حداکثر تعداد دریافت رمز پویا برای این کارت انجام شده است.',
+  'form.getOtpCountdownAria': 'تا دریافت مجدد رمز پویا {{time}} صبر کنید',
   'form.captchaImageAlt': 'کد امنیتی',
   'form.captchaAudio': 'پخش صدای کد امنیتی',
   'form.audioPlay': 'پخش صوتی',
   'form.showReceiptToggle': 'ایمیل یا شماره همراه برای ارسال رسید پرداخت (اختیاری)',
   'form.giftCardNotice': 'این کارت هدیه است',
-  'form.confirmCancel': 'آیا از انصراف اطمینان دارید؟',
+  'cancelConfirm.title': 'انصراف از پرداخت؟',
+  'cancelConfirm.description':
+    'اگر همین حالا ترک کنید، پرداخت شما ممکن است ناتمام بماند. برای اطمینان، یکی از گزینه‌ها را انتخاب کنید.',
+  'cancelConfirm.imageAlt': 'راهنمای انصراف از پرداخت',
+  'cancelConfirm.continuePay': 'ادامه پرداخت',
+  'cancelConfirm.confirmLeave': 'انصراف از پرداخت',
   'form.expiryPlaceholder': 'ماه/سال',
 
   // Accessibility

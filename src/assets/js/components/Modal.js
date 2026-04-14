@@ -1,8 +1,7 @@
 import { BottomSheet } from './BottomSheet.js';
 
 /**
- * Modal Component
- * Converts to BottomSheet on mobile
+ * Modal Component — desktop uses centered dialog; mobile uses BottomSheet.
  */
 export class Modal {
   constructor(options = {}) {
@@ -11,61 +10,96 @@ export class Modal {
       description: options.description || '',
       content: options.content || '',
       image: options.image || null,
+      imageAlt: options.imageAlt || '',
       showCloseButton: options.showCloseButton !== false,
+      closeButtonAriaLabel: options.closeButtonAriaLabel || 'Close',
       buttons: options.buttons || [],
       onClose: options.onClose || null,
       ...options,
     };
 
     this.isMobile = window.innerWidth <= 768;
+    /** @type {BottomSheet | null} */
     this.modalInstance = null;
-    this.init();
+    this.modalElement = null;
+    this.backdrop = null;
+    this.isOpen = false;
+
+    this._onResize = this.handleResize.bind(this);
+    this._onKeyDown = this.handleKeyDown.bind(this);
+
+    window.addEventListener('resize', this._onResize);
+    this.buildLayout();
   }
 
   /**
-   * Initialize modal
+   * Rebuild when crossing the mobile breakpoint (single resize listener).
    */
-  init() {
-    // Use BottomSheet on mobile, Modal on desktop
+  handleResize() {
+    const nextMobile = window.innerWidth <= 768;
+    if (nextMobile === this.isMobile) return;
+    this.destroyCurrentUi();
+    this.isMobile = nextMobile;
+    this.buildLayout();
+  }
+
+  buildLayout() {
     if (this.isMobile) {
       this.initBottomSheet();
     } else {
       this.initModal();
     }
+  }
 
-    // Listen for resize to switch between modal and bottom sheet
-    window.addEventListener('resize', () => {
-      const wasMobile = this.isMobile;
-      this.isMobile = window.innerWidth <= 768;
-
-      if (wasMobile !== this.isMobile) {
-        this.destroy();
-        this.init();
+  /**
+   * Remove the active surface (modal DOM or bottom sheet) without removing the resize listener.
+   */
+  destroyCurrentUi() {
+    if (this.isMobile && this.modalInstance) {
+      this.modalInstance.destroy();
+      this.modalInstance = null;
+      return;
+    }
+    if (!this.isMobile) {
+      document.removeEventListener('keydown', this._onKeyDown);
+      if (this.backdrop?.parentNode) {
+        this.backdrop.parentNode.removeChild(this.backdrop);
       }
-    });
+      if (this.modalElement?.parentNode) {
+        this.modalElement.parentNode.removeChild(this.modalElement);
+      }
+      this.backdrop = null;
+      this.modalElement = null;
+      this.isOpen = false;
+    }
   }
 
   /**
    * Initialize as BottomSheet (mobile)
    */
   initBottomSheet() {
-    const buttons = [...this.options.buttons];
-
     this.modalInstance = new BottomSheet({
       title: this.options.title,
       content: this.createMobileContent(),
-      buttons: buttons,
+      buttons: [...this.options.buttons],
       onClose: this.options.onClose,
     });
   }
 
   /**
-   * Create mobile content
-   * @returns {HTMLElement} - Content element
+   * @returns {HTMLElement}
    */
   createMobileContent() {
     const container = document.createElement('div');
     container.className = 'modal-content-mobile';
+
+    if (this.options.image) {
+      const img = document.createElement('img');
+      img.src = this.options.image;
+      img.alt = this.options.imageAlt || this.options.title || '';
+      img.className = 'modal-image';
+      container.appendChild(img);
+    }
 
     if (this.options.description) {
       const desc = document.createElement('p');
@@ -74,18 +108,10 @@ export class Modal {
       container.appendChild(desc);
     }
 
-    if (this.options.image) {
-      const img = document.createElement('img');
-      img.src = this.options.image;
-      img.alt = this.options.title || '';
-      img.className = 'modal-image';
-      container.appendChild(img);
-    }
-
-    if (typeof this.options.content === 'string') {
-      const content = document.createElement('div');
-      content.innerHTML = this.options.content;
-      container.appendChild(content);
+    if (typeof this.options.content === 'string' && this.options.content) {
+      const el = document.createElement('div');
+      el.innerHTML = this.options.content;
+      container.appendChild(el);
     } else if (this.options.content instanceof HTMLElement) {
       container.appendChild(this.options.content);
     }
@@ -98,42 +124,34 @@ export class Modal {
    */
   initModal() {
     this.createModalHTML();
-    this.attachEvents();
+    document.addEventListener('keydown', this._onKeyDown);
   }
 
-  /**
-   * Create modal HTML
-   */
   createModalHTML() {
-    // Backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop';
     backdrop.addEventListener('click', () => this.close());
     this.backdrop = backdrop;
 
-    // Modal container
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.setAttribute('role', 'dialog');
     modal.setAttribute('aria-modal', 'true');
     modal.setAttribute('aria-labelledby', 'modal-title');
 
-    // Modal content
     const content = document.createElement('div');
     content.className = 'modal-content';
 
-    // Close button
     if (this.options.showCloseButton) {
       const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.className = 'modal-close';
       closeBtn.innerHTML = '×';
-      closeBtn.setAttribute('aria-label', 'Close');
+      closeBtn.setAttribute('aria-label', this.options.closeButtonAriaLabel);
       closeBtn.onclick = () => this.close();
       content.appendChild(closeBtn);
     }
 
-    // Title
     if (this.options.title) {
       const title = document.createElement('h2');
       title.id = 'modal-title';
@@ -142,7 +160,6 @@ export class Modal {
       content.appendChild(title);
     }
 
-    // Description
     if (this.options.description) {
       const desc = document.createElement('p');
       desc.className = 'modal-description';
@@ -150,20 +167,18 @@ export class Modal {
       content.appendChild(desc);
     }
 
-    // Image
     if (this.options.image) {
       const img = document.createElement('img');
       img.src = this.options.image;
-      img.alt = this.options.title || '';
+      img.alt = this.options.imageAlt || this.options.title || '';
       img.className = 'modal-image';
       content.appendChild(img);
     }
 
-    // Body content
     const body = document.createElement('div');
     body.className = 'modal-body';
 
-    if (typeof this.options.content === 'string') {
+    if (typeof this.options.content === 'string' && this.options.content) {
       body.innerHTML = this.options.content;
     } else if (this.options.content instanceof HTMLElement) {
       body.appendChild(this.options.content);
@@ -171,7 +186,6 @@ export class Modal {
 
     content.appendChild(body);
 
-    // Buttons
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'modal-buttons';
@@ -179,7 +193,11 @@ export class Modal {
       this.options.buttons.forEach((button) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `btn btn-${button.type || 'secondary'}`;
+        const type = button.type || 'secondary';
+        btn.className = `btn btn-${type}`;
+        if (button.className) {
+          btn.className += ` ${button.className}`;
+        }
         btn.textContent = button.text || '';
 
         if (button.icon) {
@@ -212,84 +230,64 @@ export class Modal {
   }
 
   /**
-   * Attach events
-   */
-  attachEvents() {
-    document.addEventListener('keydown', this.handleKeyDown.bind(this));
-  }
-
-  /**
-   * Handle key down (ESC to close)
-   * @param {KeyboardEvent} e - Keyboard event
+   * @param {KeyboardEvent} e
    */
   handleKeyDown(e) {
-    if (e.key === 'Escape' && this.isOpen) {
+    if (e.key !== 'Escape') return;
+    if (this.isMobile) return;
+    if (this.isOpen) {
       this.close();
     }
   }
 
-  /**
-   * Open modal
-   */
   open() {
-    if (this.modalInstance) {
-      if (this.isMobile) {
+    if (this.isMobile) {
+      if (this.modalInstance) {
         this.modalInstance.open();
-      } else {
-        this.isOpen = true;
-        document.body.style.overflow = 'hidden';
-        this.backdrop.classList.add('show');
-        this.modalElement.classList.add('show');
-
-        // Focus trap
-        const firstFocusable = this.modalElement.querySelector(
-          'button, input, textarea, select, a[href]'
-        );
-        if (firstFocusable) {
-          firstFocusable.focus();
-        }
       }
+      return;
+    }
+    if (!this.modalElement || !this.backdrop) return;
+
+    this.isOpen = true;
+    document.body.style.overflow = 'hidden';
+    this.backdrop.classList.add('show');
+    this.modalElement.classList.add('show');
+
+    const firstFocusable = this.modalElement.querySelector(
+      'button, input, textarea, select, a[href]'
+    );
+    if (firstFocusable) {
+      firstFocusable.focus();
     }
   }
 
-  /**
-   * Close modal
-   */
   close() {
-    if (this.modalInstance) {
-      if (this.isMobile) {
+    if (this.isMobile) {
+      if (this.modalInstance) {
         this.modalInstance.close();
-      } else {
-        this.isOpen = false;
-        this.backdrop.classList.remove('show');
-        this.modalElement.classList.remove('show');
-        document.body.style.overflow = '';
-
-        setTimeout(() => {
-          if (this.options.onClose) {
-            this.options.onClose();
-          }
-        }, 300);
       }
+      return;
     }
+    if (!this.modalElement || !this.backdrop) return;
+
+    this.isOpen = false;
+    this.backdrop.classList.remove('show');
+    this.modalElement.classList.remove('show');
+    document.body.style.overflow = '';
+
+    setTimeout(() => {
+      if (this.options.onClose) {
+        this.options.onClose();
+      }
+    }, 300);
   }
 
   /**
-   * Destroy component
+   * Remove listeners and DOM (full teardown).
    */
   destroy() {
-    if (this.modalInstance) {
-      if (this.isMobile) {
-        this.modalInstance.destroy();
-      } else {
-        document.removeEventListener('keydown', this.handleKeyDown);
-        if (this.backdrop && this.backdrop.parentNode) {
-          this.backdrop.parentNode.removeChild(this.backdrop);
-        }
-        if (this.modalElement && this.modalElement.parentNode) {
-          this.modalElement.parentNode.removeChild(this.modalElement);
-        }
-      }
-    }
+    window.removeEventListener('resize', this._onResize);
+    this.destroyCurrentUi();
   }
 }

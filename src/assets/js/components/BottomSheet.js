@@ -79,7 +79,11 @@ export class BottomSheet {
       this.options.buttons.forEach((button, _index) => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = `btn btn-${button.type || 'secondary'}`;
+        const type = button.type || 'secondary';
+        btn.className = `btn btn-${type}`;
+        if (button.className) {
+          btn.className += ` ${button.className}`;
+        }
         btn.textContent = button.text || '';
 
         if (button.icon) {

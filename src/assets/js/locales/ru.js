@@ -72,10 +72,17 @@ export default {
   'form.reloadCaptcha': 'Обновить капчу',
   'form.getOtp': 'Получить OTP',
   'form.getOtpSuccess': 'OTP успешно отправлен',
+  'form.getOtpExhausted': 'Исчерпан лимит запросов OTP для этой карты.',
+  'form.getOtpCountdownAria': 'Подождите {{time}}, прежде чем снова запросить OTP',
   'form.captchaImageAlt': 'Код безопасности',
   'form.captchaAudio': 'Воспроизвести аудио капчи',
   'form.audioPlay': 'Воспроизвести аудио',
-  'form.confirmCancel': 'Вы уверены, что хотите отменить?',
+  'cancelConfirm.title': 'Отменить оплату?',
+  'cancelConfirm.description':
+    'Если вы уйдёте сейчас, оплата может остаться незавершённой. Выберите действие.',
+  'cancelConfirm.imageAlt': 'Иллюстрация: отмена оплаты',
+  'cancelConfirm.continuePay': 'Продолжить оплату',
+  'cancelConfirm.confirmLeave': 'Покинуть оплату',
   'form.expiryPlaceholder': 'ММ/ГГ',
 
   // Accessibility
