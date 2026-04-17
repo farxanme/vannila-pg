@@ -119,15 +119,23 @@ export function validateEmail(email) {
 }
 
 /**
- * Validate CVV2 (3-4 digits)
+ * Validate CVV2
  * @param {string} cvv - CVV2 code
+ * @param {number | null} expectedLength - Exact expected length (3 or 4). If null, allow 3-4.
  * @returns {Object} - { valid: boolean, message: string }
  */
-export function validateCVV2(cvv) {
+export function validateCVV2(cvv, expectedLength = null) {
   const numbers = extractNumbers(cvv);
 
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: 'CVV2 is required' };
+  }
+
+  if (expectedLength === 3 || expectedLength === 4) {
+    if (numbers.length !== expectedLength) {
+      return { valid: false, message: `CVV2 must be ${expectedLength} digits` };
+    }
+    return { valid: true, message: '' };
   }
 
   if (numbers.length < 3 || numbers.length > 4) {

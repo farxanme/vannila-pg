@@ -42,7 +42,7 @@ export const mockGetUserCardsResponse = {
         cardId: '20616',
         cardRegisteredType: 1,
         maskedPan: '62198*******8080',
-        expireDate: null,
+        expireDate: true,
         selected: false,
         isGiftCard: true,
         isLimited: false,

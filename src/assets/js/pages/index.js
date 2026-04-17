@@ -50,6 +50,8 @@ let cardList = [];
 let otpLabelElement = null;
 let captchaLabelElement = null;
 let isCurrentGiftCard = false;
+let isExpiryDateLockedFromCard = false;
+let hasUserEnabledExpiryDateEdit = false;
 
 /** When user picks a saved card from dropdown, used for OTP/pay cardId vs pan */
 let selectedSavedCardForApi = null;
@@ -270,6 +272,43 @@ function handlePaymentInitLanguageChange() {
   });
 }
 
+function isVisibleInputField(field) {
+  if (!field || field.disabled || field.readOnly) return false;
+  return field.offsetParent !== null;
+}
+
+function focusNextVisibleInputField(currentField) {
+  const allFields = Array.from(document.querySelectorAll('#payment-form .input-field'));
+  const currentIndex = allFields.indexOf(currentField);
+  if (currentIndex < 0) return;
+  for (let i = currentIndex + 1; i < allFields.length; i += 1) {
+    const nextField = allFields[i];
+    if (isVisibleInputField(nextField)) {
+      nextField.focus();
+      return;
+    }
+  }
+}
+
+function getCurrentCardBankName() {
+  if (selectedSavedCardForApi?.bankName) {
+    return String(selectedSavedCardForApi.bankName);
+  }
+  const bank = detectBank(cardNumberInput?.getValue?.() || '');
+  return bank?.name || '';
+}
+
+function getExpectedCvvLength() {
+  const bankName = getCurrentCardBankName();
+  const normalized = bankName.trim().toLowerCase();
+  const isSamanBank = normalized === 'saman' || bankName.includes('سامان');
+  return isSamanBank ? 3 : 4;
+}
+
+function shouldSendExpiryDateInPayRequest() {
+  return !isExpiryDateLockedFromCard || hasUserEnabledExpiryDateEdit;
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
   await initializePage();
@@ -465,6 +504,69 @@ async function loadCards() {
 }
 
 function initializeFormInputs() {
+  const syncCvv2Constraints = () => {
+    if (!cvv2Input || !cvv2Input.element) return;
+    const expectedLength = getExpectedCvvLength();
+    cvv2Input.options.maxLength = expectedLength;
+    cvv2Input.element.maxLength = expectedLength;
+
+    const digitsOnly = extractNumbers(cvv2Input.getValue()).slice(0, expectedLength);
+    if (digitsOnly !== cvv2Input.getValue()) {
+      cvv2Input.setValue(digitsOnly);
+    }
+
+    if (cvv2PinPad) {
+      cvv2PinPad.options.maxLength = expectedLength;
+      if (cvv2PinPad.currentValue.length > expectedLength) {
+        cvv2PinPad.currentValue = cvv2PinPad.currentValue.slice(0, expectedLength);
+        cvv2PinPad.updateDisplay();
+        cvv2PinPad.updateInput();
+      } else {
+        cvv2PinPad.updateDisplay();
+      }
+    }
+  };
+
+  const getExpiryEditActionButton = () => {
+    return expiryDateInput?.wrapper?.querySelector('.input-action-right') || null;
+  };
+
+  const setExpiryDateLocked = (locked) => {
+    if (!expiryDateInput || !expiryDateInput.element) return;
+    isExpiryDateLockedFromCard = Boolean(locked);
+    const inputEl = expiryDateInput.element;
+    inputEl.disabled = Boolean(locked);
+    inputEl.setAttribute('aria-disabled', locked ? 'true' : 'false');
+    // Keep options.disabled false so the edit action remains clickable while field is locked.
+    expiryDateInput.options.disabled = false;
+    if (expiryDateInput.wrapper) {
+      expiryDateInput.wrapper.classList.toggle('disabled', Boolean(locked));
+    }
+    if (expiryDateInput.inputContainer) {
+      expiryDateInput.inputContainer.classList.toggle('disabled', Boolean(locked));
+    }
+    const editActionBtn = getExpiryEditActionButton();
+    if (editActionBtn) {
+      editActionBtn.style.display = locked ? 'inline-flex' : 'none';
+      editActionBtn.disabled = false;
+      editActionBtn.setAttribute('aria-disabled', 'false');
+      editActionBtn.tabIndex = 0;
+    }
+    if (expiryDateInput.clearButton) {
+      if (locked) {
+        expiryDateInput.clearButton.style.display = 'none';
+      } else {
+        expiryDateInput.updateClearButton();
+      }
+    }
+  };
+
+  const applyExpiryDateModeForSelectedCard = () => {
+    const lockByCard =
+      Boolean(selectedSavedCardForApi?.hasValidExpiredDate) && !hasUserEnabledExpiryDateEdit;
+    setExpiryDateLocked(lockByCard);
+  };
+
   // Card Number Input
   const cardNumberContainer = document.getElementById('card-number-input-container');
   const hasSavedCards = cardList.length > 0;
@@ -491,6 +593,8 @@ function initializeFormInputs() {
       : null,
     onInput: (value) => {
       selectedSavedCardForApi = null;
+      hasUserEnabledExpiryDateEdit = false;
+      applyExpiryDateModeForSelectedCard();
 
       syncGetOtpButtonState();
 
@@ -503,6 +607,11 @@ function initializeFormInputs() {
       // Detect bank and show logo
       const bank = detectBank(value);
       updateBankLogo(bank);
+      syncCvv2Constraints();
+
+      if (extractNumbers(value).length >= 16) {
+        focusNextVisibleInputField(cardNumberInput.element);
+      }
 
       // Detect gift card and notify
       handleGiftCardNotificationFromPan(value);
@@ -561,11 +670,15 @@ function initializeFormInputs() {
         const card = cardList.find((c) => c.number === item.value);
         if (card) {
           selectedSavedCardForApi = card;
+          hasUserEnabledExpiryDateEdit = false;
           cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
           // Use API bank name (Persian) for logo to avoid any BIN masking issues
           updateBankLogo({ name: card.bankName });
           handleGiftCardNotificationFromPan(card.securePan);
+          applyExpiryDateModeForSelectedCard();
+          syncCvv2Constraints();
           syncGetOtpButtonState();
+          focusNextVisibleInputField(cardNumberInput.element);
         }
       },
     });
@@ -620,13 +733,17 @@ function initializeFormInputs() {
     required: true,
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
-    validator: validateCVV2,
+    validator: (value) => validateCVV2(value, getExpectedCvvLength()),
     inputMode: 'numeric',
-    maxLength: 4,
+    maxLength: getExpectedCvvLength(),
     onInput: (value) => {
-      const digitsOnly = extractNumbers(value).slice(0, 4);
+      const expectedLength = getExpectedCvvLength();
+      const digitsOnly = extractNumbers(value).slice(0, expectedLength);
       if (digitsOnly !== value) {
         cvv2Input.setValue(digitsOnly);
+      }
+      if (digitsOnly.length >= expectedLength) {
+        focusNextVisibleInputField(cvv2Input.element);
       }
     },
     rightAction: {
@@ -635,7 +752,7 @@ function initializeFormInputs() {
       onClick: () => {
         if (!cvv2PinPad) {
           cvv2PinPad = new VirtualPinPad(cvv2Input.element, {
-            maxLength: 4,
+            maxLength: getExpectedCvvLength(),
             onInput: (value) => {
               cvv2Input.setValue(value);
             },
@@ -645,6 +762,7 @@ function initializeFormInputs() {
       },
     },
   });
+  syncCvv2Constraints();
 
   // Expiry Date Input (MM/YY format)
   const expiryDateContainer = document.getElementById('expiry-date-container');
@@ -659,6 +777,16 @@ function initializeFormInputs() {
     clearButtonAriaLabel: i18n.t('common.clear'),
     inputMode: 'numeric',
     maxLength: 5,
+    rightAction: {
+      icon: '<img src="/assets/images/icons/icn-calendar.svg" alt="" aria-hidden="true" />',
+      label: i18n.t('common.edit'),
+      onClick: () => {
+        if (!isExpiryDateLockedFromCard) return;
+        hasUserEnabledExpiryDateEdit = true;
+        applyExpiryDateModeForSelectedCard();
+        expiryDateInput.focus();
+      },
+    },
     onInput: (value) => {
       // Auto-format as MM/YY
       const numbers = extractNumbers(value);
@@ -669,8 +797,14 @@ function initializeFormInputs() {
       if (formatted !== value) {
         expiryDateInput.setValue(formatted);
       }
+      if (numbers.length >= 4) {
+        focusNextVisibleInputField(expiryDateInput.element);
+      }
     },
     validator: (value) => {
+      if (!shouldSendExpiryDateInPayRequest()) {
+        return { valid: true, message: '' };
+      }
       const numbers = extractNumbers(value);
       if (numbers.length !== 4) {
         return { valid: false, message: i18n.t('form.expiryDate.invalid') };
@@ -690,6 +824,7 @@ function initializeFormInputs() {
       return { valid: true, message: '' };
     },
   });
+  applyExpiryDateModeForSelectedCard();
 
   // Captcha Input
   const captchaContainer = document.getElementById('captcha-container');
@@ -726,6 +861,9 @@ function initializeFormInputs() {
       const digitsOnly = extractNumbers(value).slice(0, 6);
       if (digitsOnly !== value) {
         captchaInput.setValue(digitsOnly);
+      }
+      if (digitsOnly.length >= 6) {
+        focusNextVisibleInputField(captchaInput.element);
       }
     },
     rightAction: {
@@ -826,6 +964,9 @@ function initializeFormInputs() {
       const digitsOnly = extractNumbers(value).slice(0, 6);
       if (digitsOnly !== value) {
         otpInput.setValue(digitsOnly);
+      }
+      if (digitsOnly.length >= 6) {
+        focusNextVisibleInputField(otpInput.element);
       }
     },
     rightAction: {
@@ -938,6 +1079,9 @@ function initializeFormInputs() {
       const digitsOnly = extractNumbers(value);
       if (digitsOnly !== value) {
         mobileInput.setValue(digitsOnly);
+      }
+      if (digitsOnly.length >= 11) {
+        focusNextVisibleInputField(mobileInput.element);
       }
     },
   });
@@ -1315,7 +1459,6 @@ function attachFormEvents() {
       const payBody = {
         ...cardPart,
         cvv2: extractNumbers(cvv2Input.getValue()),
-        expiryDate: getExpiryDateForApi(),
         pin2: extractNumbers(otpInput.getValue()),
         cellNumber:
           receiptOpen && mobileInput ? extractNumbers(mobileInput.getValue()) || null : null,
@@ -1323,6 +1466,9 @@ function attachFormEvents() {
         saveCardAfterPay: Boolean(saveCardEl?.checked),
         bill: null,
       };
+      if (shouldSendExpiryDateInPayRequest()) {
+        payBody.expiryDate = getExpiryDateForApi();
+      }
 
       await ipgService.payTransaction(payBody, {
         captchaToken: captchaTokenKey,
@@ -1413,6 +1559,10 @@ function updatePageContent() {
   if (expiryDateInput) {
     expiryDateInput.setLabel(i18n.t('form.expiryDate'));
     expiryDateInput.setPlaceholder(i18n.t('form.expiryPlaceholder'));
+    const expiryEditBtn = expiryDateInput.wrapper?.querySelector('.input-action-right');
+    if (expiryEditBtn) {
+      expiryEditBtn.setAttribute('aria-label', i18n.t('common.edit'));
+    }
   }
   if (captchaInput) {
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
