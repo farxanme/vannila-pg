@@ -409,6 +409,20 @@ export class Input {
   }
 
   /**
+   * Update aria-label for the right action button (e.g. after language change).
+   * @param {string} label - Accessible label
+   */
+  setRightActionAriaLabel(label) {
+    if (this.options.rightAction) {
+      this.options.rightAction.label = label || '';
+    }
+    const rightBtn = this.wrapper?.querySelector('.input-action-right');
+    if (rightBtn) {
+      rightBtn.setAttribute('aria-label', label || '');
+    }
+  }
+
+  /**
    * Set hint text (below the input)
    * @param {string} hintText - Hint text
    */

@@ -116,7 +116,7 @@ export default {
   'cardList.unpin': 'Sabitlemeyi Kaldır',
   'cardList.delete': 'Sil',
   'cardList.deleteConfirm': 'Bu kartı silmek istediğinizden emin misiniz?',
-  'cardList.empty': 'Kayıtlı kart yok',
+  'cardList.empty': 'Gösterilecek kayıtlı kart yok',
 
   // Receipt
   'receipt.success': 'İşlem Başarılı',

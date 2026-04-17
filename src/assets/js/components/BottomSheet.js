@@ -16,6 +16,7 @@ export class BottomSheet {
     this.startY = 0;
     this.currentY = 0;
     this.isDragging = false;
+    this.boundHandleKeyDown = this.handleKeyDown.bind(this);
     this.init();
   }
 
@@ -128,8 +129,8 @@ export class BottomSheet {
       passive: true,
     });
 
-    // Keyboard events
-    document.addEventListener('keydown', this.handleKeyDown.bind(this));
+    // Keyboard events (same function reference for removeEventListener in destroy)
+    document.addEventListener('keydown', this.boundHandleKeyDown);
   }
 
   /**
@@ -244,7 +245,11 @@ export class BottomSheet {
    * Destroy component
    */
   destroy() {
-    document.removeEventListener('keydown', this.handleKeyDown);
+    document.removeEventListener('keydown', this.boundHandleKeyDown);
+    if (this.isOpen) {
+      this.isOpen = false;
+      document.body.style.overflow = '';
+    }
     if (this.backdrop && this.backdrop.parentNode) {
       this.backdrop.parentNode.removeChild(this.backdrop);
     }

@@ -10,9 +10,14 @@ export class Dropdown {
       onSelect: options.onSelect || null,
       searchable: options.searchable || false,
       footerButtons: options.footerButtons || [],
+      emptyState: options.emptyState || null,
       placeholder: options.placeholder || 'Select...',
       maxHeight: options.maxHeight || '200px',
       ...options,
+      /** When true, do not auto-open on focus on viewports below 769px (e.g. mobile bottom sheet). */
+      desktopOnlyAutoOpen: options.desktopOnlyAutoOpen ?? false,
+      /** When true, only auto-open on focus if the input value is empty (card picker UX). */
+      openOnFocusWhenInputEmpty: options.openOnFocusWhenInputEmpty ?? false,
     };
 
     this.isOpen = false;
@@ -94,7 +99,21 @@ export class Dropdown {
     if (this.filteredItems.length === 0) {
       const empty = document.createElement('li');
       empty.className = 'dropdown-empty';
-      empty.textContent = 'No items found';
+      const emptyState = this.options.emptyState;
+      if (typeof emptyState === 'function') {
+        const rendered = emptyState();
+        if (rendered instanceof HTMLElement) {
+          empty.appendChild(rendered);
+        } else if (typeof rendered === 'string' && rendered.trim().length > 0) {
+          empty.innerHTML = rendered;
+        } else {
+          empty.textContent = 'No items found';
+        }
+      } else if (typeof emptyState === 'string' && emptyState.trim().length > 0) {
+        empty.innerHTML = emptyState;
+      } else {
+        empty.textContent = 'No items found';
+      }
       this.listElement.appendChild(empty);
       return;
     }
@@ -303,6 +322,15 @@ export class Dropdown {
           return;
         }
         if (this.options.autoOpen !== false) {
+          if (this.options.desktopOnlyAutoOpen && !window.matchMedia('(min-width: 769px)').matches) {
+            return;
+          }
+          if (this.options.openOnFocusWhenInputEmpty) {
+            const v = (actualInput.value || '').trim();
+            if (v.length > 0) {
+              return;
+            }
+          }
           this.open();
         }
       });

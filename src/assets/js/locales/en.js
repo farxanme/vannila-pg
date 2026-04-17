@@ -120,7 +120,7 @@ export default {
   'cardList.unpin': 'Unpin',
   'cardList.delete': 'Delete',
   'cardList.deleteConfirm': 'Are you sure you want to delete this card?',
-  'cardList.empty': 'No cards registered',
+  'cardList.empty': 'No saved card to display',
 
   // Receipt
   'receipt.success': 'Transaction Successful',

@@ -116,7 +116,7 @@ export default {
   'cardList.unpin': 'حذف پین',
   'cardList.delete': 'حذف',
   'cardList.deleteConfirm': 'آیا از حذف این کارت اطمینان دارید؟',
-  'cardList.empty': 'کارتی ثبت نشده است',
+  'cardList.empty': 'کارتی جهت نمایش وجود ندارد',
 
   // Receipt
   'receipt.success': 'تراکنش موفق',

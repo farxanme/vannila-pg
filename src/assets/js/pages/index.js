@@ -52,6 +52,11 @@ let header,
   emailInput;
 let cardDropdown, cvv2PinPad, otpPinPad;
 let cardList = [];
+/** True after getCards() returns a valid array in `Data` (may be empty). */
+let cardListLoadSucceeded = false;
+let cardListSheetRef = null;
+/** Set in initializeFormInputs when the mobile card list sheet is available. */
+let openCardListSheetFn = null;
 let otpLabelElement = null;
 let captchaLabelElement = null;
 let isCurrentGiftCard = false;
@@ -332,21 +337,58 @@ function getMaskedDisplayPan(securePan) {
   return parts.join(' ');
 }
 
+/**
+ * Stable unique key for saved-card rows (remove / select). Uses API subscriberCardId when set.
+ * Do not use `card.number` alone: IPG mapping can duplicate the same synthetic PAN per bank BIN.
+ */
+function getCardListKey(card) {
+  if (card == null) return '';
+  if (card.subscriberCardId != null && card.subscriberCardId !== '') {
+    return String(card.subscriberCardId);
+  }
+  return String(card.number ?? '');
+}
+
+function isCardListUiEnabled() {
+  return cardList.length > 0 || cardListLoadSucceeded;
+}
+
+function isMobileCardListViewport() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
+function buildCardEmptyStateElement() {
+  const wrap = document.createElement('div');
+  wrap.className = 'dropdown-empty-state';
+  const img = document.createElement('img');
+  img.className = 'dropdown-empty-state-img';
+  img.src = '/assets/images/icons/icn-credit-card.svg';
+  img.alt = '';
+  img.setAttribute('aria-hidden', 'true');
+  const title = document.createElement('p');
+  title.className = 'dropdown-empty-state-title';
+  title.textContent = i18n.t('cardList.empty');
+  wrap.appendChild(img);
+  wrap.appendChild(title);
+  return wrap;
+}
+
 function buildCardDropdownItems() {
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
   return cardList.map((card) => {
     const logoPath = getBankLogo(card.bankName);
     const localizedBankName = getLocalizedBankName(card.bankName, lang);
     const maskedPan = getMaskedDisplayPan(card.securePan);
+    const rowKey = getCardListKey(card);
     const removeButtonHtml = isCardListManageMode
       ? `
-                <button type="button" class="dropdown-card-remove-btn" data-card-value="${card.number}" aria-label="${i18n.t('common.delete')}">
+                <button type="button" class="dropdown-card-remove-btn" data-card-value="${rowKey.replace(/"/g, '&quot;')}" aria-label="${i18n.t('common.delete')}">
                   <img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />
                 </button>`
       : '';
     return {
       text: maskedPan,
-      value: card.number,
+      value: rowKey,
       html: `
             <div class="dropdown-card-item">
               <div class="dropdown-card-bank">
@@ -375,17 +417,17 @@ function buildCardDropdownItems() {
   });
 }
 
-function removeCardFromList(cardNumberValue) {
+function removeCardFromList(cardListKey) {
+  const keyStr = String(cardListKey);
   const beforeCount = cardList.length;
-  cardList = cardList.filter((card) => String(card.number) !== String(cardNumberValue));
+  cardList = cardList.filter((card) => getCardListKey(card) !== keyStr);
   if (cardList.length === beforeCount) return;
   if (cardList.length === 0) {
     isCardListManageMode = false;
   }
   dataStore.set('savedCards', cardList);
 
-  const currentInputValue = extractNumbers(cardNumberInput?.getValue?.() || '');
-  if (currentInputValue && String(currentInputValue) === String(cardNumberValue)) {
+  if (selectedSavedCardForApi && getCardListKey(selectedSavedCardForApi) === keyStr) {
     selectedSavedCardForApi = null;
     cardNumberInput?.setValue('');
     cardNumberInput?.clearValidation?.();
@@ -397,6 +439,10 @@ function removeCardFromList(cardNumberValue) {
   }
   if (typeof refreshCardDropdownFooterButtons === 'function') {
     refreshCardDropdownFooterButtons();
+  }
+  // Bottom sheet list is separate DOM — rebuild when open so removed rows disappear
+  if (cardListSheetRef && typeof openCardListSheetFn === 'function') {
+    void openCardListSheetFn();
   }
 }
 
@@ -578,15 +624,17 @@ function initializeTimer(durationSeconds = 900) {
  * Load cards from API service
  */
 async function loadCards() {
+  cardListLoadSucceeded = false;
   try {
     const response = await cardService.getCards();
 
-    if (response && response.Data && Array.isArray(response.Data)) {
+    if (response && Array.isArray(response.Data)) {
       // cardService.getCards() already maps API → internal format; do not convert again
       cardList = response.Data.filter((card) => card != null);
 
       // Also save to localStorage for offline access
       dataStore.set('savedCards', cardList);
+      cardListLoadSucceeded = true;
     } else {
       // Fallback to localStorage if API fails
       cardList = dataStore.get('savedCards') || [];
@@ -713,8 +761,8 @@ function initializeFormInputs() {
 
   // Card Number Input
   const cardNumberContainer = document.getElementById('card-number-input-container');
-  const hasSavedCards = cardList.length > 0;
-  const cardNumberLabel = hasSavedCards
+  const hasCardListUi = isCardListUiEnabled();
+  const cardNumberLabel = hasCardListUi
     ? i18n.t('form.cardNumber.selectCard')
     : i18n.t('form.cardNumber');
   cardNumberInput = new Input(cardNumberContainer, {
@@ -728,7 +776,7 @@ function initializeFormInputs() {
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCardNumber,
     maxLength: 19, // 16 digits + 3 spaces
-    rightAction: hasSavedCards
+    rightAction: hasCardListUi
       ? {
           icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" aria-hidden="true" />',
           label: i18n.t('form.showCards'),
@@ -760,37 +808,34 @@ function initializeFormInputs() {
 
       // Detect gift card and notify
       handleGiftCardNotificationFromPan(value);
-
-      // Auto-open card list if cards exist and input is focused
-      if (cardList.length > 0 && value.length === 0) {
-        // Will be handled by focus event
-      }
-    },
-    onFocus: () => {
-      if (cardList.length > 0 && !cardNumberInput.getValue()) {
-        setTimeout(() => {
-          if (cardDropdown) {
-            cardDropdown.open();
-          }
-        }, 100);
-      }
     },
   });
 
-  // Create card dropdown if cards exist
-  if (cardList.length > 0) {
-    const buildCardDropdownFooterButtons = () => [
+  const syncCardDropdownAfterListChange = () => {
+    if (cardDropdown) {
+      cardDropdown.updateItems(buildCardDropdownItems());
+    }
+    if (typeof refreshCardDropdownFooterButtons === 'function') {
+      refreshCardDropdownFooterButtons();
+    }
+  };
+
+  const buildCardDropdownFooterButtons = () => {
+    if (cardList.length === 0) return [];
+    return [
       ...(isCardListManageMode
         ? [
             {
               text: i18n.t('common.cancel'),
               className: 'dropdown-footer-btn-cancel',
               icon: '<img src="/assets/images/icons/icn-x.svg" alt="" />',
-              onClick: (dropdownInstance) => {
+              onClick: () => {
                 isCardListManageMode = false;
-                dropdownInstance.updateItems(buildCardDropdownItems());
-                if (typeof refreshCardDropdownFooterButtons === 'function') {
-                  refreshCardDropdownFooterButtons();
+                syncCardDropdownAfterListChange();
+                if (isMobileCardListViewport() && cardListSheetRef) {
+                  cardListSheetRef.destroy();
+                  cardListSheetRef = null;
+                  void openCardListSheet();
                 }
               },
             },
@@ -800,7 +845,7 @@ function initializeFormInputs() {
               text: i18n.t('cardList.addNew'),
               className: 'dropdown-footer-btn-add',
               icon: '<img src="/assets/images/icons/icn-square-plus.svg" alt="" />',
-              onClick: (dropdownInstance) => {
+              onClick: () => {
                 selectedSavedCardForApi = null;
                 hasUserEnabledExpiryDateEdit = false;
                 cardNumberInput.setValue('');
@@ -810,6 +855,10 @@ function initializeFormInputs() {
                 syncCvv2Constraints();
                 syncGetOtpButtonState();
                 resetFieldsOnCardChange();
+                if (cardListSheetRef) {
+                  cardListSheetRef.destroy();
+                  cardListSheetRef = null;
+                }
                 cardNumberInput.focus();
               },
             },
@@ -817,25 +866,123 @@ function initializeFormInputs() {
               text: i18n.t('cardList.manage'),
               className: 'dropdown-footer-btn-manage',
               icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" />',
-              onClick: (dropdownInstance) => {
+              onClick: () => {
                 isCardListManageMode = true;
-                dropdownInstance.updateItems(buildCardDropdownItems());
-                if (typeof refreshCardDropdownFooterButtons === 'function') {
-                  refreshCardDropdownFooterButtons();
+                syncCardDropdownAfterListChange();
+                if (isMobileCardListViewport() && cardListSheetRef) {
+                  cardListSheetRef.destroy();
+                  cardListSheetRef = null;
+                  void openCardListSheet();
                 }
               },
             },
           ]),
     ];
+  };
 
+  async function openCardListSheet() {
+    if (!isCardListUiEnabled()) return;
+    if (cardListSheetRef) {
+      cardListSheetRef.destroy();
+      cardListSheetRef = null;
+    }
+    const { BottomSheet } = await import('../components/BottomSheet.js');
+    const content = document.createElement('div');
+    content.className = 'card-list-sheet';
+
+    if (cardList.length === 0) {
+      content.appendChild(buildCardEmptyStateElement());
+    } else {
+      const ul = document.createElement('ul');
+      ul.className = 'card-list-sheet-list';
+      const items = buildCardDropdownItems();
+      items.forEach((itemDef) => {
+        const li = document.createElement('li');
+        li.className = 'dropdown-item card-list-sheet-item';
+        li.innerHTML = itemDef.html || '';
+        if (typeof itemDef.onRender === 'function') {
+          itemDef.onRender(li);
+        }
+        li.addEventListener('click', () => {
+          if (isCardListManageMode) {
+            return;
+          }
+          const card = cardList.find((c) => getCardListKey(c) === itemDef.value);
+          if (card) {
+            resetFieldsOnCardChange();
+            selectedSavedCardForApi = card;
+            hasUserEnabledExpiryDateEdit = false;
+            cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
+            updateBankLogo({ name: card.bankName });
+            handleGiftCardNotificationFromPan(card.securePan);
+            applyExpiryDateModeForSelectedCard();
+            syncCvv2Constraints();
+            syncGetOtpButtonState();
+            focusNextVisibleInputField(cardNumberInput.element);
+            if (cardListSheetRef) {
+              cardListSheetRef.close();
+            }
+          }
+        });
+        ul.appendChild(li);
+      });
+      content.appendChild(ul);
+    }
+
+    if (cardList.length > 0) {
+      const footer = document.createElement('div');
+      footer.className = 'card-list-sheet-footer';
+      const defs = buildCardDropdownFooterButtons();
+      defs.forEach((buttonDef) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `dropdown-footer-btn ${buttonDef.className || ''}`.trim();
+        button.innerHTML = `
+        ${buttonDef.icon ? `<span class="dropdown-footer-btn-icon" aria-hidden="true">${buttonDef.icon}</span>` : ''}
+        <span class="dropdown-footer-btn-text">${buttonDef.text || ''}</span>
+      `;
+        button.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          if (typeof buttonDef.onClick === 'function') {
+            buttonDef.onClick();
+          }
+        });
+        footer.appendChild(button);
+      });
+      content.appendChild(footer);
+    }
+
+    const sheet = new BottomSheet({
+      title: i18n.t('form.cardNumber.selectCard'),
+      content,
+      scrollable: true,
+      onClose: () => {
+        if (cardListSheetRef === sheet) {
+          cardListSheetRef = null;
+        }
+        sheet.destroy();
+      },
+    });
+    cardListSheetRef = sheet;
+    sheet.open();
+  }
+
+  openCardListSheetFn = openCardListSheet;
+
+  // Create card dropdown when the list was loaded from API (empty or with cards)
+  if (hasCardListUi) {
     cardDropdown = new Dropdown(cardNumberInput.element, {
       items: buildCardDropdownItems(),
       footerButtons: buildCardDropdownFooterButtons(),
+      emptyState: () => buildCardEmptyStateElement(),
+      desktopOnlyAutoOpen: true,
+      openOnFocusWhenInputEmpty: true,
       onSelect: (item) => {
         if (isCardListManageMode) {
           return;
         }
-        const card = cardList.find((c) => c.number === item.value);
+        const card = cardList.find((c) => getCardListKey(c) === item.value);
         if (card) {
           resetFieldsOnCardChange();
           selectedSavedCardForApi = card;
@@ -1336,7 +1483,11 @@ function updateBankLogo(bank) {
 }
 
 function toggleCardList() {
-  if (cardDropdown) {
+  if (isMobileCardListViewport()) {
+    if (typeof openCardListSheetFn === 'function') {
+      void openCardListSheetFn();
+    }
+  } else if (cardDropdown) {
     cardDropdown.toggle();
   }
 }
@@ -1788,11 +1939,12 @@ function updatePageContent() {
 
   // Update form labels and placeholders
   if (cardNumberInput) {
-    const hasSavedCards = cardList.length > 0;
+    const showCardUi = isCardListUiEnabled();
     cardNumberInput.setLabel(
-      hasSavedCards ? i18n.t('form.cardNumber.selectCard') : i18n.t('form.cardNumber')
+      showCardUi ? i18n.t('form.cardNumber.selectCard') : i18n.t('form.cardNumber')
     );
     cardNumberInput.setPlaceholder(i18n.t('form.cardNumber.placeholder'));
+    cardNumberInput.setRightActionAriaLabel(i18n.t('form.showCards'));
   }
   if (cardDropdown) {
     cardDropdown.updateItems(buildCardDropdownItems());

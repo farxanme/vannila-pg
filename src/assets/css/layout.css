@@ -161,6 +161,20 @@
   color: var(--color-primary);
 }
 
+/* Language bottom sheet: reinforce selected row (also uses fresh i18n.getLanguage() in JS) */
+.header-sheet-lang-menu .lang-dropdown-item.active,
+.header-sheet-lang-menu .lang-dropdown-item[aria-checked='true'] {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.header-sheet-lang-menu .lang-dropdown-item-label {
+  flex: 1;
+  min-width: 0;
+  text-align: inherit;
+}
+
 .settings-dropdown-btn {
   display: inline-flex;
   align-items: center;
@@ -471,7 +485,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  margin-top: var(--spacing-lg);
 }
 
 .form-actions .btn {

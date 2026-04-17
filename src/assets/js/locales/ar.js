@@ -116,7 +116,7 @@ export default {
   'cardList.unpin': 'إلغاء التثبيت',
   'cardList.delete': 'حذف',
   'cardList.deleteConfirm': 'هل أنت متأكد من حذف هذه البطاقة؟',
-  'cardList.empty': 'لا توجد بطاقات مسجلة',
+  'cardList.empty': 'لا توجد بطاقة محفوظة للعرض',
 
   // Receipt
   'receipt.success': 'نجحت المعاملة',

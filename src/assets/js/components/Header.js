@@ -228,11 +228,79 @@ export class Header {
     };
     document.addEventListener('languageChange', refreshSettingsI18n);
 
-    button.onclick = (e) => {
+    button.onclick = async (e) => {
       e.stopPropagation();
       if (this.langMenuEl) {
         this.langMenuEl.style.display = 'none';
         if (this.langButtonEl) this.langButtonEl.setAttribute('aria-expanded', 'false');
+      }
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        const { BottomSheet } = await import('./BottomSheet.js');
+        let settingsSheet = null;
+        const sheetContent = document.createElement('div');
+        sheetContent.className = 'header-sheet-settings-menu';
+        const sheetSectionTitle = document.createElement('div');
+        sheetSectionTitle.className = 'settings-dropdown-section-title';
+        sheetSectionTitle.id = `${menuId}-sheet-theme-heading`;
+        sheetSectionTitle.setAttribute('data-i18n', 'settings.theme');
+        sheetSectionTitle.textContent = i18n.t('settings.theme');
+
+        const sheetRadiogroup = document.createElement('div');
+        sheetRadiogroup.setAttribute('role', 'radiogroup');
+        sheetRadiogroup.setAttribute('aria-labelledby', sheetSectionTitle.id);
+
+        const themeButtonsSheet = [];
+        const syncThemeSelectionSheet = () => {
+          const pref = getThemePreference();
+          themeButtonsSheet.forEach(({ el, value }) => {
+            el.setAttribute('aria-checked', pref === value ? 'true' : 'false');
+          });
+        };
+
+        modeDefs.forEach(({ value, i18nKey }) => {
+          const row = document.createElement('button');
+          row.type = 'button';
+          row.className = 'settings-theme-option';
+          row.setAttribute('role', 'radio');
+          row.setAttribute('aria-checked', 'false');
+          const checkEl = document.createElement('span');
+          checkEl.className = 'settings-theme-check';
+          checkEl.setAttribute('aria-hidden', 'true');
+          const iconEl = document.createElement('span');
+          iconEl.className = 'settings-theme-icon';
+          iconEl.setAttribute('aria-hidden', 'true');
+          iconEl.innerHTML = getThemeOptionIconSvg(value);
+          const labelEl = document.createElement('span');
+          labelEl.setAttribute('data-i18n', i18nKey);
+          labelEl.textContent = i18n.t(i18nKey);
+          row.appendChild(iconEl);
+          row.appendChild(labelEl);
+          row.appendChild(checkEl);
+          row.onclick = (ev) => {
+            ev.stopPropagation();
+            setThemePreference(value);
+            syncThemeSelection();
+            syncThemeSelectionSheet();
+            settingsSheet?.close();
+          };
+          themeButtonsSheet.push({ el: row, value });
+          sheetRadiogroup.appendChild(row);
+        });
+
+        syncThemeSelectionSheet();
+        sheetContent.appendChild(sheetSectionTitle);
+        sheetContent.appendChild(sheetRadiogroup);
+
+        settingsSheet = new BottomSheet({
+          title: i18n.t('settings.theme'),
+          content: sheetContent,
+          scrollable: true,
+          onClose: () => {
+            settingsSheet?.destroy();
+          },
+        });
+        settingsSheet.open();
+        return;
       }
       const isOpen = menu.style.display === 'block';
       menu.style.display = isOpen ? 'none' : 'block';
@@ -287,6 +355,7 @@ export class Header {
       check.setAttribute('aria-hidden', 'true');
       item.appendChild(label);
       item.appendChild(check);
+      item.setAttribute('data-lang-code', lang.code);
       item.onclick = () => {
         i18n.setLanguage(lang.code);
         button.textContent = lang.nativeName;
@@ -306,11 +375,64 @@ export class Header {
       dropdown.appendChild(item);
     });
 
-    button.onclick = (e) => {
+    button.onclick = async (e) => {
       e.stopPropagation();
       if (this.settingsMenuEl) {
         this.settingsMenuEl.style.display = 'none';
         if (this.settingsButtonEl) this.settingsButtonEl.setAttribute('aria-expanded', 'false');
+      }
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        const { BottomSheet } = await import('./BottomSheet.js');
+        let langSheet = null;
+        const sheetWrap = document.createElement('div');
+        sheetWrap.className = 'header-sheet-lang-menu';
+        const sheetActiveLang = i18n.getLanguage();
+        languages.forEach((lang) => {
+          const item = document.createElement('button');
+          item.type = 'button';
+          const isSelected = lang.code === sheetActiveLang;
+          item.className = `lang-dropdown-item ${isSelected ? 'active' : ''}`.trim();
+          item.setAttribute('role', 'menuitemradio');
+          item.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+          item.setAttribute('data-lang-code', lang.code);
+          if (isSelected) {
+            item.setAttribute('aria-current', 'true');
+          }
+          const labelSheet = document.createElement('span');
+          labelSheet.className = 'lang-dropdown-item-label';
+          labelSheet.textContent = lang.nativeName;
+          const checkSheet = document.createElement('span');
+          checkSheet.className = 'settings-theme-check lang-dropdown-item-check';
+          checkSheet.setAttribute('aria-hidden', 'true');
+          item.appendChild(labelSheet);
+          item.appendChild(checkSheet);
+          item.onclick = () => {
+            i18n.setLanguage(lang.code);
+            button.textContent = lang.nativeName;
+            dropdown.querySelectorAll('.lang-dropdown-item').forEach((dropdownItem) => {
+              const isActive = dropdownItem.getAttribute('data-lang-code') === lang.code;
+              dropdownItem.classList.toggle('active', isActive);
+              dropdownItem.setAttribute('aria-checked', isActive ? 'true' : 'false');
+            });
+            button.setAttribute('aria-expanded', 'false');
+            dropdown.style.display = 'none';
+            langSheet?.close();
+            if (this.options.onLanguageChange) {
+              this.options.onLanguageChange(lang.code);
+            }
+          };
+          sheetWrap.appendChild(item);
+        });
+        langSheet = new BottomSheet({
+          title: i18n.t('accessibility.selectLanguage'),
+          content: sheetWrap,
+          scrollable: true,
+          onClose: () => {
+            langSheet?.destroy();
+          },
+        });
+        langSheet.open();
+        return;
       }
       const isOpen = dropdown.style.display === 'block';
       dropdown.style.display = isOpen ? 'none' : 'block';

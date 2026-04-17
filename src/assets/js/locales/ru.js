@@ -116,7 +116,7 @@ export default {
   'cardList.unpin': 'Открепить',
   'cardList.delete': 'Удалить',
   'cardList.deleteConfirm': 'Вы уверены, что хотите удалить эту карту?',
-  'cardList.empty': 'Нет зарегистрированных карт',
+  'cardList.empty': 'Нет сохранённой карты для отображения',
 
   // Receipt
   'receipt.success': 'Транзакция успешна',

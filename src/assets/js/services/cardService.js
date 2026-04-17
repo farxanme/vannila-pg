@@ -52,8 +52,13 @@ class CardService {
         ? (bin6FromBank + '0000000000').slice(0, 16)
         : (digitsFromMasked + '0000000000000000').slice(0, 16);
       const cardIdNum = Number(apiCard.cardId);
+      // Prefer cardId for `number` so rows stay unique (BIN-based paddedPan repeats per bank).
+      const numberFromId =
+        apiCard.cardId != null && String(apiCard.cardId).trim() !== ''
+          ? String(apiCard.cardId)
+          : paddedPan;
       return {
-        number: paddedPan,
+        number: numberFromId,
         securePan: masked,
         subscriberCardId: Number.isNaN(cardIdNum) ? apiCard.cardId : cardIdNum,
         bankName: bank?.name || '',
