@@ -91,6 +91,12 @@ export default {
   // Accessibility
   'accessibility.selectLanguage': 'انتخاب زبان',
   'accessibility.partnerLogo': 'لوگوی همکار',
+  'accessibility.openSettings': 'تنظیمات',
+
+  'settings.theme': 'تم',
+  'settings.theme.light': 'روشن',
+  'settings.theme.dark': 'تیره',
+  'settings.theme.system': 'هماهنگ با ساعت (روز/شب)',
 
   // Card List
   'cardList.addNew': 'افزودن کارت جدید',
@@ -117,6 +123,11 @@ export default {
   'receipt.copied': 'متن رسید کپی شد',
   'receipt.saveError': 'خطا در ذخیره رسید',
   'receipt.shareText': 'رسید تراکنش',
+  'receipt.plain.amount': 'مبلغ:',
+  'receipt.plain.merchant': 'پذیرنده:',
+  'receipt.plain.transactionId': 'شماره تراکنش:',
+  'receipt.plain.date': 'تاریخ:',
+  'receipt.demo.transactionType': 'خرید',
 
   // Transaction
   'transaction.merchant': 'پذیرنده',
@@ -127,6 +138,8 @@ export default {
   'transaction.showLess': 'نمایش کمتر',
   'transaction.rial': 'ریال',
   'transaction.toman': 'تومان',
+  'transaction.demo.merchantName': 'فروشگاه نمونه',
+  'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
   'pinPad.title': 'ورود رمز',

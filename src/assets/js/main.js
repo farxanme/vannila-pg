@@ -3,6 +3,9 @@
  * Loads translations and initializes i18n
  */
 import { i18n } from './utils/i18n.js';
+import { initTheme } from './utils/themeManager.js';
+
+initTheme();
 
 (async () => {
   await i18n.readyPromise;

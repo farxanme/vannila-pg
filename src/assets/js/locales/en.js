@@ -28,6 +28,7 @@ export default {
 
   // Form
   'form.cardNumber': 'Card Number',
+  'form.cardNumber.selectCard': 'Select card',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
   'form.cardNumber.required': 'Card number is required',
   'form.cardNumber.invalid': 'Invalid card number',
@@ -84,6 +85,7 @@ export default {
   'cancelConfirm.continuePay': 'Continue payment',
   'cancelConfirm.confirmLeave': 'Leave payment',
   'form.expiryPlaceholder': 'MM/YY',
+  'form.giftCardNotice': 'This is a gift card',
 
   // Payment init (SSR session)
   'paymentInit.error.title': 'Cannot start payment',
@@ -93,6 +95,12 @@ export default {
   // Accessibility
   'accessibility.selectLanguage': 'Select language',
   'accessibility.partnerLogo': 'Partner logo',
+  'accessibility.openSettings': 'Settings',
+
+  'settings.theme': 'Theme',
+  'settings.theme.light': 'Light',
+  'settings.theme.dark': 'Dark',
+  'settings.theme.system': 'System (time of day)',
 
   // Card List
   'cardList.addNew': 'Add New Card',
@@ -119,6 +127,11 @@ export default {
   'receipt.copied': 'Receipt text copied',
   'receipt.saveError': 'Error saving receipt',
   'receipt.shareText': 'Transaction receipt',
+  'receipt.plain.amount': 'Amount:',
+  'receipt.plain.merchant': 'Merchant:',
+  'receipt.plain.transactionId': 'Transaction ID:',
+  'receipt.plain.date': 'Date:',
+  'receipt.demo.transactionType': 'Purchase',
 
   // Transaction
   'transaction.merchant': 'Merchant',
@@ -129,6 +142,8 @@ export default {
   'transaction.showLess': 'Show Less',
   'transaction.rial': 'Rial',
   'transaction.toman': 'Toman',
+  'transaction.demo.merchantName': 'Sample store',
+  'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
   'pinPad.title': 'Enter PIN',
@@ -138,7 +153,6 @@ export default {
   'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
 
-  // Receipt toggle
   'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
 
   // Errors

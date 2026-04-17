@@ -18,12 +18,14 @@ import {
 } from '../utils/validators.js';
 import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
 import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
+import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
+import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
+import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
 import { getPaymentInitData, validatePaymentInitData } from '../services/paymentInitData.js';
 import { fetchCaptcha, fetchCaptchaAudio } from '../services/captchaService.js';
 import * as ipgService from '../services/ipgService.js';
-import { getIpgBaseUrl } from '../config/env.js';
 import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
@@ -74,23 +76,6 @@ function markAppReady() {
   const root = document.documentElement;
   root.classList.remove('app-booting');
   root.classList.add('app-ready');
-}
-
-function parseTimeSpanToSeconds(timeSpan) {
-  if (!timeSpan || typeof timeSpan !== 'string') return 900;
-  const parts = timeSpan.split(':').map((p) => parseInt(p, 10));
-  if (parts.length === 3 && parts.every((n) => !Number.isNaN(n))) {
-    return parts[0] * 3600 + parts[1] * 60 + parts[2];
-  }
-  return 900;
-}
-
-function resolveMerchantLogoUrl(uri) {
-  if (!uri) return null;
-  if (uri.startsWith('http')) return uri;
-  const base = getIpgBaseUrl();
-  if (!base) return null;
-  return `${base}${uri.startsWith('/') ? '' : '/'}${uri}`;
 }
 
 async function loadCaptchaImage(captchaImageEl) {
@@ -149,13 +134,6 @@ function ensureOtpTriesForKey(key) {
   if (otpTriesRemainingByCardKey[key] === undefined) {
     otpTriesRemainingByCardKey[key] = transactionOtpSettings.maxTries;
   }
-}
-
-function formatSecondsAsMmSs(totalSeconds) {
-  const s = Math.max(0, Math.ceil(totalSeconds));
-  const mm = Math.floor(s / 60);
-  const ss = s % 60;
-  return `${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}`;
 }
 
 function clearOtpButtonCountdownInterval() {
@@ -303,7 +281,7 @@ async function initializePage() {
     // Non-empty so .loading-text exists for updateText() after i18n is ready
     text: '\u00A0',
     showProgressBar: true,
-    ariaLabel: 'Loading',
+    ariaLabel: '\u00A0',
   });
   loadingScreen.show();
 
@@ -1035,12 +1013,12 @@ async function initializeTransactionInfo() {
   }
 
   const transactionData = {
-    merchant: txPayload?.merchant?.merchantName ?? 'فروشگاه نمونه',
+    merchant: txPayload?.merchant?.merchantName ?? i18n.t('transaction.demo.merchantName'),
     amount: typeof txPayload?.totalAmount === 'number' ? txPayload.totalAmount : 100000,
     terminal: init?.terminalNumber || String(txPayload?.terminalNumber ?? '12345678'),
     site:
       txPayload?.merchant?.merchantWebSite?.replace(/^https?:\/\//, '')?.replace(/\/$/, '') ??
-      'example.com',
+      i18n.t('transaction.demo.siteHost'),
   };
 
   const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
@@ -1061,6 +1039,7 @@ async function initializeTransactionInfo() {
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToPersianWords(amountInTomans);
+  const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
 
   container.innerHTML = `
     <div class="more-content" id="more-transaction-info">
@@ -1100,7 +1079,7 @@ async function initializeTransactionInfo() {
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="amount">${i18n.t('transaction.amount')}</div>
           <div class="transaction-info-value">
-            <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString('fa-IR')} ${i18n.t('transaction.rial')}</div>
+            <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
             <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
           </div>
         </div>
@@ -1156,7 +1135,7 @@ function refreshTransactionAmountValues() {
   if (typeof amount !== 'number' || Number.isNaN(amount)) return;
 
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const locale = ['fa', 'ar'].includes(lang) ? 'fa-IR' : 'en-US';
+  const locale = getNumberLocaleForLang(lang);
   rialEl.textContent = `${amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
   rialEl.setAttribute('data-amount', String(amount));
 
@@ -1171,7 +1150,7 @@ function setPayButtonState(state) {
 
   const amount = getTransactionAmountFromDom();
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const locale = ['fa', 'ar'].includes(lang) ? 'fa-IR' : 'en-US';
+  const locale = getNumberLocaleForLang(lang);
 
   if (state === 'active') {
     if (typeof amount === 'number') {
@@ -1417,31 +1396,14 @@ function updatePageContent() {
   }
   syncGetOtpButtonState();
 
-  const i18nElements = document.querySelectorAll('[data-i18n]');
-  i18nElements.forEach((element) => {
-    const key = element.getAttribute('data-i18n');
-    if (key) {
-      element.textContent = i18n.t(key);
-    }
-  });
-
-  // Update card number label based on saved cards and current language
-  if (cardNumberInput && cardNumberInput.labelElement) {
-    const hasSavedCards = cardList.length > 0;
-    const cardLabel = hasSavedCards
-      ? i18n.t('form.cardNumber.selectCard')
-      : i18n.t('form.cardNumber');
-    // Preserve required asterisk if present
-    const requiredSpan = cardNumberInput.labelElement.querySelector('.input-required');
-    cardNumberInput.labelElement.textContent = cardLabel;
-    if (requiredSpan) {
-      cardNumberInput.labelElement.appendChild(requiredSpan);
-    }
-  }
+  i18n.applyDataI18n(document);
 
   // Update form labels and placeholders
   if (cardNumberInput) {
-    cardNumberInput.setLabel(i18n.t('form.cardNumber'));
+    const hasSavedCards = cardList.length > 0;
+    cardNumberInput.setLabel(
+      hasSavedCards ? i18n.t('form.cardNumber.selectCard') : i18n.t('form.cardNumber')
+    );
     cardNumberInput.setPlaceholder(i18n.t('form.cardNumber.placeholder'));
   }
   if (cvv2Input) {

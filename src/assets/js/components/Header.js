@@ -3,6 +3,8 @@
  * Fixed at top, logo, title, language dropdown, card
  */
 export class Header {
+  static settingsMenuIdSeq = 0;
+
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
@@ -37,11 +39,25 @@ export class Header {
     const container = document.createElement('div');
     container.className = 'container header-container';
 
-    // Language dropdown (outside container, floating)
-    const langDropdown = document.createElement('div');
-    langDropdown.className = 'header-lang-dropdown';
-    await this.createLanguageDropdown(langDropdown);
-    header.appendChild(langDropdown);
+    // Toolbar: settings + language (floating)
+    const toolbar = document.createElement('div');
+    toolbar.className = 'header-toolbar';
+    this.headerToolbar = toolbar;
+    await this.createSettingsDropdown(toolbar);
+    await this.createLanguageDropdown(toolbar);
+    header.appendChild(toolbar);
+
+    this.closeAllHeaderMenus = () => {
+      if (this.langMenuEl) this.langMenuEl.style.display = 'none';
+      if (this.langButtonEl) this.langButtonEl.setAttribute('aria-expanded', 'false');
+      if (this.settingsMenuEl) this.settingsMenuEl.style.display = 'none';
+      if (this.settingsButtonEl) this.settingsButtonEl.setAttribute('aria-expanded', 'false');
+    };
+    document.addEventListener('click', (e) => {
+      if (this.headerToolbar && !this.headerToolbar.contains(e.target)) {
+        this.closeAllHeaderMenus();
+      }
+    });
 
     // Inner container
     const innerContainer = document.createElement('div');
@@ -93,11 +109,130 @@ export class Header {
   }
 
   /**
+   * Settings dropdown (theme: light / dark / system)
+   * @param {HTMLElement} container - Toolbar element
+   */
+  async createSettingsDropdown(container) {
+    const { i18n } = await import('../utils/i18n.js');
+    const { getThemePreference, setThemePreference } = await import('../utils/themeManager.js');
+
+    const wrap = document.createElement('div');
+    wrap.className = 'header-settings-dropdown';
+
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'settings-dropdown-btn';
+    button.setAttribute('aria-label', i18n.t('accessibility.openSettings'));
+    button.setAttribute('aria-haspopup', 'true');
+    button.setAttribute('aria-expanded', 'false');
+    button.setAttribute('aria-controls', `header-settings-menu-${Header.settingsMenuIdSeq++}`);
+
+    button.innerHTML = `
+      <svg class="settings-dropdown-btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.65.87.12.064.243.123.367.18.338.154.73.26 1.125.26.17 0 .34-.02.505-.06l1.28-.256a1.125 1.125 0 011.315.63l.621 1.29c.15.307.09.67-.15.92l-.855.93a1.125 1.125 0 011.315 1.595l.855.93c.24.25.3.613.15.92l-.621 1.29a1.125 1.125 0 01-1.315.63l-1.28-.256a1.125 1.125 0 00-.505.06c-.385.07-.76.157-1.125.26-.124.057-.247.116-.367.18-.337.184-.587.496-.65.87l-.213 1.281c-.09.542-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.65-.87a5.71 5.71 0 01-.367-.18 1.125 1.125 0 01-1.125-.26l-1.28.256a1.125 1.125 0 01-1.315-.63l-.621-1.29a1.125 1.125 0 01.15-.92l.855-.93a1.125 1.125 0 01-1.315-1.595l.855-.93a1.125 1.125 0 01-.15-.92l.621-1.29a1.125 1.125 0 011.315-.63l1.28.256c.168.038.337.058.505.06.385.07.76.157 1.125.26.124.057.247.116.367.18.337.184.587.496.65.87l.213 1.281z" />
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+      </svg>`;
+
+    const menu = document.createElement('div');
+    menu.className = 'settings-dropdown-menu';
+    menu.style.display = 'none';
+    const menuId = button.getAttribute('aria-controls');
+    menu.id = menuId;
+
+    const sectionTitle = document.createElement('div');
+    sectionTitle.className = 'settings-dropdown-section-title';
+    sectionTitle.id = `${menuId}-theme-heading`;
+    sectionTitle.setAttribute('data-i18n', 'settings.theme');
+    sectionTitle.textContent = i18n.t('settings.theme');
+
+    const radiogroup = document.createElement('div');
+    radiogroup.setAttribute('role', 'radiogroup');
+    radiogroup.setAttribute('aria-labelledby', sectionTitle.id);
+
+    const modeDefs = [
+      { value: 'light', i18nKey: 'settings.theme.light' },
+      { value: 'dark', i18nKey: 'settings.theme.dark' },
+      { value: 'system', i18nKey: 'settings.theme.system' },
+    ];
+
+    const themeButtons = [];
+
+    const syncThemeSelection = () => {
+      const pref = getThemePreference();
+      themeButtons.forEach(({ el, value }) => {
+        const checked = pref === value;
+        el.setAttribute('aria-checked', checked ? 'true' : 'false');
+      });
+    };
+
+    modeDefs.forEach(({ value, i18nKey }) => {
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'settings-theme-option';
+      row.setAttribute('role', 'radio');
+      row.setAttribute('aria-checked', 'false');
+      const check = document.createElement('span');
+      check.className = 'settings-theme-check';
+      check.setAttribute('aria-hidden', 'true');
+      check.textContent = '✓';
+      const label = document.createElement('span');
+      label.setAttribute('data-i18n', i18nKey);
+      label.textContent = i18n.t(i18nKey);
+      row.appendChild(check);
+      row.appendChild(label);
+      row.onclick = (e) => {
+        e.stopPropagation();
+        setThemePreference(value);
+        syncThemeSelection();
+        menu.style.display = 'none';
+        button.setAttribute('aria-expanded', 'false');
+      };
+      themeButtons.push({ el: row, value });
+      radiogroup.appendChild(row);
+    });
+
+    syncThemeSelection();
+    window.addEventListener('themePreferenceChange', syncThemeSelection);
+
+    menu.appendChild(sectionTitle);
+    menu.appendChild(radiogroup);
+
+    const refreshSettingsI18n = () => {
+      sectionTitle.textContent = i18n.t('settings.theme');
+      i18n.applyDataI18n(menu);
+      button.setAttribute('aria-label', i18n.t('accessibility.openSettings'));
+      radiogroup.setAttribute('aria-label', i18n.t('settings.theme'));
+    };
+    document.addEventListener('languageChange', refreshSettingsI18n);
+
+    button.onclick = (e) => {
+      e.stopPropagation();
+      if (this.langMenuEl) {
+        this.langMenuEl.style.display = 'none';
+        if (this.langButtonEl) this.langButtonEl.setAttribute('aria-expanded', 'false');
+      }
+      const isOpen = menu.style.display === 'block';
+      menu.style.display = isOpen ? 'none' : 'block';
+      button.setAttribute('aria-expanded', !isOpen);
+    };
+
+    wrap.appendChild(button);
+    wrap.appendChild(menu);
+    container.appendChild(wrap);
+
+    this.settingsButtonEl = button;
+    this.settingsMenuEl = menu;
+  }
+
+  /**
    * Create language dropdown
-   * @param {HTMLElement} container - Container element
+   * @param {HTMLElement} container - Toolbar element
    */
   async createLanguageDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
+
+    const wrap = document.createElement('div');
+    wrap.className = 'header-lang-dropdown';
 
     const button = document.createElement('button');
     button.type = 'button';
@@ -135,23 +270,22 @@ export class Header {
 
     button.onclick = (e) => {
       e.stopPropagation();
+      if (this.settingsMenuEl) {
+        this.settingsMenuEl.style.display = 'none';
+        if (this.settingsButtonEl) this.settingsButtonEl.setAttribute('aria-expanded', 'false');
+      }
       const isOpen = dropdown.style.display === 'block';
       dropdown.style.display = isOpen ? 'none' : 'block';
       button.setAttribute('aria-expanded', !isOpen);
     };
 
-    container.appendChild(button);
-    container.appendChild(dropdown);
+    wrap.appendChild(button);
+    wrap.appendChild(dropdown);
+    container.appendChild(wrap);
 
-    // Close on outside click
-    document.addEventListener('click', (e) => {
-      if (!container.contains(e.target)) {
-        dropdown.style.display = 'none';
-        button.setAttribute('aria-expanded', 'false');
-      }
-    });
-
-    this.langDropdown = container;
+    this.langButtonEl = button;
+    this.langMenuEl = dropdown;
+    this.langDropdown = wrap;
   }
 
   /**

@@ -4,9 +4,12 @@
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import { shareContent } from '../utils/share.js';
+import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { i18n } from '../main.js';
 
 let header, footer;
+/** Last rendered receipt payload (for language refresh). */
+let lastReceiptData = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
@@ -33,15 +36,14 @@ async function initializePage() {
   const transactionId = urlParams.get('id') || '123456789';
   const status = urlParams.get('status') || 'success';
 
-  // Update receipt content
+  // Update receipt content (demo payload; real API can set useDemoCopy: false and pass strings)
   updateReceiptContent({
     id: transactionId,
     status: status,
     amount: 100000,
-    merchant: 'فروشگاه نمونه',
-    date: new Date().toLocaleString('fa-IR'),
+    useDemoCopy: true,
+    dateMs: Date.now(),
     cardNumber: '****1234',
-    type: 'خرید',
   });
 
   attachEvents();
@@ -56,17 +58,19 @@ function updateReceiptLanguage() {
   if (footer) {
     footer.updateCopyright(i18n.t('footer.copyright'));
   }
-  document.querySelectorAll('[data-i18n]').forEach((el) => {
-    const key = el.getAttribute('data-i18n');
-    if (key) el.textContent = i18n.t(key);
-  });
+  i18n.applyDataI18n(document);
   const shareBtn = document.getElementById('share-button');
   const saveBtn = document.getElementById('save-button');
   if (shareBtn) shareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
   if (saveBtn) saveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
+  if (lastReceiptData) {
+    updateReceiptContent(lastReceiptData);
+  }
 }
 
 function updateReceiptContent(data) {
+  lastReceiptData = { ...data };
+  const locale = getNumberLocaleForLang(i18n.getLanguage());
   const statusBadge = document.getElementById('receipt-status-badge');
   const title = document.getElementById('receipt-title');
   const subtitle = document.getElementById('receipt-subtitle');
@@ -89,12 +93,19 @@ function updateReceiptContent(data) {
       ? i18n.t('receipt.paymentSuccessDesc')
       : i18n.t('receipt.paymentFailedDesc');
 
-  amount.textContent = `${data.amount.toLocaleString()} ریال`;
-  type.textContent = data.type;
+  amount.textContent = `${data.amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
   transactionId.textContent = data.id;
-  transactionDate.textContent = data.date;
+  transactionDate.textContent =
+    typeof data.dateMs === 'number'
+      ? new Date(data.dateMs).toLocaleString(locale)
+      : data.date;
   cardNumber.textContent = data.cardNumber;
-  merchantName.textContent = data.merchant;
+  merchantName.textContent = data.useDemoCopy
+    ? i18n.t('transaction.demo.merchantName')
+    : data.merchant;
+  type.textContent = data.useDemoCopy
+    ? i18n.t('receipt.demo.transactionType')
+    : data.type;
 }
 
 function attachEvents() {
@@ -136,9 +147,9 @@ function generateReceiptText() {
 
   return `
 ${title}
-مبلغ: ${amount}
-پذیرنده: ${merchant}
-شماره تراکنش: ${transactionId}
-تاریخ: ${date}
+${i18n.t('receipt.plain.amount')} ${amount}
+${i18n.t('receipt.plain.merchant')} ${merchant}
+${i18n.t('receipt.plain.transactionId')} ${transactionId}
+${i18n.t('receipt.plain.date')} ${date}
   `.trim();
 }

@@ -28,6 +28,7 @@ export default {
 
   // Form
   'form.cardNumber': 'Номер карты',
+  'form.cardNumber.selectCard': 'Выберите карту',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
   'form.cardNumber.required': 'Номер карты обязателен',
   'form.cardNumber.invalid': 'Неверный номер карты',
@@ -84,10 +85,18 @@ export default {
   'cancelConfirm.continuePay': 'Продолжить оплату',
   'cancelConfirm.confirmLeave': 'Покинуть оплату',
   'form.expiryPlaceholder': 'ММ/ГГ',
+  'form.giftCardNotice': 'Это подарочная карта',
+  'form.showReceiptToggle': 'Электронная почта или телефон для квитанции (необязательно)',
 
   // Accessibility
   'accessibility.selectLanguage': 'Выбрать язык',
   'accessibility.partnerLogo': 'Логотип партнера',
+  'accessibility.openSettings': 'Настройки',
+
+  'settings.theme': 'Тема',
+  'settings.theme.light': 'Светлая',
+  'settings.theme.dark': 'Тёмная',
+  'settings.theme.system': 'Системная (по времени суток)',
 
   // Card List
   'cardList.addNew': 'Добавить новую карту',
@@ -114,6 +123,11 @@ export default {
   'receipt.copied': 'Текст квитанции скопирован',
   'receipt.saveError': 'Ошибка сохранения квитанции',
   'receipt.shareText': 'Квитанция транзакции',
+  'receipt.plain.amount': 'Сумма:',
+  'receipt.plain.merchant': 'Торговец:',
+  'receipt.plain.transactionId': 'Номер операции:',
+  'receipt.plain.date': 'Дата:',
+  'receipt.demo.transactionType': 'Покупка',
 
   // Transaction
   'transaction.merchant': 'Торговец',
@@ -124,6 +138,8 @@ export default {
   'transaction.showLess': 'Показать меньше',
   'transaction.rial': 'Риал',
   'transaction.toman': 'Томан',
+  'transaction.demo.merchantName': 'Демо-магазин',
+  'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
   'pinPad.title': 'Введите PIN',

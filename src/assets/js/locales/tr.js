@@ -28,6 +28,7 @@ export default {
 
   // Form
   'form.cardNumber': 'Kart Numarası',
+  'form.cardNumber.selectCard': 'Kart seçin',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
   'form.cardNumber.required': 'Kart numarası gereklidir',
   'form.cardNumber.invalid': 'Geçersiz kart numarası',
@@ -84,10 +85,18 @@ export default {
   'cancelConfirm.continuePay': 'Ödemeye devam et',
   'cancelConfirm.confirmLeave': 'Ödemeyi iptal et',
   'form.expiryPlaceholder': 'AA/YY',
+  'form.giftCardNotice': 'Bu bir hediye kartıdır',
+  'form.showReceiptToggle': 'Makbuz için e-posta veya cep (isteğe bağlı)',
 
   // Accessibility
   'accessibility.selectLanguage': 'Dil seçin',
   'accessibility.partnerLogo': 'İş ortağı logosu',
+  'accessibility.openSettings': 'Ayarlar',
+
+  'settings.theme': 'Tema',
+  'settings.theme.light': 'Açık',
+  'settings.theme.dark': 'Koyu',
+  'settings.theme.system': 'Sistem (günün saatine göre)',
 
   // Card List
   'cardList.addNew': 'Yeni Kart Ekle',
@@ -114,6 +123,11 @@ export default {
   'receipt.copied': 'Fiş metni kopyalandı',
   'receipt.saveError': 'Fiş kaydedilirken hata',
   'receipt.shareText': 'İşlem fişi',
+  'receipt.plain.amount': 'Tutar:',
+  'receipt.plain.merchant': 'Satıcı:',
+  'receipt.plain.transactionId': 'İşlem numarası:',
+  'receipt.plain.date': 'Tarih:',
+  'receipt.demo.transactionType': 'Satın alma',
 
   // Transaction
   'transaction.merchant': 'Satıcı',
@@ -124,6 +138,8 @@ export default {
   'transaction.showLess': 'Daha Az Göster',
   'transaction.rial': 'Riyal',
   'transaction.toman': 'Toman',
+  'transaction.demo.merchantName': 'Örnek mağaza',
+  'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
   'pinPad.title': 'PIN Gir',

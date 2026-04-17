@@ -28,6 +28,7 @@ export default {
 
   // Form
   'form.cardNumber': 'رقم البطاقة',
+  'form.cardNumber.selectCard': 'اختر البطاقة',
   'form.cardNumber.placeholder': '1234 5678 9012 3456',
   'form.cardNumber.required': 'رقم البطاقة مطلوب',
   'form.cardNumber.invalid': 'رقم البطاقة غير صالح',
@@ -84,10 +85,18 @@ export default {
   'cancelConfirm.continuePay': 'متابعة الدفع',
   'cancelConfirm.confirmLeave': 'إلغاء الدفع',
   'form.expiryPlaceholder': 'شهر/سنة',
+  'form.giftCardNotice': 'هذه بطاقة هدية',
+  'form.showReceiptToggle': 'البريد أو الجوال لاستلام الإيصال (اختياري)',
 
   // Accessibility
   'accessibility.selectLanguage': 'اختيار اللغة',
   'accessibility.partnerLogo': 'شعار الشريك',
+  'accessibility.openSettings': 'الإعدادات',
+
+  'settings.theme': 'المظهر',
+  'settings.theme.light': 'فاتح',
+  'settings.theme.dark': 'داكن',
+  'settings.theme.system': 'النظام (حسب الوقت)',
 
   // Card List
   'cardList.addNew': 'إضافة بطاقة جديدة',
@@ -114,6 +123,11 @@ export default {
   'receipt.copied': 'تم نسخ نص الإيصال',
   'receipt.saveError': 'خطأ في حفظ الإيصال',
   'receipt.shareText': 'إيصال المعاملة',
+  'receipt.plain.amount': 'المبلغ:',
+  'receipt.plain.merchant': 'التاجر:',
+  'receipt.plain.transactionId': 'رقم المعاملة:',
+  'receipt.plain.date': 'التاريخ:',
+  'receipt.demo.transactionType': 'شراء',
 
   // Transaction
   'transaction.merchant': 'التاجر',
@@ -124,6 +138,8 @@ export default {
   'transaction.showLess': 'عرض أقل',
   'transaction.rial': 'ريال',
   'transaction.toman': 'تومان',
+  'transaction.demo.merchantName': 'متجر تجريبي',
+  'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
   'pinPad.title': 'أدخل PIN',

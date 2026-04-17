@@ -104,6 +104,17 @@ class I18n {
   }
 
   /**
+   * Apply translations to every element with `data-i18n` under `root`.
+   * @param {ParentNode} [root=document]
+   */
+  applyDataI18n(root = document) {
+    root.querySelectorAll('[data-i18n]').forEach((el) => {
+      const key = el.getAttribute('data-i18n');
+      if (key) el.textContent = this.t(key);
+    });
+  }
+
+  /**
    * Load translations from file
    * @param {string} lang - Language code
    * @param {Object} translations - Translations object
