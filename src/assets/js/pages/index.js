@@ -20,6 +20,7 @@ import { extractNumbers, numberToWordsByLang } from '../utils/numberConverter.js
 import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
+import { getTransactionTypeInfo } from '../utils/transactionType.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
 import { getPaymentInitData, validatePaymentInitData } from '../services/paymentInitData.js';
@@ -69,6 +70,7 @@ const otpCooldownUntilByCardKey = Object.create(null);
 
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
+let currentTransactionPrCode = null;
 
 /**
  * Reveal main content after loading and all setup (success, error, or failure paths).
@@ -1184,6 +1186,10 @@ async function initializeTransactionInfo() {
 
   const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
   const merchantLogoUrl = resolveMerchantLogoUrl(txPayload?.merchant?.merchantLogoUri);
+  const prCodeCandidate = txPayload?.appSettings?.prCodesPanLimits?.prCode;
+  currentTransactionPrCode =
+    typeof prCodeCandidate === 'number' && !Number.isNaN(prCodeCandidate) ? prCodeCandidate : null;
+  const transactionTypeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
 
   const rawOtp = txPayload?.appSettings?.otpSettings;
   const maxTriesFromApi =
@@ -1245,6 +1251,15 @@ async function initializeTransactionInfo() {
           <div class="transaction-info-value">${transactionData.site}</div>
         </div>
       </div>
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          <img src="${transactionTypeInfo.icon}" alt="" aria-hidden="true" />
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label" data-transaction-field="transactionType">${i18n.t('transaction.transactionType')}</div>
+          <div class="transaction-info-value" id="transaction-type-value">${transactionTypeInfo.label}</div>
+        </div>
+      </div>
     </div>
     <button type="button" class="more-toggle" id="more-toggle">${i18n.t('transaction.showMore')}</button>
   `;
@@ -1281,9 +1296,17 @@ function getTransactionAmountFromDom() {
 const transactionFieldToI18nKey = {
   terminal: 'transaction.terminal',
   site: 'transaction.site',
+  transactionType: 'transaction.transactionType',
   merchant: 'transaction.merchant',
   amount: 'transaction.amount',
 };
+
+function refreshTransactionTypeValue() {
+  const valueEl = document.getElementById('transaction-type-value');
+  if (!valueEl) return;
+  const typeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
+  valueEl.textContent = typeInfo.label;
+}
 
 /**
  * Re-format rial / toman lines from `data-amount` (used after language change).
@@ -1624,6 +1647,7 @@ function updatePageContent() {
       label.textContent = i18n.t(i18nKey);
     }
   });
+  refreshTransactionTypeValue();
   refreshTransactionAmountValues();
 
   // Update more/less toggle button
