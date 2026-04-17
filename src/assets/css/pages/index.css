@@ -66,14 +66,19 @@ html.app-ready #app .main-content {
   }
 }
 
-/* Small card layout: stack content, keep transaction info at bottom */
+/* Small card layout: stack content, show transaction info below logos */
+.card.card-large,
+.card.card-small {
+  padding: 14px;
+}
+
 .card.card-small {
   display: flex;
   flex-direction: column;
 }
 
 .card.card-small .transaction-info {
-  margin-top: auto;
+  margin-top: var(--spacing-lg);
 }
 
 .partner-logos-section {

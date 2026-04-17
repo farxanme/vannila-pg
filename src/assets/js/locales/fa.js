@@ -7,6 +7,7 @@ export default {
   'common.cancel': 'انصراف',
   'common.close': 'بستن',
   'common.confirm': 'تایید',
+  'common.help': 'راهنما',
   'common.delete': 'حذف',
   'common.edit': 'ویرایش',
   'common.save': 'ذخیره',

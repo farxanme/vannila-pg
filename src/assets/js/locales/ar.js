@@ -7,6 +7,7 @@ export default {
   'common.cancel': 'إلغاء',
   'common.close': 'إغلاق',
   'common.confirm': 'تأكيد',
+  'common.help': 'مساعدة',
   'common.delete': 'حذف',
   'common.edit': 'تعديل',
   'common.save': 'حفظ',

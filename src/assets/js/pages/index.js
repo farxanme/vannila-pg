@@ -1186,26 +1186,6 @@ async function initializeTransactionInfo() {
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
 
   container.innerHTML = `
-    <div class="more-content" id="more-transaction-info">
-      <div class="transaction-info-item">
-        <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-shop.svg" alt="" aria-hidden="true" />
-        </div>
-        <div class="transaction-info-content">
-          <div class="transaction-info-label" data-transaction-field="terminal">${i18n.t('transaction.terminal')}</div>
-          <div class="transaction-info-value">${transactionData.terminal}</div>
-        </div>
-      </div>
-      <div class="transaction-info-item">
-        <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-world.svg" alt="" aria-hidden="true" />
-        </div>
-        <div class="transaction-info-content">
-          <div class="transaction-info-label" data-transaction-field="site">${i18n.t('transaction.site')}</div>
-          <div class="transaction-info-value">${transactionData.site}</div>
-        </div>
-      </div>
-    </div>
     <div class="transaction-summary-card">
       <div class="transaction-info-item">
         <div class="transaction-info-icon">
@@ -1226,6 +1206,26 @@ async function initializeTransactionInfo() {
             <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
             <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
           </div>
+        </div>
+      </div>
+    </div>
+    <div class="more-content" id="more-transaction-info">
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-shop.svg" alt="" aria-hidden="true" />
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label" data-transaction-field="terminal">${i18n.t('transaction.terminal')}</div>
+          <div class="transaction-info-value">${transactionData.terminal}</div>
+        </div>
+      </div>
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          <img src="/assets/images/icons/icn-world.svg" alt="" aria-hidden="true" />
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label" data-transaction-field="site">${i18n.t('transaction.site')}</div>
+          <div class="transaction-info-value">${transactionData.site}</div>
         </div>
       </div>
     </div>

@@ -329,8 +329,9 @@
   background: var(--color-primary-50);
   color: var(--color-primary-500);
   border-radius: var(--radius-lg);
-  min-height: 56px;
-  padding: 0 var(--spacing-md);
+  height: 50px;
+  min-height: 50px;
+  padding: 0 16px;
   box-sizing: border-box;
   border: none;
   margin-bottom: var(--spacing-md);
@@ -338,6 +339,28 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--spacing-md);
+}
+
+#timer-header {
+  height: 50px;
+  min-height: 50px;
+  padding: 0 16px;
+}
+
+.card-header-help-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+
+.card-header-help-btn img {
+  width: 20px;
+  height: 20px;
 }
 
 .card-title {

@@ -7,6 +7,7 @@ export default {
   'common.cancel': 'İptal',
   'common.close': 'Kapat',
   'common.confirm': 'Onayla',
+  'common.help': 'Yardım',
   'common.delete': 'Sil',
   'common.edit': 'Düzenle',
   'common.save': 'Kaydet',
