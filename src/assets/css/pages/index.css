@@ -196,16 +196,9 @@ html.app-ready #app .main-content {
   gap: 0;
 }
 
-/* Captcha audio button spacing */
+/* Captcha audio button spacing (logical: same gap in LTR and RTL) */
 .captcha-container .captcha-input-row .captcha-audio-btn {
-  margin-left: var(--spacing-md);
-  /* LTR: gap on left side (between image and button) */
-}
-
-/* RTL: move gap to right side */
-[dir='rtl'] .captcha-container .captcha-input-row .captcha-audio-btn {
-  margin-left: 0;
-  margin-right: var(--spacing-md);
+  margin-inline-start: var(--spacing-md);
 }
 
 /* Captcha input wrapper */
@@ -373,7 +366,6 @@ html.app-ready #app .main-content {
   max-width: 154px;
   flex-shrink: 0;
   margin-top: 0;
-  margin-right: var(--spacing-md);
   height: 48px;
   min-height: 48px;
   display: flex;
@@ -457,6 +449,29 @@ html.app-ready #app .main-content {
   gap: var(--spacing-xs);
 }
 
+.dropdown-card-remove-btn {
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.dropdown-card-remove-btn:hover {
+  background: var(--color-error-50);
+}
+
+.dropdown-card-remove-btn img {
+  width: 16px;
+  height: 16px;
+}
+
 .dropdown-card-number {
   font-family: monospace;
   direction: ltr;
@@ -484,4 +499,40 @@ html.app-ready #app .main-content {
 .init-error-section .payment-init-error .empty-state {
   padding-top: 0;
   padding-bottom: 0;
+}
+
+/* Mobile: captcha audio = icon only; checkout card headers minimized */
+@media (max-width: 768px) {
+  .captcha-container .captcha-input-row .captcha-audio-btn .captcha-audio-btn-label {
+    display: none;
+  }
+
+  .captcha-container .captcha-input-row .captcha-audio-btn {
+    min-width: 48px;
+    max-width: 48px;
+    padding-inline: var(--spacing-xs);
+    gap: 0;
+  }
+
+  /* Hide payment form card strip (title + help) */
+  .card-large > .card-header {
+    display: none;
+  }
+
+  /* Timer card: hide title bar text; keep countdown; strip chrome when not warning/danger */
+  .card-small #timer-header .card-title {
+    display: none;
+  }
+
+  .card-small #timer-header {
+    margin-bottom: var(--spacing-md);
+    padding: var(--spacing-xs) var(--spacing-sm);
+    min-height: 0;
+    height: auto;
+    justify-content: center;
+  }
+
+  .card-small #timer-header:not(.warning):not(.danger) {
+    background: transparent;
+  }
 }

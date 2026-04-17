@@ -138,7 +138,8 @@ export class Input {
       clearBtn.className = 'input-clear';
       clearBtn.innerHTML = '<img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />';
       clearBtn.setAttribute('aria-label', this.options.clearButtonAriaLabel);
-      clearBtn.style.display = 'none';
+      clearBtn.style.visibility = 'hidden';
+      clearBtn.style.pointerEvents = 'none';
       clearBtn.onclick = (e) => {
         e.stopPropagation();
         this.clear();
@@ -236,8 +237,9 @@ export class Input {
    */
   updateClearButton() {
     if (this.clearButton) {
-      this.clearButton.style.display =
-        this.element.value && !this.options.disabled ? 'block' : 'none';
+      const shouldShow = Boolean(this.element.value) && !this.options.disabled;
+      this.clearButton.style.visibility = shouldShow ? 'visible' : 'hidden';
+      this.clearButton.style.pointerEvents = shouldShow ? 'auto' : 'none';
     }
   }
 

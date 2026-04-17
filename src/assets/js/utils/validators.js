@@ -1,4 +1,5 @@
 import { extractNumbers } from './numberConverter.js';
+import { i18n } from './i18n.js';
 
 /**
  * Validation Rules
@@ -39,11 +40,11 @@ export function validateCardNumber(cardNumber) {
   const numbers = extractNumbers(cardNumber);
 
   if (!numbers || numbers.length === 0) {
-    return { valid: false, message: 'Card number is required' };
+    return { valid: false, message: i18n.t('form.cardNumber.required') };
   }
 
   if (numbers.length !== 16) {
-    return { valid: false, message: 'Card number must be 16 digits' };
+    return { valid: false, message: i18n.t('form.cardNumber.mustBe16Digits') };
   }
 
   // Luhn algorithm check
@@ -68,7 +69,7 @@ export function validateCardNumber(cardNumber) {
 
   return {
     valid,
-    message: valid ? '' : 'Invalid card number',
+    message: valid ? '' : i18n.t('form.cardNumber.invalid'),
   };
 }
 
@@ -81,7 +82,7 @@ export function validateMobile(mobile) {
   const numbers = extractNumbers(mobile);
 
   if (!numbers || numbers.length === 0) {
-    return { valid: false, message: 'Mobile number is required' };
+    return { valid: false, message: i18n.t('form.mobile.required') };
   }
 
   // Iranian mobile: 09xxxxxxxxx (11 digits) or 9xxxxxxxxx (10 digits)
@@ -93,7 +94,7 @@ export function validateMobile(mobile) {
       : numbers;
 
   if (!pattern.test(cleanMobile) || cleanMobile.length !== 11) {
-    return { valid: false, message: 'Invalid mobile number format' };
+    return { valid: false, message: i18n.t('form.mobile.invalid') };
   }
 
   return { valid: true, message: '' };
@@ -106,7 +107,7 @@ export function validateMobile(mobile) {
  */
 export function validateEmail(email) {
   if (!email || email.trim() === '') {
-    return { valid: false, message: 'Email is required' };
+    return { valid: false, message: i18n.t('form.email.required') };
   }
 
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -114,7 +115,7 @@ export function validateEmail(email) {
 
   return {
     valid,
-    message: valid ? '' : 'Invalid email format',
+    message: valid ? '' : i18n.t('form.email.invalid'),
   };
 }
 
@@ -128,18 +129,21 @@ export function validateCVV2(cvv, expectedLength = null) {
   const numbers = extractNumbers(cvv);
 
   if (!numbers || numbers.length === 0) {
-    return { valid: false, message: 'CVV2 is required' };
+    return { valid: false, message: i18n.t('form.cvv2.required') };
   }
 
   if (expectedLength === 3 || expectedLength === 4) {
     if (numbers.length !== expectedLength) {
-      return { valid: false, message: `CVV2 must be ${expectedLength} digits` };
+      return {
+        valid: false,
+        message: i18n.t('form.cvv2.invalidLength', { count: String(expectedLength) }),
+      };
     }
     return { valid: true, message: '' };
   }
 
   if (numbers.length < 3 || numbers.length > 4) {
-    return { valid: false, message: 'CVV2 must be 3 or 4 digits' };
+    return { valid: false, message: i18n.t('form.cvv2.invalidLengthRange') };
   }
 
   return { valid: true, message: '' };
@@ -156,11 +160,11 @@ export function validateExpiryDate(month, year) {
   const yearNum = parseInt(extractNumbers(year));
 
   if (!month || !year) {
-    return { valid: false, message: 'Expiry date is required' };
+    return { valid: false, message: i18n.t('form.expiryDate.required') };
   }
 
   if (monthNum < 1 || monthNum > 12) {
-    return { valid: false, message: 'Invalid month' };
+    return { valid: false, message: i18n.t('form.expiryDate.invalidMonth') };
   }
 
   // Convert 2-digit year to 4-digit
@@ -170,7 +174,7 @@ export function validateExpiryDate(month, year) {
   const currentMonth = currentDate.getMonth() + 1;
 
   if (fullYear < currentYear || (fullYear === currentYear && monthNum < currentMonth)) {
-    return { valid: false, message: 'Card has expired' };
+    return { valid: false, message: i18n.t('form.expiryDate.expired') };
   }
 
   return { valid: true, message: '' };
@@ -179,12 +183,11 @@ export function validateExpiryDate(month, year) {
 /**
  * Validate required field
  * @param {string} value - Field value
- * @param {string} fieldName - Field name for error message
  * @returns {Object} - { valid: boolean, message: string }
  */
-export function validateRequired(value, fieldName = 'Field') {
+export function validateRequired(value) {
   if (!value || value.trim() === '') {
-    return { valid: false, message: `${fieldName} is required` };
+    return { valid: false, message: i18n.t('common.required') };
   }
   return { valid: true, message: '' };
 }
@@ -198,11 +201,11 @@ export function validateOTP(otp) {
   const numbers = extractNumbers(otp);
 
   if (!numbers || numbers.length === 0) {
-    return { valid: false, message: 'OTP is required' };
+    return { valid: false, message: i18n.t('form.otp.required') };
   }
 
   if (numbers.length !== 6) {
-    return { valid: false, message: 'OTP must be 6 digits' };
+    return { valid: false, message: i18n.t('form.otp.mustBe6Digits') };
   }
 
   return { valid: true, message: '' };

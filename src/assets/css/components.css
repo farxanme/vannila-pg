@@ -4,6 +4,8 @@
 .input-wrapper {
   margin-bottom: var(--spacing-md);
   position: relative;
+  min-width: 0;
+  max-width: 100%;
 }
 
 .input-label {
@@ -29,6 +31,9 @@
   transition: all var(--transition-base);
   height: var(--height-control-md);
   min-height: var(--height-control-md);
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .input-container.focused {
@@ -70,8 +75,10 @@
 }
 
 .input-field {
-  flex: 1;
-  padding: var(--spacing-3);
+  flex: 1 1 0;
+  min-width: 0;
+  padding-block: var(--spacing-3);
+  padding-inline: var(--spacing-3);
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background: transparent;
@@ -80,6 +87,15 @@
   height: 100%;
   border: none;
   outline: none;
+}
+
+/* Extra inline padding toward action/clear strip (same in LTR & RTL via logical props) */
+.input-container:has(.input-right-container) .input-field {
+  padding-inline-end: calc(var(--spacing-3) + var(--spacing-xs));
+}
+
+.input-container:has(.input-action-left) .input-field {
+  padding-inline-start: calc(var(--spacing-3) + var(--spacing-xs));
 }
 
 .input-password-mask {
@@ -100,12 +116,8 @@
 .card-bank-logo {
   display: flex;
   align-items: center;
-  margin-right: var(--spacing-3);
-}
-
-[dir='ltr'] .card-bank-logo {
-  margin-right: 0;
-  margin-left: var(--spacing-3);
+  margin-inline-start: var(--spacing-3);
+  flex-shrink: 0;
 }
 
 .card-bank-logo img {
@@ -126,14 +138,9 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding-right: var(--spacing-3);
-  padding-left: 0;
+  padding-inline-end: var(--spacing-3);
+  padding-inline-start: 0;
   flex-shrink: 0;
-}
-
-[dir='rtl'] .input-right-container {
-  padding-right: 0;
-  padding-left: var(--spacing-3);
 }
 
 .input-action {

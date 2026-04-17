@@ -77,6 +77,7 @@ let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
 let refreshCardDropdownFooterButtons = null;
+let isCardListManageMode = false;
 
 /**
  * Reveal main content after loading and all setup (success, error, or failure paths).
@@ -337,6 +338,12 @@ function buildCardDropdownItems() {
     const logoPath = getBankLogo(card.bankName);
     const localizedBankName = getLocalizedBankName(card.bankName, lang);
     const maskedPan = getMaskedDisplayPan(card.securePan);
+    const removeButtonHtml = isCardListManageMode
+      ? `
+                <button type="button" class="dropdown-card-remove-btn" data-card-value="${card.number}" aria-label="${i18n.t('common.delete')}">
+                  <img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />
+                </button>`
+      : '';
     return {
       text: maskedPan,
       value: card.number,
@@ -348,12 +355,49 @@ function buildCardDropdownItems() {
               </div>
               <div class="dropdown-card-meta">
                 <span class="dropdown-card-number">${maskedPan}</span>
+                ${removeButtonHtml}
                 ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
               </div>
             </div>
           `,
+      onRender: (listItem) => {
+        const removeBtn = listItem.querySelector('.dropdown-card-remove-btn');
+        if (!removeBtn) return;
+        removeBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          const targetValue = removeBtn.getAttribute('data-card-value');
+          if (!targetValue) return;
+          removeCardFromList(targetValue);
+        });
+      },
     };
   });
+}
+
+function removeCardFromList(cardNumberValue) {
+  const beforeCount = cardList.length;
+  cardList = cardList.filter((card) => String(card.number) !== String(cardNumberValue));
+  if (cardList.length === beforeCount) return;
+  if (cardList.length === 0) {
+    isCardListManageMode = false;
+  }
+  dataStore.set('savedCards', cardList);
+
+  const currentInputValue = extractNumbers(cardNumberInput?.getValue?.() || '');
+  if (currentInputValue && String(currentInputValue) === String(cardNumberValue)) {
+    selectedSavedCardForApi = null;
+    cardNumberInput?.setValue('');
+    cardNumberInput?.clearValidation?.();
+    updateBankLogo(null);
+  }
+
+  if (cardDropdown) {
+    cardDropdown.updateItems(buildCardDropdownItems());
+  }
+  if (typeof refreshCardDropdownFooterButtons === 'function') {
+    refreshCardDropdownFooterButtons();
+  }
 }
 
 // Initialize page
@@ -736,38 +780,61 @@ function initializeFormInputs() {
   // Create card dropdown if cards exist
   if (cardList.length > 0) {
     const buildCardDropdownFooterButtons = () => [
-      {
-        text: i18n.t('cardList.addNew'),
-        className: 'dropdown-footer-btn-add',
-        icon: '<img src="/assets/images/icons/icn-square-plus.svg" alt="" />',
-        onClick: (dropdownInstance) => {
-          dropdownInstance.close();
-          selectedSavedCardForApi = null;
-          hasUserEnabledExpiryDateEdit = false;
-          cardNumberInput.setValue('');
-          cardNumberInput.clearValidation?.();
-          updateBankLogo(null);
-          applyExpiryDateModeForSelectedCard();
-          syncCvv2Constraints();
-          syncGetOtpButtonState();
-          resetFieldsOnCardChange();
-          cardNumberInput.focus();
-        },
-      },
-      {
-        text: i18n.t('cardList.manage'),
-        className: 'dropdown-footer-btn-manage',
-        icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" />',
-        onClick: (dropdownInstance) => {
-          dropdownInstance.close();
-        },
-      },
+      ...(isCardListManageMode
+        ? [
+            {
+              text: i18n.t('common.cancel'),
+              className: 'dropdown-footer-btn-cancel',
+              icon: '<img src="/assets/images/icons/icn-x.svg" alt="" />',
+              onClick: (dropdownInstance) => {
+                isCardListManageMode = false;
+                dropdownInstance.updateItems(buildCardDropdownItems());
+                if (typeof refreshCardDropdownFooterButtons === 'function') {
+                  refreshCardDropdownFooterButtons();
+                }
+              },
+            },
+          ]
+        : [
+            {
+              text: i18n.t('cardList.addNew'),
+              className: 'dropdown-footer-btn-add',
+              icon: '<img src="/assets/images/icons/icn-square-plus.svg" alt="" />',
+              onClick: (dropdownInstance) => {
+                selectedSavedCardForApi = null;
+                hasUserEnabledExpiryDateEdit = false;
+                cardNumberInput.setValue('');
+                cardNumberInput.clearValidation?.();
+                updateBankLogo(null);
+                applyExpiryDateModeForSelectedCard();
+                syncCvv2Constraints();
+                syncGetOtpButtonState();
+                resetFieldsOnCardChange();
+                cardNumberInput.focus();
+              },
+            },
+            {
+              text: i18n.t('cardList.manage'),
+              className: 'dropdown-footer-btn-manage',
+              icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" />',
+              onClick: (dropdownInstance) => {
+                isCardListManageMode = true;
+                dropdownInstance.updateItems(buildCardDropdownItems());
+                if (typeof refreshCardDropdownFooterButtons === 'function') {
+                  refreshCardDropdownFooterButtons();
+                }
+              },
+            },
+          ]),
     ];
 
     cardDropdown = new Dropdown(cardNumberInput.element, {
       items: buildCardDropdownItems(),
       footerButtons: buildCardDropdownFooterButtons(),
       onSelect: (item) => {
+        if (isCardListManageMode) {
+          return;
+        }
         const card = cardList.find((c) => c.number === item.value);
         if (card) {
           resetFieldsOnCardChange();
@@ -839,13 +906,13 @@ function initializeFormInputs() {
     placeholder: i18n.t('form.cvv2.placeholder'),
     hint: i18n.t('form.cvv2.hint'),
     required: true,
-    requiredMessage: i18n.t('common.required'),
+    requiredMessage: i18n.t('form.cvv2.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: (value) => {
       const constraints = getCvv2Constraints();
       const numbers = extractNumbers(value);
       if (!numbers || numbers.length === 0) {
-        return { valid: false, message: i18n.t('common.required') };
+        return { valid: false, message: i18n.t('form.cvv2.required') };
       }
       if (constraints.fixedLength && numbers.length !== constraints.maxLength) {
         return {
@@ -943,14 +1010,14 @@ function initializeFormInputs() {
       const month = parseInt(numbers.substring(0, 2));
       const year = parseInt(numbers.substring(2, 4));
       if (month < 1 || month > 12) {
-        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
+        return { valid: false, message: i18n.t('form.expiryDate.invalidMonth') };
       }
       // Validate expiry date (not expired)
       const currentDate = new Date();
       const currentYear = currentDate.getFullYear() % 100;
       const currentMonth = currentDate.getMonth() + 1;
       if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
+        return { valid: false, message: i18n.t('form.expiryDate.expired') };
       }
       return { valid: true, message: '' };
     },
@@ -1031,7 +1098,7 @@ function initializeFormInputs() {
   captchaAudio.className = 'btn btn-primary btn-bordered captcha-audio-btn';
   captchaAudio.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   captchaAudio.innerHTML = `
-    <span data-i18n="form.audioPlay">${i18n.t('form.audioPlay')}</span>
+    <span class="captcha-audio-btn-label" data-i18n="form.audioPlay">${i18n.t('form.audioPlay')}</span>
     <span class="btn-icon" aria-hidden="true">
       <img src="/assets/images/icons/icn-volume.svg" alt="" />
     </span>

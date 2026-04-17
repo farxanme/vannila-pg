@@ -16,6 +16,8 @@ export class Dropdown {
     };
 
     this.isOpen = false;
+    /** When true, next focus on the linked input will not auto-open (e.g. after "add new card"). */
+    this.skipNextFocusOpen = false;
     this.filteredItems = [...this.options.items];
     this.init();
   }
@@ -113,6 +115,9 @@ export class Dropdown {
           icon.className = 'dropdown-item-icon';
           icon.innerHTML = item.icon;
           li.insertBefore(icon, li.firstChild);
+        }
+        if (typeof item.onRender === 'function') {
+          item.onRender(li, this);
         }
       }
 
@@ -293,6 +298,10 @@ export class Dropdown {
     // Open on input focus
     if (actualInput && actualInput.tagName === 'INPUT') {
       actualInput.addEventListener('focus', () => {
+        if (this.skipNextFocusOpen) {
+          this.skipNextFocusOpen = false;
+          return;
+        }
         if (this.options.autoOpen !== false) {
           this.open();
         }

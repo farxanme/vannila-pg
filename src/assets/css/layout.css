@@ -450,13 +450,20 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--spacing-md);
+  align-items: start;
+}
+
+/* Prevent grid/flex children (CVV2 + expiry) from overflowing the row */
+.form-row > * {
+  min-width: 0;
+  max-width: 100%;
 }
 
 @media (max-width: 768px) {
   .form-row {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -619,6 +626,13 @@
 
   .more-toggle {
     display: block;
+  }
+
+  /* Tighter vertical rhythm between transaction summary rows (half of desktop gap) */
+  .transaction-info,
+  .transaction-summary-card,
+  .more-content {
+    gap: calc(var(--spacing-7_5) / 2);
   }
 }
 
