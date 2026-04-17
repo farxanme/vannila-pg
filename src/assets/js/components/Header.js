@@ -118,12 +118,17 @@ export class Header {
   }
 
   /**
-   * Settings dropdown (theme: light / dark / system)
+   * Settings dropdown (grouped; collapsible when multiple groups — see settingsPanel.js)
    * @param {HTMLElement} container - Toolbar element
    */
   async createSettingsDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
     const { getThemePreference, setThemePreference } = await import('../utils/themeManager.js');
+    const {
+      getSettingsGroupDescriptors,
+      buildSettingsGroupBody,
+      mountSettingsGroupsLayout,
+    } = await import('./settingsPanel.js');
 
     const wrap = document.createElement('div');
     wrap.className = 'header-settings-dropdown';
@@ -148,83 +153,50 @@ export class Header {
     const menuId = button.getAttribute('aria-controls');
     menu.id = menuId;
 
-    const sectionTitle = document.createElement('div');
-    sectionTitle.className = 'settings-dropdown-section-title';
-    sectionTitle.id = `${menuId}-theme-heading`;
-    sectionTitle.setAttribute('data-i18n', 'settings.theme');
-    sectionTitle.textContent = i18n.t('settings.theme');
+    const descriptors = getSettingsGroupDescriptors();
+    const accordion = descriptors.length > 1;
 
-    const radiogroup = document.createElement('div');
-    radiogroup.setAttribute('role', 'radiogroup');
-    radiogroup.setAttribute('aria-labelledby', sectionTitle.id);
-
-    const modeDefs = [
-      { value: 'light', i18nKey: 'settings.theme.light' },
-      { value: 'dark', i18nKey: 'settings.theme.dark' },
-      { value: 'system', i18nKey: 'settings.theme.system' },
-    ];
-
-    const getThemeOptionIconSvg = (mode) => {
-      if (mode === 'light') {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-5a1 1 0 1 1 0 2h-1.5a1 1 0 1 1 0-2H20ZM6.5 11a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2h1.5Zm9.07-4.66a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L15.57 7.75a1 1 0 0 1 0-1.41Zm-7.14 7.14a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L8.43 14.9a1 1 0 0 1 0-1.41Zm8.2 2.47a1 1 0 0 1 1.41 0 1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06Zm-7.14-7.14a1 1 0 0 1 1.41-1.41 1 1 0 0 1 0 1.41L8.84 9.88a1 1 0 1 1-1.41-1.41l1.06-1.06Z"/></svg>';
+    const syncThemeFromWindow = () => {
+      if (typeof this._settingsMenuThemeSync === 'function') {
+        this._settingsMenuThemeSync();
       }
-      if (mode === 'dark') {
-        return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.6 2.4a1 1 0 0 1 .7 1.68 7.5 7.5 0 1 0 8.62 8.62 1 1 0 0 1 1.68.7A9.5 9.5 0 1 1 14.6 2.4Z"/></svg>';
-      }
-      return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15h-11A2.5 2.5 0 0 1 4 12.5v-7Zm2.5-.5a.5.5 0 0 0-.5.5v7c0 .28.22.5.5.5h11a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-11ZM8 19a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Z"/></svg>';
     };
 
-    const themeButtons = [];
-
-    const syncThemeSelection = () => {
-      const pref = getThemePreference();
-      themeButtons.forEach(({ el, value }) => {
-        const checked = pref === value;
-        el.setAttribute('aria-checked', checked ? 'true' : 'false');
-      });
-    };
-
-    modeDefs.forEach(({ value, i18nKey }) => {
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'settings-theme-option';
-      row.setAttribute('role', 'radio');
-      row.setAttribute('aria-checked', 'false');
-      const check = document.createElement('span');
-      check.className = 'settings-theme-check';
-      check.setAttribute('aria-hidden', 'true');
-      const icon = document.createElement('span');
-      icon.className = 'settings-theme-icon';
-      icon.setAttribute('aria-hidden', 'true');
-      icon.innerHTML = getThemeOptionIconSvg(value);
-      const label = document.createElement('span');
-      label.setAttribute('data-i18n', i18nKey);
-      label.textContent = i18n.t(i18nKey);
-      row.appendChild(icon);
-      row.appendChild(label);
-      row.appendChild(check);
-      row.onclick = (e) => {
-        e.stopPropagation();
-        setThemePreference(value);
-        syncThemeSelection();
+    const { bodies } = mountSettingsGroupsLayout(menu, {
+      menuId,
+      i18n,
+      descriptors,
+      accordion,
+      getThemePreference,
+      setThemePreference,
+      buildBody: buildSettingsGroupBody,
+      onThemePicked: () => {
         menu.style.display = 'none';
         button.setAttribute('aria-expanded', 'false');
-      };
-      themeButtons.push({ el: row, value });
-      radiogroup.appendChild(row);
+      },
     });
 
-    syncThemeSelection();
-    window.addEventListener('themePreferenceChange', syncThemeSelection);
-
-    menu.appendChild(sectionTitle);
-    menu.appendChild(radiogroup);
+    const menuThemeBody = bodies.find((b) => b.themeButtons && b.themeButtons.length > 0) || bodies[0];
+    this._settingsMenuThemeSync = menuThemeBody.syncThemeSelection;
+    window.addEventListener('themePreferenceChange', syncThemeFromWindow);
 
     const refreshSettingsI18n = () => {
-      sectionTitle.textContent = i18n.t('settings.theme');
       i18n.applyDataI18n(menu);
       button.setAttribute('aria-label', i18n.t('accessibility.openSettings'));
-      radiogroup.setAttribute('aria-label', i18n.t('settings.theme'));
+      const singleTitle = menu.querySelector('.settings-dropdown-section-title');
+      if (singleTitle && !accordion) {
+        singleTitle.textContent = i18n.t(descriptors[0].titleKey);
+      }
+      menu.querySelectorAll('.settings-group-header-text').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (key) {
+          el.textContent = i18n.t(key);
+        }
+      });
+      const rg = menu.querySelector('[role="radiogroup"]');
+      if (rg && !accordion) {
+        rg.setAttribute('aria-label', i18n.t('settings.theme'));
+      }
     };
     document.addEventListener('languageChange', refreshSettingsI18n);
 
@@ -239,63 +211,37 @@ export class Header {
         let settingsSheet = null;
         const sheetContent = document.createElement('div');
         sheetContent.className = 'header-sheet-settings-menu';
-        const sheetSectionTitle = document.createElement('div');
-        sheetSectionTitle.className = 'settings-dropdown-section-title';
-        sheetSectionTitle.id = `${menuId}-sheet-theme-heading`;
-        sheetSectionTitle.setAttribute('data-i18n', 'settings.theme');
-        sheetSectionTitle.textContent = i18n.t('settings.theme');
 
-        const sheetRadiogroup = document.createElement('div');
-        sheetRadiogroup.setAttribute('role', 'radiogroup');
-        sheetRadiogroup.setAttribute('aria-labelledby', sheetSectionTitle.id);
+        const sheetTitle = accordion
+          ? i18n.t('accessibility.openSettings')
+          : i18n.t(descriptors[0].titleKey);
 
-        const themeButtonsSheet = [];
-        const syncThemeSelectionSheet = () => {
-          const pref = getThemePreference();
-          themeButtonsSheet.forEach(({ el, value }) => {
-            el.setAttribute('aria-checked', pref === value ? 'true' : 'false');
-          });
-        };
-
-        modeDefs.forEach(({ value, i18nKey }) => {
-          const row = document.createElement('button');
-          row.type = 'button';
-          row.className = 'settings-theme-option';
-          row.setAttribute('role', 'radio');
-          row.setAttribute('aria-checked', 'false');
-          const checkEl = document.createElement('span');
-          checkEl.className = 'settings-theme-check';
-          checkEl.setAttribute('aria-hidden', 'true');
-          const iconEl = document.createElement('span');
-          iconEl.className = 'settings-theme-icon';
-          iconEl.setAttribute('aria-hidden', 'true');
-          iconEl.innerHTML = getThemeOptionIconSvg(value);
-          const labelEl = document.createElement('span');
-          labelEl.setAttribute('data-i18n', i18nKey);
-          labelEl.textContent = i18n.t(i18nKey);
-          row.appendChild(iconEl);
-          row.appendChild(labelEl);
-          row.appendChild(checkEl);
-          row.onclick = (ev) => {
-            ev.stopPropagation();
-            setThemePreference(value);
-            syncThemeSelection();
-            syncThemeSelectionSheet();
+        const { bodies: sheetBodies } = mountSettingsGroupsLayout(sheetContent, {
+          menuId: `${menuId}-sheet`,
+          i18n,
+          descriptors,
+          accordion,
+          getThemePreference,
+          setThemePreference,
+          buildBody: buildSettingsGroupBody,
+          onThemePicked: () => {
             settingsSheet?.close();
-          };
-          themeButtonsSheet.push({ el: row, value });
-          sheetRadiogroup.appendChild(row);
+          },
         });
 
-        syncThemeSelectionSheet();
-        sheetContent.appendChild(sheetSectionTitle);
-        sheetContent.appendChild(sheetRadiogroup);
+        const sheetThemeBody =
+          sheetBodies.find((b) => b.themeButtons && b.themeButtons.length > 0) || sheetBodies[0];
+        const onThemePrefChangeForSheet = () => {
+          sheetThemeBody.syncThemeSelection();
+        };
+        window.addEventListener('themePreferenceChange', onThemePrefChangeForSheet);
 
         settingsSheet = new BottomSheet({
-          title: i18n.t('settings.theme'),
+          title: sheetTitle,
           content: sheetContent,
           scrollable: true,
           onClose: () => {
+            window.removeEventListener('themePreferenceChange', onThemePrefChangeForSheet);
             settingsSheet?.destroy();
           },
         });
