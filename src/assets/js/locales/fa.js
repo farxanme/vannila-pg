@@ -33,7 +33,7 @@ export default {
   // Form
   'form.cardNumber': 'شماره کارت',
   'form.cardNumber.selectCard': 'انتخاب کارت',
-  'form.cardNumber.placeholder': '1234 5678 9012 3456',
+  'form.cardNumber.placeholder': '●●●● ●●●● ●●●● ●●●●',
   'form.cardNumber.required': 'شماره کارت الزامی است',
   'form.cardNumber.invalid': 'شماره کارت نامعتبر است',
   'form.cvv2': 'CVV2',
@@ -41,6 +41,7 @@ export default {
   'form.cvv2.required': 'CVV2 الزامی است',
   'form.cvv2.hint': 'کد ۳ یا ۴ رقمی پشت کارت',
   'form.cvv2.invalidLength': 'CVV2 باید {{count}} رقمی باشد',
+  'form.cvv2.invalidLengthRange': 'CVV2 باید ۳ یا ۴ رقمی باشد',
   'form.expiryDate': 'تاریخ انقضا',
   'form.expiryMonth': 'ماه',
   'form.expiryYear': 'سال',

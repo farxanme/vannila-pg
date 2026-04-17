@@ -9,6 +9,7 @@ export class Dropdown {
       items: options.items || [],
       onSelect: options.onSelect || null,
       searchable: options.searchable || false,
+      footerButtons: options.footerButtons || [],
       placeholder: options.placeholder || 'Select...',
       maxHeight: options.maxHeight || '200px',
       ...options,
@@ -55,6 +56,11 @@ export class Dropdown {
     dropdown.appendChild(list);
     this.listElement = list;
 
+    const footer = document.createElement('div');
+    footer.className = 'dropdown-footer';
+    dropdown.appendChild(footer);
+    this.footerElement = footer;
+
     // Find input wrapper (input-wrapper) and append dropdown to it
     let wrapper = this.inputElement.closest('.input-wrapper');
     if (!wrapper) {
@@ -74,6 +80,7 @@ export class Dropdown {
 
     this.dropdownElement = dropdown;
     this.renderItems();
+    this.renderFooterButtons();
   }
 
   /**
@@ -114,6 +121,34 @@ export class Dropdown {
       });
 
       this.listElement.appendChild(li);
+    });
+  }
+
+  renderFooterButtons() {
+    if (!this.footerElement) return;
+    this.footerElement.innerHTML = '';
+    const buttons = Array.isArray(this.options.footerButtons) ? this.options.footerButtons : [];
+    if (buttons.length === 0) {
+      this.footerElement.style.display = 'none';
+      return;
+    }
+    this.footerElement.style.display = 'flex';
+    buttons.forEach((buttonDef) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `dropdown-footer-btn ${buttonDef.className || ''}`.trim();
+      button.innerHTML = `
+        ${buttonDef.icon ? `<span class="dropdown-footer-btn-icon" aria-hidden="true">${buttonDef.icon}</span>` : ''}
+        <span class="dropdown-footer-btn-text">${buttonDef.text || ''}</span>
+      `;
+      button.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        if (typeof buttonDef.onClick === 'function') {
+          buttonDef.onClick(this);
+        }
+      });
+      this.footerElement.appendChild(button);
     });
   }
 
@@ -273,6 +308,7 @@ export class Dropdown {
     this.options.items = items;
     this.filteredItems = [...items];
     this.renderItems();
+    this.renderFooterButtons();
   }
 
   /**

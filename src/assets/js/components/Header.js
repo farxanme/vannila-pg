@@ -193,7 +193,6 @@ export class Header {
       const check = document.createElement('span');
       check.className = 'settings-theme-check';
       check.setAttribute('aria-hidden', 'true');
-      check.textContent = '✓';
       const icon = document.createElement('span');
       icon.className = 'settings-theme-icon';
       icon.setAttribute('aria-hidden', 'true');
@@ -201,9 +200,9 @@ export class Header {
       const label = document.createElement('span');
       label.setAttribute('data-i18n', i18nKey);
       label.textContent = i18n.t(i18nKey);
-      row.appendChild(check);
       row.appendChild(icon);
       row.appendChild(label);
+      row.appendChild(check);
       row.onclick = (e) => {
         e.stopPropagation();
         setThemePreference(value);
@@ -278,10 +277,25 @@ export class Header {
       const item = document.createElement('button');
       item.type = 'button';
       item.className = `lang-dropdown-item ${lang.code === currentLang ? 'active' : ''}`;
-      item.textContent = lang.nativeName;
+      item.setAttribute('role', 'menuitemradio');
+      item.setAttribute('aria-checked', lang.code === currentLang ? 'true' : 'false');
+      const label = document.createElement('span');
+      label.className = 'lang-dropdown-item-label';
+      label.textContent = lang.nativeName;
+      const check = document.createElement('span');
+      check.className = 'settings-theme-check lang-dropdown-item-check';
+      check.setAttribute('aria-hidden', 'true');
+      item.appendChild(label);
+      item.appendChild(check);
       item.onclick = () => {
         i18n.setLanguage(lang.code);
         button.textContent = lang.nativeName;
+        dropdown.querySelectorAll('.lang-dropdown-item').forEach((dropdownItem) => {
+          dropdownItem.classList.remove('active');
+          dropdownItem.setAttribute('aria-checked', 'false');
+        });
+        item.classList.add('active');
+        item.setAttribute('aria-checked', 'true');
         dropdown.style.display = 'none';
         button.setAttribute('aria-expanded', 'false');
 

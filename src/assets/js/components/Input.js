@@ -246,6 +246,13 @@ export class Input {
    * @returns {boolean} - Is valid
    */
   validate() {
+    if (this.element?.disabled || this.element?.readOnly || this.options.disabled) {
+      this.isValid = true;
+      this.errorMessage = '';
+      this.clearValidation();
+      return true;
+    }
+
     const value = this.getValue();
     let validationResult = { valid: true, message: '' };
 
@@ -274,20 +281,27 @@ export class Input {
    */
   updateValidationState() {
     if (this.isValid) {
-      this.wrapper.classList.remove('error');
-      if (this.inputContainer) this.inputContainer.classList.remove('error');
-      this.errorElement.textContent = '';
-      this.errorElement.style.display = 'none';
+      this.clearValidation();
     } else {
       this.wrapper.classList.add('error');
       if (this.inputContainer) this.inputContainer.classList.add('error');
       this.errorElement.textContent = this.errorMessage;
-      this.errorElement.style.display = 'block';
+      this.errorElement.style.visibility = 'visible';
 
       if (navigator.vibrate) {
         navigator.vibrate(200);
       }
     }
+  }
+
+  /**
+   * Clear validation UI state
+   */
+  clearValidation() {
+    this.wrapper.classList.remove('error');
+    if (this.inputContainer) this.inputContainer.classList.remove('error');
+    this.errorElement.textContent = '';
+    this.errorElement.style.visibility = 'hidden';
   }
 
   /**

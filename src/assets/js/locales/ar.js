@@ -33,7 +33,7 @@ export default {
   // Form
   'form.cardNumber': 'رقم البطاقة',
   'form.cardNumber.selectCard': 'اختر البطاقة',
-  'form.cardNumber.placeholder': '1234 5678 9012 3456',
+  'form.cardNumber.placeholder': '●●●● ●●●● ●●●● ●●●●',
   'form.cardNumber.required': 'رقم البطاقة مطلوب',
   'form.cardNumber.invalid': 'رقم البطاقة غير صالح',
   'form.cvv2': 'CVV2',
@@ -41,6 +41,7 @@ export default {
   'form.cvv2.required': 'CVV2 مطلوب',
   'form.cvv2.hint': 'الرمز المكون من 3 أو 4 أرقام خلف البطاقة',
   'form.cvv2.invalidLength': 'يجب أن يكون CVV2 مكوّناً من {{count}} أرقام',
+  'form.cvv2.invalidLengthRange': 'يجب أن يكون CVV2 مكوّناً من 3 أو 4 أرقام',
   'form.expiryDate': 'تاريخ الانتهاء',
   'form.expiryMonth': 'الشهر',
   'form.expiryYear': 'السنة',

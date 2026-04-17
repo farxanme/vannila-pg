@@ -33,7 +33,7 @@ export default {
   // Form
   'form.cardNumber': 'Kart Numarası',
   'form.cardNumber.selectCard': 'Kart seçin',
-  'form.cardNumber.placeholder': '1234 5678 9012 3456',
+  'form.cardNumber.placeholder': '●●●● ●●●● ●●●● ●●●●',
   'form.cardNumber.required': 'Kart numarası gereklidir',
   'form.cardNumber.invalid': 'Geçersiz kart numarası',
   'form.cvv2': 'CVV2',
@@ -41,6 +41,7 @@ export default {
   'form.cvv2.required': 'CVV2 gereklidir',
   'form.cvv2.hint': 'Kartın arkasındaki 3 veya 4 haneli kod',
   'form.cvv2.invalidLength': 'CVV2 {{count}} haneli olmalıdır',
+  'form.cvv2.invalidLengthRange': 'CVV2 3 veya 4 haneli olmalıdır',
   'form.expiryDate': 'Son Kullanma Tarihi',
   'form.expiryMonth': 'Ay',
   'form.expiryYear': 'Yıl',

@@ -85,44 +85,56 @@ export class VirtualPinPad {
     const grid = document.createElement('div');
     grid.className = 'pin-pad-grid';
 
-    // First row: 1, 2, 3
-    for (let i = 0; i < 3; i++) {
-      const btn = this.createNumberButton(this.numbers[i + 1]);
+    // Row 1: 4 random numbers
+    for (let i = 0; i < 4; i++) {
+      const btn = this.createNumberButton(this.numbers[i]);
       grid.appendChild(btn);
     }
 
-    // Second row: 4, 5, 6
-    for (let i = 0; i < 3; i++) {
-      const btn = this.createNumberButton(this.numbers[i + 4]);
+    // Row 2: next 4 random numbers
+    for (let i = 4; i < 8; i++) {
+      const btn = this.createNumberButton(this.numbers[i]);
       grid.appendChild(btn);
     }
 
-    // Third row: 7, 8, 9
-    for (let i = 0; i < 3; i++) {
-      const btn = this.createNumberButton(this.numbers[i + 7]);
-      grid.appendChild(btn);
-    }
-
-    // Fourth row: 0, backspace, clear
-    const zeroBtn = this.createNumberButton(0);
-    grid.appendChild(zeroBtn);
-
+    // Row 3: clear, remaining two numbers, backspace
     const backspaceBtn = document.createElement('button');
     backspaceBtn.type = 'button';
     backspaceBtn.className = 'pin-pad-btn pin-pad-backspace';
-    backspaceBtn.innerHTML = '⌫';
+    backspaceBtn.innerHTML = `<span class="pin-pad-action-icon" aria-hidden="true">${this.getBackspaceIconSvg()}</span>`;
     backspaceBtn.onclick = () => this.handleBackspace();
-    grid.appendChild(backspaceBtn);
 
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'pin-pad-btn pin-pad-clear';
-    clearBtn.textContent = i18n.t('pinPad.clear');
+    clearBtn.innerHTML = `<span class="pin-pad-action-icon" aria-hidden="true">${this.getClearIconSvg()}</span>`;
+    clearBtn.setAttribute('aria-label', i18n.t('pinPad.clear'));
     clearBtn.onclick = () => this.handleClear();
+
     grid.appendChild(clearBtn);
+    grid.appendChild(this.createNumberButton(this.numbers[8]));
+    grid.appendChild(this.createNumberButton(this.numbers[9]));
+    grid.appendChild(backspaceBtn);
 
     container.appendChild(grid);
     return container;
+  }
+
+  getBackspaceIconSvg() {
+    return `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M11 7H19C20.1 7 21 7.9 21 9V15C21 16.1 20.1 17 19 17H11L4 12L11 7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M14 10L17 14M17 10L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      </svg>
+    `;
+  }
+
+  getClearIconSvg() {
+    return `
+      <svg viewBox="0 0 24 24" fill="none">
+        <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    `;
   }
 
   /**

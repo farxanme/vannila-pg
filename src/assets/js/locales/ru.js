@@ -33,7 +33,7 @@ export default {
   // Form
   'form.cardNumber': 'Номер карты',
   'form.cardNumber.selectCard': 'Выберите карту',
-  'form.cardNumber.placeholder': '1234 5678 9012 3456',
+  'form.cardNumber.placeholder': '●●●● ●●●● ●●●● ●●●●',
   'form.cardNumber.required': 'Номер карты обязателен',
   'form.cardNumber.invalid': 'Неверный номер карты',
   'form.cvv2': 'CVV2',
@@ -41,6 +41,7 @@ export default {
   'form.cvv2.required': 'CVV2 обязателен',
   'form.cvv2.hint': '3- или 4-значный код на обороте карты',
   'form.cvv2.invalidLength': 'CVV2 должен содержать {{count}} цифры',
+  'form.cvv2.invalidLengthRange': 'CVV2 должен содержать 3 или 4 цифры',
   'form.expiryDate': 'Срок действия',
   'form.expiryMonth': 'Месяц',
   'form.expiryYear': 'Год',

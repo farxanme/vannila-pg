@@ -76,6 +76,7 @@ const otpCooldownUntilByCardKey = Object.create(null);
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
+let refreshCardDropdownFooterButtons = null;
 
 /**
  * Reveal main content after loading and all setup (success, error, or failure paths).
@@ -227,12 +228,14 @@ function syncGetOtpButtonState() {
   const maxTriesCfg = transactionOtpSettings.maxTries;
 
   if (otpRequestInFlight) {
+    btn.classList.add('loading');
     btn.disabled = true;
     btn.setAttribute('aria-busy', 'true');
     btn.textContent = i18n.t('common.processing');
     btn.removeAttribute('aria-label');
     return;
   }
+  btn.classList.remove('loading');
   btn.removeAttribute('aria-busy');
 
   if (maxTriesCfg <= 0) {
@@ -304,11 +307,14 @@ function getCurrentCardBankName() {
   return bank?.name || '';
 }
 
-function getExpectedCvvLength() {
+function getCvv2Constraints() {
   const bankName = getCurrentCardBankName();
   const normalized = bankName.trim().toLowerCase();
   const isSamanBank = normalized === 'saman' || bankName.includes('سامان');
-  return isSamanBank ? 3 : 4;
+  if (isSamanBank) {
+    return { minLength: 3, maxLength: 3, fixedLength: true };
+  }
+  return { minLength: 3, maxLength: 4, fixedLength: false };
 }
 
 function shouldSendExpiryDateInPayRequest() {
@@ -549,21 +555,67 @@ async function loadCards() {
 }
 
 function initializeFormInputs() {
+  const resetFieldsOnCardChange = () => {
+    cvv2Input?.setValue('');
+    cvv2Input?.clearValidation?.();
+    expiryDateInput?.setValue('');
+    expiryDateInput?.clearValidation?.();
+    captchaInput?.setValue('');
+    captchaInput?.clearValidation?.();
+    otpInput?.setValue('');
+    otpInput?.clearValidation?.();
+    mobileInput?.setValue('');
+    mobileInput?.clearValidation?.();
+    emailInput?.setValue('');
+    emailInput?.clearValidation?.();
+
+    if (cvv2PinPad) {
+      cvv2PinPad.clear();
+      cvv2PinPad.close();
+    }
+    if (otpPinPad) {
+      otpPinPad.clear();
+      otpPinPad.close();
+    }
+
+    const saveCardEl = document.getElementById('save-card-checkbox');
+    if (saveCardEl) {
+      saveCardEl.checked = false;
+      const saveCardIcon = document.querySelector('.save-card-icon img');
+      if (saveCardIcon) {
+        saveCardIcon.src = '/assets/images/icons/icn-square-plus.svg';
+      }
+    }
+
+    const showReceiptEl = document.getElementById('show-receipt-toggle');
+    if (showReceiptEl) {
+      showReceiptEl.checked = false;
+    }
+    const receiptFields = document.getElementById('receipt-fields');
+    if (receiptFields) {
+      receiptFields.classList.remove('show');
+    }
+    const showReceiptIcon = document.querySelector('.show-receipt-icon img');
+    if (showReceiptIcon) {
+      showReceiptIcon.src = '/assets/images/icons/icn-square-plus.svg';
+    }
+  };
+
   const syncCvv2Constraints = () => {
     if (!cvv2Input || !cvv2Input.element) return;
-    const expectedLength = getExpectedCvvLength();
-    cvv2Input.options.maxLength = expectedLength;
-    cvv2Input.element.maxLength = expectedLength;
+    const constraints = getCvv2Constraints();
+    cvv2Input.options.maxLength = constraints.maxLength;
+    cvv2Input.element.maxLength = constraints.maxLength;
 
-    const digitsOnly = extractNumbers(cvv2Input.getValue()).slice(0, expectedLength);
+    const digitsOnly = extractNumbers(cvv2Input.getValue()).slice(0, constraints.maxLength);
     if (digitsOnly !== cvv2Input.getValue()) {
       cvv2Input.setValue(digitsOnly);
     }
 
     if (cvv2PinPad) {
-      cvv2PinPad.options.maxLength = expectedLength;
-      if (cvv2PinPad.currentValue.length > expectedLength) {
-        cvv2PinPad.currentValue = cvv2PinPad.currentValue.slice(0, expectedLength);
+      cvv2PinPad.options.maxLength = constraints.maxLength;
+      if (cvv2PinPad.currentValue.length > constraints.maxLength) {
+        cvv2PinPad.currentValue = cvv2PinPad.currentValue.slice(0, constraints.maxLength);
         cvv2PinPad.updateDisplay();
         cvv2PinPad.updateInput();
       } else {
@@ -604,6 +656,9 @@ function initializeFormInputs() {
         expiryDateInput.updateClearButton();
       }
     }
+    if (locked) {
+      expiryDateInput.clearValidation?.();
+    }
   };
 
   const applyExpiryDateModeForSelectedCard = () => {
@@ -637,6 +692,7 @@ function initializeFormInputs() {
         }
       : null,
     onInput: (value) => {
+      resetFieldsOnCardChange();
       selectedSavedCardForApi = null;
       hasUserEnabledExpiryDateEdit = false;
       applyExpiryDateModeForSelectedCard();
@@ -679,11 +735,42 @@ function initializeFormInputs() {
 
   // Create card dropdown if cards exist
   if (cardList.length > 0) {
+    const buildCardDropdownFooterButtons = () => [
+      {
+        text: i18n.t('cardList.addNew'),
+        className: 'dropdown-footer-btn-add',
+        icon: '<img src="/assets/images/icons/icn-square-plus.svg" alt="" />',
+        onClick: (dropdownInstance) => {
+          dropdownInstance.close();
+          selectedSavedCardForApi = null;
+          hasUserEnabledExpiryDateEdit = false;
+          cardNumberInput.setValue('');
+          cardNumberInput.clearValidation?.();
+          updateBankLogo(null);
+          applyExpiryDateModeForSelectedCard();
+          syncCvv2Constraints();
+          syncGetOtpButtonState();
+          resetFieldsOnCardChange();
+          cardNumberInput.focus();
+        },
+      },
+      {
+        text: i18n.t('cardList.manage'),
+        className: 'dropdown-footer-btn-manage',
+        icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" />',
+        onClick: (dropdownInstance) => {
+          dropdownInstance.close();
+        },
+      },
+    ];
+
     cardDropdown = new Dropdown(cardNumberInput.element, {
       items: buildCardDropdownItems(),
+      footerButtons: buildCardDropdownFooterButtons(),
       onSelect: (item) => {
         const card = cardList.find((c) => c.number === item.value);
         if (card) {
+          resetFieldsOnCardChange();
           selectedSavedCardForApi = card;
           hasUserEnabledExpiryDateEdit = false;
           cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
@@ -697,6 +784,12 @@ function initializeFormInputs() {
         }
       },
     });
+
+    refreshCardDropdownFooterButtons = () => {
+      if (!cardDropdown) return;
+      cardDropdown.options.footerButtons = buildCardDropdownFooterButtons();
+      cardDropdown.renderFooterButtons();
+    };
   }
 
   /**
@@ -749,29 +842,38 @@ function initializeFormInputs() {
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: (value) => {
-      const expectedLength = getExpectedCvvLength();
+      const constraints = getCvv2Constraints();
       const numbers = extractNumbers(value);
       if (!numbers || numbers.length === 0) {
         return { valid: false, message: i18n.t('common.required') };
       }
-      if (numbers.length !== expectedLength) {
+      if (constraints.fixedLength && numbers.length !== constraints.maxLength) {
         return {
           valid: false,
-          message: i18n.t('form.cvv2.invalidLength', { count: String(expectedLength) }),
+          message: i18n.t('form.cvv2.invalidLength', { count: String(constraints.maxLength) }),
+        };
+      }
+      if (
+        !constraints.fixedLength &&
+        (numbers.length < constraints.minLength || numbers.length > constraints.maxLength)
+      ) {
+        return {
+          valid: false,
+          message: i18n.t('form.cvv2.invalidLengthRange'),
         };
       }
       return { valid: true, message: '' };
     },
     inputMode: 'numeric',
     maskWithPasswordFont: true,
-    maxLength: getExpectedCvvLength(),
+    maxLength: getCvv2Constraints().maxLength,
     onInput: (value) => {
-      const expectedLength = getExpectedCvvLength();
-      const digitsOnly = extractNumbers(value).slice(0, expectedLength);
+      const constraints = getCvv2Constraints();
+      const digitsOnly = extractNumbers(value).slice(0, constraints.maxLength);
       if (digitsOnly !== value) {
         cvv2Input.setValue(digitsOnly);
       }
-      if (digitsOnly.length >= expectedLength) {
+      if (digitsOnly.length >= constraints.maxLength) {
         focusNextVisibleInputField(cvv2Input.element);
       }
     },
@@ -781,7 +883,7 @@ function initializeFormInputs() {
       onClick: () => {
         if (!cvv2PinPad) {
           cvv2PinPad = new VirtualPinPad(cvv2Input.element, {
-            maxLength: getExpectedCvvLength(),
+            maxLength: getCvv2Constraints().maxLength,
             onInput: (value) => {
               cvv2Input.setValue(value);
             },
@@ -1627,6 +1729,9 @@ function updatePageContent() {
   }
   if (cardDropdown) {
     cardDropdown.updateItems(buildCardDropdownItems());
+  }
+  if (typeof refreshCardDropdownFooterButtons === 'function') {
+    refreshCardDropdownFooterButtons();
   }
   if (cvv2Input) {
     cvv2Input.setLabel(i18n.t('form.cvv2'));

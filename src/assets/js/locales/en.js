@@ -33,7 +33,7 @@ export default {
   // Form
   'form.cardNumber': 'Card Number',
   'form.cardNumber.selectCard': 'Select card',
-  'form.cardNumber.placeholder': '1234 5678 9012 3456',
+  'form.cardNumber.placeholder': '●●●● ●●●● ●●●● ●●●●',
   'form.cardNumber.required': 'Card number is required',
   'form.cardNumber.invalid': 'Invalid card number',
   'form.cvv2': 'CVV2',
@@ -41,6 +41,7 @@ export default {
   'form.cvv2.required': 'CVV2 is required',
   'form.cvv2.hint': '3 or 4 digit code on the back of the card',
   'form.cvv2.invalidLength': 'CVV2 must be {{count}} digits',
+  'form.cvv2.invalidLengthRange': 'CVV2 must be 3 or 4 digits',
   'form.expiryDate': 'Expiry Date',
   'form.expiryMonth': 'Month',
   'form.expiryYear': 'Year',
