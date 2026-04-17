@@ -502,7 +502,7 @@
 }
 
 .card-title {
-  font-size: var(--font-size-lg);
+  font-size: var(--font-size-base);
   font-weight: 600;
   line-height: 1.25;
   margin: 0;
@@ -831,8 +831,8 @@
 }
 
 .card-header .timer-value {
-  font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: 600;
   line-height: 1.25;
   font-family: var(--font-family-base);
   font-variant-numeric: tabular-nums;

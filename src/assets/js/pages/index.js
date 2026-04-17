@@ -1505,10 +1505,30 @@ async function initializeTransactionInfo() {
     console.error('getTransaction failed:', e);
   }
 
+  const terminalFromSession =
+    init?.terminalNumber != null && String(init.terminalNumber).trim() !== ''
+      ? String(init.terminalNumber).trim()
+      : null;
+  const terminalFromApi =
+    txPayload?.terminalNumber != null ? String(txPayload.terminalNumber).trim() : null;
+  const terminalStr = terminalFromSession ?? terminalFromApi ?? '12345678';
+
+  const merchantNumStr =
+    txPayload?.merchant?.merchantNumber != null
+      ? String(txPayload.merchant.merchantNumber).trim()
+      : '';
+
+  const terminalMerchantDisplay =
+    merchantNumStr !== '' && terminalStr !== ''
+      ? `${terminalStr} / ${merchantNumStr}`
+      : merchantNumStr !== ''
+        ? merchantNumStr
+        : terminalStr;
+
   const transactionData = {
     merchant: txPayload?.merchant?.merchantName ?? i18n.t('transaction.demo.merchantName'),
     amount: typeof txPayload?.totalAmount === 'number' ? txPayload.totalAmount : 100000,
-    terminal: init?.terminalNumber || String(txPayload?.terminalNumber ?? '12345678'),
+    terminal: terminalMerchantDisplay,
     site:
       txPayload?.merchant?.merchantWebSite?.replace(/^https?:\/\//, '')?.replace(/\/$/, '') ??
       i18n.t('transaction.demo.siteHost'),

@@ -2,7 +2,6 @@
 
 /* Input Component */
 .input-wrapper {
-  margin-bottom: var(--spacing-md);
   position: relative;
   min-width: 0;
   max-width: 100%;
