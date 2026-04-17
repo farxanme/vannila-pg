@@ -28,6 +28,7 @@ export class Input {
       inputMode: options.inputMode || null,
       pattern: options.pattern || null,
       maxLength: options.maxLength || null,
+      maskWithPasswordFont: options.maskWithPasswordFont || false,
       requiredMessage: options.requiredMessage || 'This field is required',
       clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
       ...options,
@@ -66,12 +67,6 @@ export class Input {
       this.labelElement.className = 'input-label';
       this.labelElement.setAttribute('for', this.options.id);
       this.labelElement.textContent = this.options.label;
-      if (this.options.required) {
-        const required = document.createElement('span');
-        required.className = 'input-required';
-        required.textContent = ' *';
-        this.labelElement.appendChild(required);
-      }
       wrapper.appendChild(this.labelElement);
     }
 
@@ -125,7 +120,7 @@ export class Input {
     if (this.options.maxLength) {
       input.maxLength = this.options.maxLength;
     }
-    if (isPasswordType) {
+    if (this.options.maskWithPasswordFont) {
       input.classList.add('input-password-mask');
     }
 
@@ -380,15 +375,7 @@ export class Input {
       this.wrapper.insertBefore(this.labelElement, this.wrapper.firstChild);
     }
     if (this.labelElement) {
-      // Remove required span if exists
-      const required = this.labelElement.querySelector('.input-required');
       this.labelElement.textContent = label;
-      if (this.options.required) {
-        const requiredSpan = document.createElement('span');
-        requiredSpan.className = 'input-required';
-        requiredSpan.textContent = ' *';
-        this.labelElement.appendChild(requiredSpan);
-      }
     }
   }
 

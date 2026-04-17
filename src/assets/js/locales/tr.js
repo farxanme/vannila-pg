@@ -25,7 +25,10 @@ export default {
   'header.title': 'Ödeme Ağ Geçidi',
 
   // Footer
-  'footer.copyright': '© 2024 Tüm hakları saklıdır',
+  'footer.supportPrefix': '7/24 musteri iletisim merkezi:',
+  'footer.supportPhone': '021-84080',
+  'footer.copyright':
+    '© 2020 - 2025 (SEP) Saman Electronic Payment\nTum maddi ve manevi haklar Saman Electronic Payment icin saklidir.',
 
   // Form
   'form.cardNumber': 'Kart Numarası',
@@ -37,6 +40,7 @@ export default {
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 gereklidir',
   'form.cvv2.hint': 'Kartın arkasındaki 3 veya 4 haneli kod',
+  'form.cvv2.invalidLength': 'CVV2 {{count}} haneli olmalıdır',
   'form.expiryDate': 'Son Kullanma Tarihi',
   'form.expiryMonth': 'Ay',
   'form.expiryYear': 'Yıl',

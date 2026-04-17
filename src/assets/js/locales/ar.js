@@ -25,7 +25,10 @@ export default {
   'header.title': 'بوابة الدفع',
 
   // Footer
-  'footer.copyright': '© 2024 جميع الحقوق محفوظة',
+  'footer.supportPrefix': 'مركز خدمة العملاء على مدار الساعة:',
+  'footer.supportPhone': '021-84080',
+  'footer.copyright':
+    '© 2020 - 2025 (SEP) Saman Electronic Payment\nجميع الحقوق المادية والمعنوية محفوظة لصالح سامان للدفع الإلكتروني.',
 
   // Form
   'form.cardNumber': 'رقم البطاقة',
@@ -37,6 +40,7 @@ export default {
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 مطلوب',
   'form.cvv2.hint': 'الرمز المكون من 3 أو 4 أرقام خلف البطاقة',
+  'form.cvv2.invalidLength': 'يجب أن يكون CVV2 مكوّناً من {{count}} أرقام',
   'form.expiryDate': 'تاريخ الانتهاء',
   'form.expiryMonth': 'الشهر',
   'form.expiryYear': 'السنة',

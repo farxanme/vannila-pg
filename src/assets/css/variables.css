@@ -5,21 +5,21 @@
    */
 
   /* Primary */
-  --color-primary-default: #007dff;
-  --color-primary-light: #aad4ff;
-  --color-primary-dark: #0059b5;
+  --color-primary-default: #4980e0;
+  --color-primary-light: #7da7eb;
+  --color-primary-dark: #2f63bf;
 
   /* Numbered scale (compat with existing selectors + focus rings) */
-  --color-primary-50: #e6f4ff;
-  --color-primary-100: #aad4ff;
-  --color-primary-200: #66b3ff;
-  --color-primary-300: #007dff;
-  --color-primary-400: #007dff;
-  --color-primary-500: #007dff;
-  --color-primary-600: #006dde;
-  --color-primary-700: #0059b5;
-  --color-primary-800: #003d7a;
-  --color-primary-900: #002647;
+  --color-primary-50: #edf2fb;
+  --color-primary-100: #d0def6;
+  --color-primary-200: #afc7f0;
+  --color-primary-300: #7da7eb;
+  --color-primary-400: #6292e6;
+  --color-primary-500: #4980e0;
+  --color-primary-600: #3b72d5;
+  --color-primary-700: #2f63bf;
+  --color-primary-800: #274f99;
+  --color-primary-900: #1f3d75;
 
   --color-primary: var(--color-primary-500);
   --color-primary-hover: var(--color-primary-600);
@@ -57,6 +57,9 @@
   --color-bg-light: var(--color-light);
   --color-bg-white: #ffffff;
   --color-stroke: #e5e7eb;
+  --color-footer-bg: #e4eaec;
+  --color-footer-copyright: #718e9c;
+  --color-footer-contact: #253035;
 
   /* Error */
   --color-error-default: #ff3651;
@@ -156,6 +159,8 @@
   --font-size-lg: 18px;
   --font-size-xl: 20px;
   --font-size-2xl: 24px;
+  --font-size-footer-contact: 14px;
+  --font-size-footer-copyright: 12px;
 
   /* Layout */
   --container-max-width: 1024px;
@@ -184,7 +189,7 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-default: var(--shadow);
 
-  --shadow-input-focus: 0 0 9px 0 rgba(0, 125, 255, 0.35);
+  --shadow-input-focus: 0 0 9px 0 rgba(73, 128, 224, 0.35);
   --shadow-input-error: 0 0 9px 0 rgba(255, 54, 81, 0.35);
 
   /* Transitions */
@@ -211,7 +216,7 @@
   --color-text-muted: #8a939e;
   --color-controller: #2a2a2a;
   --color-gray-100: #2a2a2a;
-  --color-primary-50: rgba(0, 125, 255, 0.12);
+  --color-primary-50: rgba(73, 128, 224, 0.12);
   --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.35);
   --shadow-colored: 0 20px 27px 0 rgba(0, 0, 0, 0.35);
 }

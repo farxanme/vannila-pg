@@ -278,7 +278,7 @@
 
 /* Footer */
 .footer {
-  background: var(--color-bg-white);
+  background: var(--color-footer-bg);
   border-top: 1px solid var(--color-stroke);
   padding: var(--spacing-lg) 0;
   margin-top: auto;
@@ -297,9 +297,27 @@
 }
 
 .footer-copyright {
-  font-size: var(--font-size-sm);
-  color: var(--color-text-secondary);
+  font-size: var(--font-size-footer-copyright);
+  color: var(--color-footer-copyright);
   text-align: center;
+  white-space: pre-line;
+  line-height: 1.8;
+}
+
+.footer-support {
+  font-size: var(--font-size-footer-contact);
+  color: var(--color-footer-contact);
+  text-align: center;
+}
+
+.footer-support-link {
+  color: var(--color-footer-contact);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.footer-support-link:hover {
+  text-decoration: underline;
 }
 
 /* Main Content */
@@ -406,12 +424,13 @@
 
 .form-actions {
   display: flex;
+  flex-direction: column;
   gap: var(--spacing-md);
   margin-top: var(--spacing-lg);
 }
 
 .form-actions .btn {
-  flex: 1;
+  width: 100%;
 }
 
 /* Badge */

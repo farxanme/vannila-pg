@@ -6,6 +6,8 @@ export class Footer {
     this.options = {
       logo: options.logo || null,
       copyright: options.copyright || '',
+      supportPrefix: options.supportPrefix || '',
+      supportPhone: options.supportPhone || '',
       ...options,
     };
 
@@ -45,6 +47,25 @@ export class Footer {
       container.appendChild(logo);
     }
 
+    // Support line
+    if (this.options.supportPrefix || this.options.supportPhone) {
+      const support = document.createElement('div');
+      support.className = 'footer-support';
+      const prefixSpan = document.createElement('span');
+      prefixSpan.className = 'footer-support-prefix';
+      prefixSpan.textContent = this.options.supportPrefix;
+      support.appendChild(prefixSpan);
+      if (this.options.supportPhone) {
+        support.append(' ');
+        const phoneLink = document.createElement('a');
+        phoneLink.className = 'footer-support-link';
+        phoneLink.href = `tel:${this.options.supportPhone}`;
+        phoneLink.textContent = this.options.supportPhone;
+        support.appendChild(phoneLink);
+      }
+      container.appendChild(support);
+    }
+
     // Copyright
     if (this.options.copyright) {
       const copyright = document.createElement('div');
@@ -66,6 +87,29 @@ export class Footer {
     const copyrightElement = this.element?.querySelector('.footer-copyright');
     if (copyrightElement) {
       copyrightElement.textContent = text;
+    }
+  }
+
+  /**
+   * Update support prefix text
+   * @param {string} text - New support prefix
+   */
+  updateSupportPrefix(text) {
+    const prefixElement = this.element?.querySelector('.footer-support-prefix');
+    if (prefixElement) {
+      prefixElement.textContent = text;
+    }
+  }
+
+  /**
+   * Update support phone
+   * @param {string} phone - New support phone
+   */
+  updateSupportPhone(phone) {
+    const phoneLink = this.element?.querySelector('.footer-support-link');
+    if (phoneLink) {
+      phoneLink.textContent = phone;
+      phoneLink.setAttribute('href', `tel:${phone}`);
     }
   }
 

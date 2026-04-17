@@ -13,6 +13,8 @@ export class Header {
       showCard: options.showCard !== false,
       cardContent: options.cardContent || null,
       onLanguageChange: options.onLanguageChange || null,
+      showLanguageSwitcher:
+        typeof options.showLanguageSwitcher === 'boolean' ? options.showLanguageSwitcher : null,
       ...options,
     };
 
@@ -32,6 +34,7 @@ export class Header {
    * Create HTML structure
    */
   async createHTML() {
+    const { getShowLanguageSwitcher } = await import('../config/env.js');
     const header = document.createElement('header');
     header.className = 'header';
     header.setAttribute('role', 'banner');
@@ -44,7 +47,13 @@ export class Header {
     toolbar.className = 'header-toolbar';
     this.headerToolbar = toolbar;
     await this.createSettingsDropdown(toolbar);
-    await this.createLanguageDropdown(toolbar);
+    const shouldShowLanguageSwitcher =
+      this.options.showLanguageSwitcher == null
+        ? getShowLanguageSwitcher()
+        : this.options.showLanguageSwitcher;
+    if (shouldShowLanguageSwitcher) {
+      await this.createLanguageDropdown(toolbar);
+    }
     header.appendChild(toolbar);
 
     this.closeAllHeaderMenus = () => {

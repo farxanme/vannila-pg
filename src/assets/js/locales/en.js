@@ -25,7 +25,10 @@ export default {
   'header.title': 'Payment Gateway',
 
   // Footer
-  'footer.copyright': '© 2024 All rights reserved',
+  'footer.supportPrefix': '24/7 customer support center:',
+  'footer.supportPhone': '021-84080',
+  'footer.copyright':
+    '© 2020 - 2025 (SEP) Saman Electronic Payment\nAll material and intellectual rights are reserved for Saman Electronic Payment.',
 
   // Form
   'form.cardNumber': 'Card Number',
@@ -37,6 +40,7 @@ export default {
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 is required',
   'form.cvv2.hint': '3 or 4 digit code on the back of the card',
+  'form.cvv2.invalidLength': 'CVV2 must be {{count}} digits',
   'form.expiryDate': 'Expiry Date',
   'form.expiryMonth': 'Month',
   'form.expiryYear': 'Year',

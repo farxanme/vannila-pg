@@ -1,6 +1,7 @@
 @import './variables.css';
 @import './fonts/vazirmatn-font-face.css';
 @import './fonts/vazirmatn-fd-font-face.css';
+@import './fonts/password-font-face.css';
 @import './reset.css';
 
 .container {

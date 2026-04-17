@@ -1,4 +1,5 @@
 import { BottomSheet } from './BottomSheet.js';
+import { i18n } from '../main.js';
 
 /**
  * Virtual Pin Pad Component
@@ -54,7 +55,7 @@ export class VirtualPinPad {
     const content = this.createPinPadContent();
 
     this.bottomSheet = new BottomSheet({
-      title: 'Enter PIN',
+      title: i18n.t('pinPad.title'),
       content: content,
       scrollable: false,
       onClose: () => {
@@ -79,13 +80,6 @@ export class VirtualPinPad {
   createPinPadContent() {
     const container = document.createElement('div');
     container.className = 'pin-pad';
-
-    // Display area
-    const display = document.createElement('div');
-    display.className = 'pin-pad-display';
-    display.textContent = '•'.repeat(this.currentValue.length).padEnd(this.options.maxLength, '○');
-    this.displayElement = display;
-    container.appendChild(display);
 
     // Numbers grid
     const grid = document.createElement('div');
@@ -123,7 +117,7 @@ export class VirtualPinPad {
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'pin-pad-btn pin-pad-clear';
-    clearBtn.textContent = 'Clear';
+    clearBtn.textContent = i18n.t('pinPad.clear');
     clearBtn.onclick = () => this.handleClear();
     grid.appendChild(clearBtn);
 
@@ -156,9 +150,17 @@ export class VirtualPinPad {
     const content = this.createPinPadContent();
     pinPad.appendChild(content);
 
-    // Position relative to input
-    if (this.inputElement && this.inputElement.parentNode) {
-      this.inputElement.parentNode.insertBefore(pinPad, this.inputElement.nextSibling);
+    // Attach to input wrapper (same pattern as card dropdown).
+    let wrapper = this.inputElement?.closest('.input-wrapper');
+    if (!wrapper) {
+      wrapper = this.inputElement?.parentNode;
+    }
+    if (wrapper) {
+      const computedStyle = window.getComputedStyle(wrapper);
+      if (computedStyle.position === 'static') {
+        wrapper.style.position = 'relative';
+      }
+      wrapper.appendChild(pinPad);
     } else {
       document.body.appendChild(pinPad);
     }
@@ -171,13 +173,13 @@ export class VirtualPinPad {
    */
   attachDesktopEvents() {
     if (this.inputElement) {
-      this.inputElement.addEventListener('focus', () => {
-        this.showDesktop();
-      });
-
       // Close on outside click
       document.addEventListener('click', (e) => {
-        if (!this.desktopElement.contains(e.target) && !this.inputElement.contains(e.target)) {
+        if (
+          this.desktopElement &&
+          !this.desktopElement.contains(e.target) &&
+          !this.inputElement.contains(e.target)
+        ) {
           this.hideDesktop();
         }
       });
@@ -209,9 +211,16 @@ export class VirtualPinPad {
   positionDesktop() {
     if (!this.inputElement || !this.desktopElement) return;
 
-    const rect = this.inputElement.getBoundingClientRect();
-    this.desktopElement.style.top = `${rect.bottom + 10}px`;
-    this.desktopElement.style.left = `${rect.left}px`;
+    const inputContainer = this.inputElement.closest('.input-container');
+    const targetElement = inputContainer || this.inputElement;
+    const rect = targetElement.getBoundingClientRect();
+    const wrapper = this.desktopElement.parentElement;
+    if (!wrapper) return;
+    const wrapperRect = wrapper.getBoundingClientRect();
+
+    this.desktopElement.style.top = `${rect.bottom - wrapperRect.top + 8}px`;
+    this.desktopElement.style.left = `${rect.left - wrapperRect.left}px`;
+    this.desktopElement.style.width = `${rect.width}px`;
   }
 
   /**
@@ -222,15 +231,17 @@ export class VirtualPinPad {
     if (this.currentValue.length >= this.options.maxLength) return;
 
     this.currentValue += number.toString();
-    this.updateDisplay();
     this.updateInput();
 
     if (this.options.onInput) {
       this.options.onInput(this.currentValue, this);
     }
 
-    if (this.currentValue.length >= this.options.maxLength && this.options.onComplete) {
-      this.options.onComplete(this.currentValue, this);
+    if (this.currentValue.length >= this.options.maxLength) {
+      if (this.options.onComplete) {
+        this.options.onComplete(this.currentValue, this);
+      }
+      this.close();
     }
   }
 
@@ -240,7 +251,6 @@ export class VirtualPinPad {
   handleBackspace() {
     if (this.currentValue.length > 0) {
       this.currentValue = this.currentValue.slice(0, -1);
-      this.updateDisplay();
       this.updateInput();
 
       if (this.options.onInput) {
@@ -254,7 +264,6 @@ export class VirtualPinPad {
    */
   handleClear() {
     this.currentValue = '';
-    this.updateDisplay();
     this.updateInput();
 
     if (this.options.onInput) {
@@ -266,11 +275,7 @@ export class VirtualPinPad {
    * Update display
    */
   updateDisplay() {
-    if (this.displayElement) {
-      const filled = '•'.repeat(this.currentValue.length);
-      const empty = '○'.repeat(Math.max(0, this.options.maxLength - this.currentValue.length));
-      this.displayElement.textContent = filled + empty;
-    }
+    // Display bar was removed by design. Keep method for compatibility.
   }
 
   /**
@@ -298,6 +303,11 @@ export class VirtualPinPad {
       }
       this.bottomSheet.open();
     } else {
+      this.numbers = this.generateRandomNumbers();
+      if (this.desktopElement) {
+        this.desktopElement.innerHTML = '';
+        this.desktopElement.appendChild(this.createPinPadContent());
+      }
       this.showDesktop();
     }
   }
@@ -328,7 +338,6 @@ export class VirtualPinPad {
    */
   clear() {
     this.currentValue = '';
-    this.updateDisplay();
     this.updateInput();
   }
 

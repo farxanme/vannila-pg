@@ -25,7 +25,10 @@ export default {
   'header.title': 'درگاه پرداخت اینترنتی سِپ',
 
   // Footer
-  'footer.copyright': '© 2024 تمامی حقوق محفوظ است',
+  'footer.supportPrefix': 'مرکز شبانه روزی ارتباط با مشتریان:',
+  'footer.supportPhone': '021-84080',
+  'footer.copyright':
+    '© 2020 - 2025 (SEP) Saman Electronic Payment\nتمام حقوق مادی و معنوی برای پرداخت الکترونیک سامان محفوظ است.',
 
   // Form
   'form.cardNumber': 'شماره کارت',
@@ -37,6 +40,7 @@ export default {
   'form.cvv2.placeholder': '●●●',
   'form.cvv2.required': 'CVV2 الزامی است',
   'form.cvv2.hint': 'کد ۳ یا ۴ رقمی پشت کارت',
+  'form.cvv2.invalidLength': 'CVV2 باید {{count}} رقمی باشد',
   'form.expiryDate': 'تاریخ انقضا',
   'form.expiryMonth': 'ماه',
   'form.expiryYear': 'سال',

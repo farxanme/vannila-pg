@@ -11,13 +11,12 @@ import { LoadingScreen } from '../components/LoadingScreen.js';
 import { PaymentInitErrorScreen } from '../components/PaymentInitErrorScreen.js';
 import {
   validateCardNumber,
-  validateCVV2,
   validateMobile,
   validateEmail,
   validateOTP,
 } from '../utils/validators.js';
 import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
-import { extractNumbers, numberToPersianWords } from '../utils/numberConverter.js';
+import { extractNumbers, numberToWordsByLang } from '../utils/numberConverter.js';
 import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
@@ -357,6 +356,8 @@ async function initializePage() {
 
       footer = new Footer({
         logo: '/assets/images/logo.svg',
+        supportPrefix: i18n.t('footer.supportPrefix'),
+        supportPhone: i18n.t('footer.supportPhone'),
         copyright: i18n.t('footer.copyright'),
       });
 
@@ -394,6 +395,8 @@ async function initializePage() {
     // Initialize footer
     footer = new Footer({
       logo: '/assets/images/logo.svg',
+      supportPrefix: i18n.t('footer.supportPrefix'),
+      supportPhone: i18n.t('footer.supportPhone'),
       copyright: i18n.t('footer.copyright'),
     });
 
@@ -733,8 +736,22 @@ function initializeFormInputs() {
     required: true,
     requiredMessage: i18n.t('common.required'),
     clearButtonAriaLabel: i18n.t('common.clear'),
-    validator: (value) => validateCVV2(value, getExpectedCvvLength()),
+    validator: (value) => {
+      const expectedLength = getExpectedCvvLength();
+      const numbers = extractNumbers(value);
+      if (!numbers || numbers.length === 0) {
+        return { valid: false, message: i18n.t('common.required') };
+      }
+      if (numbers.length !== expectedLength) {
+        return {
+          valid: false,
+          message: i18n.t('form.cvv2.invalidLength', { count: String(expectedLength) }),
+        };
+      }
+      return { valid: true, message: '' };
+    },
     inputMode: 'numeric',
+    maskWithPasswordFont: true,
     maxLength: getExpectedCvvLength(),
     onInput: (value) => {
       const expectedLength = getExpectedCvvLength();
@@ -833,8 +850,7 @@ function initializeFormInputs() {
   captchaLabelElement = document.createElement('label');
   captchaLabelElement.className = 'input-label';
   captchaLabelElement.setAttribute('for', 'captcha');
-  captchaLabelElement.innerHTML =
-    i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+  captchaLabelElement.textContent = i18n.t('form.securityCode');
   captchaContainer.appendChild(captchaLabelElement);
 
   // Flex row: [ input + captcha image ] | audio — cluster keeps field + image aligned
@@ -940,7 +956,7 @@ function initializeFormInputs() {
   otpLabelElement = document.createElement('label');
   otpLabelElement.className = 'input-label';
   otpLabelElement.setAttribute('for', 'otp');
-  otpLabelElement.innerHTML = i18n.t('form.otp') + ' <span class="input-required">*</span>';
+  otpLabelElement.textContent = i18n.t('form.otp');
   otpContainer.appendChild(otpLabelElement);
 
   // Create flex wrapper for input and button
@@ -959,6 +975,7 @@ function initializeFormInputs() {
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateOTP,
     inputMode: 'numeric',
+    maskWithPasswordFont: true,
     maxLength: 6,
     onInput: (value) => {
       const digitsOnly = extractNumbers(value).slice(0, 6);
@@ -1182,7 +1199,7 @@ async function initializeTransactionInfo() {
 
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
-  const amountInWords = numberToPersianWords(amountInTomans);
+  const amountInWords = numberToWordsByLang(amountInTomans, i18n.getLanguage());
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
 
   container.innerHTML = `
@@ -1284,7 +1301,7 @@ function refreshTransactionAmountValues() {
   rialEl.setAttribute('data-amount', String(amount));
 
   const amountInTomans = Math.floor(amount / 10);
-  const amountInWords = numberToPersianWords(amountInTomans);
+  const amountInWords = numberToWordsByLang(amountInTomans, lang);
   tomanEl.textContent = `${amountInWords} ${i18n.t('transaction.toman')}`;
 }
 
@@ -1539,10 +1556,17 @@ function updatePageContent() {
   }
   if (footer) {
     footer.updateCopyright(i18n.t('footer.copyright'));
+    footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
+    footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
   syncGetOtpButtonState();
 
   i18n.applyDataI18n(document);
+  const headerHelpButton = document.getElementById('card-header-help-button');
+  if (headerHelpButton) {
+    headerHelpButton.setAttribute('aria-label', i18n.t('common.help'));
+    headerHelpButton.setAttribute('title', i18n.t('common.help'));
+  }
 
   // Update form labels and placeholders
   if (cardNumberInput) {
@@ -1567,8 +1591,7 @@ function updatePageContent() {
   if (captchaInput) {
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
     if (captchaLabelElement) {
-      captchaLabelElement.innerHTML =
-        i18n.t('form.securityCode') + ' <span class="input-required">*</span>';
+      captchaLabelElement.textContent = i18n.t('form.securityCode');
     }
   }
   const captchaImg = document.querySelector('.captcha-image');
@@ -1579,7 +1602,7 @@ function updatePageContent() {
     otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
     // Update separate OTP label
     if (otpLabelElement) {
-      otpLabelElement.innerHTML = i18n.t('form.otp') + ' <span class="input-required">*</span>';
+      otpLabelElement.textContent = i18n.t('form.otp');
     }
   }
   if (mobileInput) {

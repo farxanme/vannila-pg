@@ -34,3 +34,12 @@ export function useCaptchaMock() {
   if (import.meta.env.VITE_CAPTCHA_USE_MOCK === 'true') return true;
   return useIpgMock();
 }
+
+/**
+ * Language switcher visibility in header.
+ * - false: hide
+ * - any other value / undefined: show
+ */
+export function getShowLanguageSwitcher() {
+  return import.meta.env.VITE_SHOW_LANGUAGE_SWITCHER !== 'false';
+}

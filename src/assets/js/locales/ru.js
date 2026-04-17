@@ -25,7 +25,10 @@ export default {
   'header.title': 'Платежный шлюз',
 
   // Footer
-  'footer.copyright': '© 2024 Все права защищены',
+  'footer.supportPrefix': 'Круглосуточный центр поддержки клиентов:',
+  'footer.supportPhone': '021-84080',
+  'footer.copyright':
+    '© 2020 - 2025 (SEP) Saman Electronic Payment\nВсе материальные и интеллектуальные права принадлежат Saman Electronic Payment.',
 
   // Form
   'form.cardNumber': 'Номер карты',
@@ -37,6 +40,7 @@ export default {
   'form.cvv2.placeholder': '123',
   'form.cvv2.required': 'CVV2 обязателен',
   'form.cvv2.hint': '3- или 4-значный код на обороте карты',
+  'form.cvv2.invalidLength': 'CVV2 должен содержать {{count}} цифры',
   'form.expiryDate': 'Срок действия',
   'form.expiryMonth': 'Месяц',
   'form.expiryYear': 'Год',

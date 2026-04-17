@@ -28,6 +28,8 @@ async function initializePage() {
 
   footer = new Footer({
     logo: '/assets/images/logo.svg',
+    supportPrefix: i18n.t('footer.supportPrefix'),
+    supportPhone: i18n.t('footer.supportPhone'),
     copyright: i18n.t('footer.copyright'),
   });
 
@@ -57,6 +59,8 @@ function updateReceiptLanguage() {
   }
   if (footer) {
     footer.updateCopyright(i18n.t('footer.copyright'));
+    footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
+    footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
   i18n.applyDataI18n(document);
   const shareBtn = document.getElementById('share-button');

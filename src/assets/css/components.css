@@ -16,7 +16,7 @@
 }
 
 .input-required {
-  color: var(--color-danger);
+  display: none;
 }
 
 .input-container {
@@ -83,8 +83,18 @@
 }
 
 .input-password-mask {
-  -webkit-text-security: circle;
-  text-security: circle;
+  font-family: 'password', var(--font-family-base), monospace;
+  font-size: 20px;
+  letter-spacing: 1px;
+  -webkit-text-security: none;
+  text-security: none;
+}
+
+.input-password-mask::placeholder,
+.input-password-mask:placeholder-shown {
+  font-family: var(--font-family-base);
+  font-size: var(--font-size-base);
+  letter-spacing: 0;
 }
 
 .card-bank-logo {
@@ -437,18 +447,7 @@
 
 /* Virtual Pin Pad */
 .pin-pad {
-  padding: var(--spacing-md);
-}
-
-.pin-pad-display {
-  text-align: center;
-  font-size: var(--font-size-2xl);
-  letter-spacing: var(--spacing-md);
-  padding: var(--spacing-lg);
-  margin-bottom: var(--spacing-md);
-  background: var(--color-bg-light);
-  border-radius: var(--radius-md);
-  font-family: monospace;
+  padding: var(--spacing-sm);
 }
 
 .pin-pad-grid {
@@ -490,7 +489,8 @@
   border: 1px solid var(--color-stroke);
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-lg);
-  padding: var(--spacing-md);
+  padding: 0;
+  box-sizing: border-box;
 }
 
 /* Loading Screen */
