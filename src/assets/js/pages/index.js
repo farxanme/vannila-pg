@@ -15,7 +15,12 @@ import {
   validateEmail,
   validateOTP,
 } from '../utils/validators.js';
-import { detectBank, formatCardNumber, getBankLogo } from '../utils/bankDetector.js';
+import {
+  detectBank,
+  formatCardNumber,
+  getBankLogo,
+  getLocalizedBankName,
+} from '../utils/bankDetector.js';
 import { extractNumbers, numberToWordsByLang } from '../utils/numberConverter.js';
 import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
@@ -308,6 +313,41 @@ function getExpectedCvvLength() {
 
 function shouldSendExpiryDateInPayRequest() {
   return !isExpiryDateLockedFromCard || hasUserEnabledExpiryDateEdit;
+}
+
+function getMaskedDisplayPan(securePan) {
+  if (!securePan) return '';
+  const raw = securePan.replace(/\s/g, '').replace(/#/g, '●').replace(/\*/g, '●');
+  const parts = [];
+  for (let i = 0; i < raw.length; i += 4) {
+    parts.push(raw.substring(i, i + 4));
+  }
+  return parts.join(' ');
+}
+
+function buildCardDropdownItems() {
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  return cardList.map((card) => {
+    const logoPath = getBankLogo(card.bankName);
+    const localizedBankName = getLocalizedBankName(card.bankName, lang);
+    const maskedPan = getMaskedDisplayPan(card.securePan);
+    return {
+      text: maskedPan,
+      value: card.number,
+      html: `
+            <div class="dropdown-card-item">
+              <div class="dropdown-card-bank">
+                ${logoPath ? `<img class="dropdown-card-bank-logo" src="${logoPath}" alt="${localizedBankName}" />` : ''}
+                <span class="dropdown-card-bank-name">${localizedBankName}</span>
+              </div>
+              <div class="dropdown-card-meta">
+                <span class="dropdown-card-number">${maskedPan}</span>
+                ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
+              </div>
+            </div>
+          `,
+    };
+  });
 }
 
 // Initialize page
@@ -637,40 +677,10 @@ function initializeFormInputs() {
     },
   });
 
-  function getMaskedDisplayPan(securePan) {
-    if (!securePan) return '';
-    const raw = securePan.replace(/\s/g, '').replace(/#/g, '●').replace(/\*/g, '●');
-    const parts = [];
-    for (let i = 0; i < raw.length; i += 4) {
-      parts.push(raw.substring(i, i + 4));
-    }
-    return parts.join(' ');
-  }
-
   // Create card dropdown if cards exist
   if (cardList.length > 0) {
     cardDropdown = new Dropdown(cardNumberInput.element, {
-      items: cardList.map((card) => ({
-        text: getMaskedDisplayPan(card.securePan),
-        value: card.number,
-        html: (() => {
-          const logoPath = getBankLogo(card.bankName);
-          const bankName = card.bankName || '';
-          const maskedPan = getMaskedDisplayPan(card.securePan);
-          return `
-            <div class="dropdown-card-item">
-              <div class="dropdown-card-bank">
-                ${logoPath ? `<img class="dropdown-card-bank-logo" src="${logoPath}" alt="${bankName}" />` : ''}
-                <span class="dropdown-card-bank-name">${bankName}</span>
-              </div>
-              <div class="dropdown-card-meta">
-                <span class="dropdown-card-number">${maskedPan}</span>
-                ${card.pinned ? '<span class="dropdown-card-pinned">📌</span>' : ''}
-              </div>
-            </div>
-          `;
-        })(),
-      })),
+      items: buildCardDropdownItems(),
       onSelect: (item) => {
         const card = cardList.find((c) => c.number === item.value);
         if (card) {
@@ -1339,7 +1349,10 @@ function setPayButtonState(state) {
   if (state === 'active') {
     if (typeof amount === 'number') {
       const formattedAmount = amount.toLocaleString(locale);
-      payButton.textContent = `${i18n.t('form.pay.securePrefix')} ${formattedAmount} ${i18n.t('transaction.rial')}`;
+      payButton.textContent = i18n.t('form.pay.secureWithAmount', {
+        amount: formattedAmount,
+        currency: i18n.t('transaction.rial'),
+      });
     } else {
       payButton.textContent = i18n.t('form.pay.securePrefix');
     }
@@ -1447,6 +1460,7 @@ function openCancelPaymentConfirm() {
 
 function attachFormEvents() {
   const form = document.getElementById('payment-form');
+  const saveCardCheckbox = document.getElementById('save-card-checkbox');
   const showReceiptToggle = document.getElementById('show-receipt-toggle');
   const receiptFields = document.getElementById('receipt-fields');
   const payButton = document.getElementById('pay-button');
@@ -1558,6 +1572,18 @@ function attachFormEvents() {
     });
   }
 
+  if (saveCardCheckbox) {
+    const saveCardIcon = document.querySelector('.save-card-icon img');
+    const updateSaveCardIcon = () => {
+      if (!saveCardIcon) return;
+      saveCardIcon.src = saveCardCheckbox.checked
+        ? '/assets/images/icons/icn-square-minus.svg'
+        : '/assets/images/icons/icn-square-plus.svg';
+    };
+    updateSaveCardIcon();
+    saveCardCheckbox.addEventListener('change', updateSaveCardIcon);
+  }
+
   document.getElementById('cancel-button').addEventListener('click', () => {
     openCancelPaymentConfirm();
   });
@@ -1598,6 +1624,9 @@ function updatePageContent() {
       hasSavedCards ? i18n.t('form.cardNumber.selectCard') : i18n.t('form.cardNumber')
     );
     cardNumberInput.setPlaceholder(i18n.t('form.cardNumber.placeholder'));
+  }
+  if (cardDropdown) {
+    cardDropdown.updateItems(buildCardDropdownItems());
   }
   if (cvv2Input) {
     cvv2Input.setLabel(i18n.t('form.cvv2'));

@@ -62,6 +62,7 @@ export default {
   'form.saveCard': 'Save card in SEP gateway',
   'form.pay': 'Pay',
   'form.pay.securePrefix': 'Secure payment',
+  'form.pay.secureWithAmount': 'Secure payment ({{amount}} {{currency}})',
   'form.pay.disabled': 'Please complete all information',
   'form.pay.processing': 'Connecting to bank...',
   'form.pay.success': 'Payment completed successfully',

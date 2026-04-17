@@ -62,6 +62,7 @@ export default {
   'form.saveCard': 'Сохранить карту в шлюзе SEP',
   'form.pay': 'Оплатить',
   'form.pay.securePrefix': 'Безопасная оплата',
+  'form.pay.secureWithAmount': 'Безопасная оплата ({{amount}} {{currency}})',
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
   'form.pay.processing': 'Подключение к банку...',
   'form.pay.success': 'Платёж успешно выполнен',

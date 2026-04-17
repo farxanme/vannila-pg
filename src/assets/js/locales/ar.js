@@ -62,6 +62,7 @@ export default {
   'form.saveCard': 'حفظ البطاقة في بوابة SEP',
   'form.pay': 'دفع',
   'form.pay.securePrefix': 'دفع آمن',
+  'form.pay.secureWithAmount': 'دفع آمن ({{amount}} {{currency}})',
   'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
   'form.pay.processing': 'جارٍ الاتصال بالبنك...',
   'form.pay.success': 'تم الدفع بنجاح',

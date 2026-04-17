@@ -62,6 +62,7 @@ export default {
   'form.saveCard': 'Kartı SEP ağ geçidinde kaydet',
   'form.pay': 'Öde',
   'form.pay.securePrefix': 'Güvenli ödeme',
+  'form.pay.secureWithAmount': 'Güvenli ödeme ({{amount}} {{currency}})',
   'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
   'form.pay.processing': 'Banka ile bağlantı kuruluyor...',
   'form.pay.success': 'Ödeme başarıyla tamamlandı',

@@ -64,6 +64,102 @@ const neoBins = [
   { bin: '62198619', bankName: 'Blu', bankCode: '' },
 ];
 
+const bankLocalizedNames = {
+  saman: { en: 'Saman', fa: 'سامان', ar: 'سامان' },
+  pasargad: { en: 'Pasargad', fa: 'پاسارگاد', ar: 'باسارغاد' },
+  ayandeh: { en: 'Ayandeh', fa: 'آینده', ar: 'آينده' },
+  'gharzolhasaneh-resalat': { en: 'Resalat', fa: 'رسالت', ar: 'رسالت' },
+  melli: { en: 'Melli', fa: 'ملی', ar: 'ملي' },
+  mellat: { en: 'Mellat', fa: 'ملت', ar: 'ملت' },
+  saderat: { en: 'Saderat', fa: 'صادرات', ar: 'صادرات' },
+  keshavarzi: { en: 'Keshavarzi', fa: 'کشاورزی', ar: 'الزراعة' },
+  tejarat: { en: 'Tejarat', fa: 'تجارت', ar: 'تجارت' },
+  maskan: { en: 'Maskan', fa: 'مسکن', ar: 'مسكن' },
+  'sanat-madan': { en: 'Industry & Mine', fa: 'صنعت و معدن', ar: 'الصناعة والمناجم' },
+  shahr: { en: 'Shahr', fa: 'شهر', ar: 'شهر' },
+  'eghtesad-novin': { en: 'Eghtesad Novin', fa: 'اقتصاد نوین', ar: 'اقتصاد نوين' },
+  sina: { en: 'Sina', fa: 'سینا', ar: 'سينا' },
+  refah: { en: 'Refah', fa: 'رفاه', ar: 'رفاه' },
+  sepah: { en: 'Sepah', fa: 'سپه', ar: 'سبه' },
+  'iran-zamin': { en: 'Iran Zamin', fa: 'ایران زمین', ar: 'ايران زمين' },
+  ansar: { en: 'Ansar', fa: 'انصار', ar: 'أنصار' },
+  ghavamin: { en: 'Ghavamin', fa: 'قوامین', ar: 'قوامين' },
+  parsian: { en: 'Parsian', fa: 'پارسیان', ar: 'بارسيان' },
+  blu: { en: 'Blu', fa: 'بلو', ar: 'بلو' },
+  post: { en: 'Post', fa: 'پست بانک', ar: 'بنك البريد' },
+  'middle-east': { en: 'Middle East', fa: 'خاورمیانه', ar: 'الشرق الأوسط' },
+  dey: { en: 'Dey', fa: 'دی', ar: 'دي' },
+  'tosee-taavon': { en: 'Tosee Taavon', fa: 'توسعه تعاون', ar: 'تنمية التعاون' },
+  'karafarin': { en: 'Kar Afarin', fa: 'کارآفرین', ar: 'كار آفرين' },
+  'mehr-eghtesad': { en: 'Mehr', fa: 'مهر', ar: 'مهر' },
+  mellal: { en: 'Mellal', fa: 'ملل', ar: 'ملل' },
+  sarmaye: { en: 'Sarmayeh', fa: 'سرمایه', ar: 'سرماية' },
+  tourism: { en: 'Tourism', fa: 'گردشگری', ar: 'السياحة' },
+};
+
+const bankNameToKeyMatchers = [
+  { key: 'saman', checks: ['saman', 'سامان'] },
+  { key: 'pasargad', checks: ['pasargad', 'پاسارگاد'] },
+  { key: 'ayandeh', checks: ['ayandeh', 'آینده'] },
+  { key: 'gharzolhasaneh-resalat', checks: ['resalat', 'رسالت'] },
+  { key: 'melli', checks: ['melli', 'melli iran', 'ملی'] },
+  { key: 'mellat', checks: ['mellat', 'ملت'] },
+  { key: 'saderat', checks: ['saderat', 'صادرات'] },
+  { key: 'keshavarzi', checks: ['keshavarzi', 'کشاورزی'] },
+  { key: 'tejarat', checks: ['tejarat', 'تجارت'] },
+  { key: 'maskan', checks: ['maskan', 'مسکن'] },
+  { key: 'sanat-madan', checks: ['industry & mine', 'صنعت و معدن'] },
+  { key: 'shahr', checks: ['shahr', 'شهر'] },
+  { key: 'eghtesad-novin', checks: ['eghtesad novin', 'اقتصاد نوین'] },
+  { key: 'sina', checks: ['sina', 'سینا'] },
+  { key: 'refah', checks: ['refah', 'رفاه'] },
+  { key: 'sepah', checks: ['sepah', 'سپه'] },
+  { key: 'iran-zamin', checks: ['iran zamin', 'ایران زمین'] },
+  { key: 'ansar', checks: ['ansar', 'انصار'] },
+  { key: 'ghavamin', checks: ['ghavamin', 'قوامین'] },
+  { key: 'parsian', checks: ['parsian', 'پارسیان'] },
+  { key: 'blu', checks: ['blu', 'بلو'] },
+  { key: 'post', checks: ['post', 'پست'] },
+  { key: 'middle-east', checks: ['middle east', 'خاورمیانه'] },
+  { key: 'dey', checks: ['dey', 'دی'] },
+  { key: 'tosee-taavon', checks: ['tosee taavon', 'توسعه تعاون'] },
+  { key: 'karafarin', checks: ['kar afarin', 'کارآفرین'] },
+  { key: 'mehr-eghtesad', checks: ['mehr', 'مهر'] },
+  { key: 'mellal', checks: ['mellal', 'ملل'] },
+  { key: 'sarmaye', checks: ['sarmayeh', 'سرمایه'] },
+  { key: 'tourism', checks: ['tourism', 'گردشگری'] },
+];
+
+function resolveBankLocalizationKey(bankName) {
+  const raw = String(bankName || '').trim();
+  if (!raw) return null;
+  const normalized = raw.toLowerCase().replace(/\s+/g, ' ');
+  for (const matcher of bankNameToKeyMatchers) {
+    if (matcher.checks.some((s) => normalized.includes(s.toLowerCase()))) {
+      return matcher.key;
+    }
+  }
+  return null;
+}
+
+/**
+ * Get localized bank name for card list.
+ * - fa => Persian
+ * - ar => Arabic
+ * - others => English
+ * @param {string} bankName
+ * @param {string} lang
+ * @returns {string}
+ */
+export function getLocalizedBankName(bankName, lang = 'fa') {
+  const key = resolveBankLocalizationKey(bankName);
+  if (!key || !bankLocalizedNames[key]) {
+    return bankName || '';
+  }
+  const targetLang = lang === 'fa' || lang === 'ar' ? lang : 'en';
+  return bankLocalizedNames[key][targetLang] || bankLocalizedNames[key].en || bankName || '';
+}
+
 /**
  * Detect bank from card number
  * @param {string} cardNumber - Card number (can include spaces)

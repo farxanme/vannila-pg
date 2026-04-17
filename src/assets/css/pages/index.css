@@ -110,19 +110,6 @@ html.app-ready #app .main-content {
   object-fit: contain;
 }
 
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  cursor: pointer;
-}
-
-.checkbox-label input[type='checkbox'] {
-  width: 18px;
-  height: 18px;
-  cursor: pointer;
-}
-
 .payment-form {
   display: flex;
   flex-direction: column;
@@ -409,10 +396,11 @@ html.app-ready #app .main-content {
   margin-top: var(--spacing-md);
 }
 
-.show-receipt-toggle {
+.show-receipt-toggle,
+.save-card-toggle {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-2);
+  gap: 12px;
   cursor: pointer;
   user-select: none;
   font-family: var(--font-family-base);
@@ -428,7 +416,14 @@ html.app-ready #app .main-content {
   pointer-events: none;
 }
 
-.show-receipt-icon img {
+.save-card-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.show-receipt-icon img,
+.save-card-icon img {
   width: var(--size-icon-md);
   height: var(--size-icon-md);
 }
