@@ -1803,6 +1803,7 @@ function updatePageContent() {
   if (cvv2Input) {
     cvv2Input.setLabel(i18n.t('form.cvv2'));
     cvv2Input.setPlaceholder(i18n.t('form.cvv2.placeholder'));
+    cvv2Input.setHint(i18n.t('form.cvv2.hint'));
   }
   if (expiryDateInput) {
     expiryDateInput.setLabel(i18n.t('form.expiryDate'));

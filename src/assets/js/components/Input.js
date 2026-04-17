@@ -39,6 +39,7 @@ export class Input {
     this.element = null;
     this.labelElement = null;
     this.inputContainer = null;
+    this.hintElement = null;
     this.init();
   }
 
@@ -176,6 +177,7 @@ export class Input {
       hint.className = 'input-hint';
       hint.textContent = this.options.hint;
       wrapper.appendChild(hint);
+      this.hintElement = hint;
     }
 
     // Error message
@@ -403,6 +405,17 @@ export class Input {
     this.options.placeholder = placeholder;
     if (this.element) {
       this.element.placeholder = placeholder;
+    }
+  }
+
+  /**
+   * Set hint text (below the input)
+   * @param {string} hintText - Hint text
+   */
+  setHint(hintText) {
+    this.options.hint = hintText || '';
+    if (this.hintElement) {
+      this.hintElement.textContent = this.options.hint;
     }
   }
 

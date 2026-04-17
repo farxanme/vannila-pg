@@ -47,6 +47,11 @@ export function validateCardNumber(cardNumber) {
     return { valid: false, message: i18n.t('form.cardNumber.mustBe16Digits') };
   }
 
+  // Luhn accepts impossible PANs like 0000000000000000 (checksum 0); reject all-identical digits.
+  if (/^(\d)\1{15}$/.test(numbers)) {
+    return { valid: false, message: i18n.t('form.cardNumber.invalid') };
+  }
+
   // Luhn algorithm check
   let sum = 0;
   let isEven = false;
