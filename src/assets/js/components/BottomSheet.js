@@ -20,7 +20,18 @@ export class BottomSheet {
     this.currentY = 0;
     this.isDragging = false;
     this.boundHandleKeyDown = this.handleKeyDown.bind(this);
+    this.boundCloseOnResize = this.closeOnResize.bind(this);
+    window.addEventListener('resize', this.boundCloseOnResize);
     this.init();
+  }
+
+  /**
+   * Close when viewport is resized (avoid stale layout / wrong surface).
+   */
+  closeOnResize() {
+    if (this.isOpen) {
+      this.close();
+    }
   }
 
   /**
@@ -268,6 +279,7 @@ export class BottomSheet {
    * Destroy component
    */
   destroy() {
+    window.removeEventListener('resize', this.boundCloseOnResize);
     document.removeEventListener('keydown', this.boundHandleKeyDown);
     if (this.isOpen) {
       this.isOpen = false;

@@ -13,7 +13,7 @@ html.app-ready #app .main-content {
 .grid.grid-2-col {
   display: flex;
   align-items: stretch;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-md);
 }
 
 /* RTL: small card on LEFT, large card on RIGHT */

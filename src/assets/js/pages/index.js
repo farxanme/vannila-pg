@@ -21,7 +21,11 @@ import {
   getBankLogo,
   getLocalizedBankName,
 } from '../utils/bankDetector.js';
-import { extractNumbers, numberToWordsByLang } from '../utils/numberConverter.js';
+import {
+  convertToEnglishNumbers,
+  extractNumbers,
+  numberToWordsByLang,
+} from '../utils/numberConverter.js';
 import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
@@ -338,6 +342,103 @@ function getMaskedDisplayPan(securePan) {
 }
 
 /**
+ * Digit string from card field for filtering saved cards: full typed PAN, or lead+tail when UI shows mask (●).
+ */
+function getCardNumberFilterDigits(rawValue) {
+  if (!rawValue) return '';
+  const value = convertToEnglishNumbers(rawValue);
+  if (!/[●*#]/.test(value)) {
+    return extractNumbers(rawValue);
+  }
+  let firstMaskIdx = -1;
+  for (let i = 0; i < value.length; i++) {
+    if (/[●*#]/.test(value[i])) {
+      firstMaskIdx = i;
+      break;
+    }
+  }
+  let lastMaskIdx = -1;
+  for (let i = value.length - 1; i >= 0; i--) {
+    if (/[●*#]/.test(value[i])) {
+      lastMaskIdx = i;
+      break;
+    }
+  }
+  const before = firstMaskIdx === -1 ? value : value.slice(0, firstMaskIdx);
+  const after = lastMaskIdx === -1 ? '' : value.slice(lastMaskIdx + 1);
+  return `${before.replace(/\D/g, '')}${after.replace(/\D/g, '')}`;
+}
+
+/**
+ * Parse API masked PAN into BIN prefix, suffix, and index where suffix starts (standard 16-digit layout).
+ */
+function parseMaskedPanStructure(securePan) {
+  if (!securePan || typeof securePan !== 'string') {
+    return { lead: '', tail: '', tailStart: 0, totalLen: 0 };
+  }
+  const raw = securePan
+    .replace(/\s/g, '')
+    .replace(/●/g, '*')
+    .replace(/#/g, '*')
+    .replace(/[^\d*]/g, '');
+  let i = 0;
+  let lead = '';
+  while (i < raw.length && raw[i] !== '*') {
+    lead += raw[i];
+    i++;
+  }
+  let maskLen = 0;
+  while (i < raw.length && raw[i] === '*') {
+    maskLen++;
+    i++;
+  }
+  let tail = '';
+  while (i < raw.length && raw[i] !== '*') {
+    tail += raw[i];
+    i++;
+  }
+  const totalLen = lead.length + maskLen + tail.length;
+  const tailStart = lead.length + maskLen;
+  return { lead, tail, tailStart, totalLen };
+}
+
+/**
+ * Whether typed digits can still match this saved card's masked PAN (prefix, middle unknown, suffix aligned).
+ */
+function savedCardMatchesTypedDigits(securePan, typedDigits) {
+  const U = String(typedDigits).replace(/\D/g, '');
+  if (U.length === 0) return true;
+
+  const { lead, tail, tailStart, totalLen } = parseMaskedPanStructure(securePan);
+  if (!totalLen) return false;
+
+  const compareLen = Math.min(U.length, totalLen);
+  if (compareLen === 0) return true;
+
+  const prefixLen = Math.min(compareLen, lead.length);
+  if (prefixLen > 0 && U.slice(0, prefixLen) !== lead.slice(0, prefixLen)) {
+    return false;
+  }
+
+  if (compareLen <= tailStart) {
+    return true;
+  }
+
+  if (!tail || tail.length === 0) {
+    return true;
+  }
+
+  for (let j = tailStart; j < compareLen; j++) {
+    const ti = j - tailStart;
+    if (ti >= tail.length) break;
+    if (U[j] !== tail[ti]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
  * Stable unique key for saved-card rows (remove / select). Uses API subscriberCardId when set.
  * Do not use `card.number` alone: IPG mapping can duplicate the same synthetic PAN per bank BIN.
  */
@@ -373,9 +474,17 @@ function buildCardEmptyStateElement() {
   return wrap;
 }
 
-function buildCardDropdownItems() {
+function buildCardDropdownItems(typedDigits) {
+  const digits =
+    typedDigits !== undefined
+      ? String(typedDigits).replace(/\D/g, '')
+      : getCardNumberFilterDigits(cardNumberInput?.getValue?.() || '');
+  const filtered =
+    digits.length > 0
+      ? cardList.filter((card) => savedCardMatchesTypedDigits(card.securePan, digits))
+      : cardList;
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  return cardList.map((card) => {
+  return filtered.map((card) => {
     const logoPath = getBankLogo(card.bankName);
     const localizedBankName = getLocalizedBankName(card.bankName, lang);
     const maskedPan = getMaskedDisplayPan(card.securePan);
@@ -808,6 +917,10 @@ function initializeFormInputs() {
 
       // Detect gift card and notify
       handleGiftCardNotificationFromPan(value);
+
+      if (cardDropdown) {
+        cardDropdown.updateItems(buildCardDropdownItems());
+      }
     },
   });
 
@@ -1488,6 +1601,7 @@ function toggleCardList() {
       void openCardListSheetFn();
     }
   } else if (cardDropdown) {
+    cardDropdown.updateItems(buildCardDropdownItems());
     cardDropdown.toggle();
   }
 }

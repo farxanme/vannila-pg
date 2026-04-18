@@ -24,7 +24,18 @@ export class Dropdown {
     /** When true, next focus on the linked input will not auto-open (e.g. after "add new card"). */
     this.skipNextFocusOpen = false;
     this.filteredItems = [...this.options.items];
+    this.boundCloseOnResize = this.closeOnResize.bind(this);
+    window.addEventListener('resize', this.boundCloseOnResize);
     this.init();
+  }
+
+  /**
+   * Close when viewport is resized (position and width are invalid).
+   */
+  closeOnResize() {
+    if (this.isOpen) {
+      this.close();
+    }
   }
 
   /**
@@ -352,6 +363,7 @@ export class Dropdown {
    * Destroy component
    */
   destroy() {
+    window.removeEventListener('resize', this.boundCloseOnResize);
     document.removeEventListener('click', this.handleOutsideClick);
     if (this.dropdownElement && this.dropdownElement.parentNode) {
       this.dropdownElement.parentNode.removeChild(this.dropdownElement);

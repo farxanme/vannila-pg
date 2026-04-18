@@ -23,9 +23,23 @@ export class VirtualPinPad {
     this.isMobile = window.innerWidth <= 768;
     this.currentValue = '';
     this.numbers = this.generateRandomNumbers();
+    this.boundCloseOnResize = this.closeOnViewportResize.bind(this);
+    window.addEventListener('resize', this.boundCloseOnResize);
     this.init();
     this.pinPadLanguageChangeListener = () => this.applyPinPadI18n();
     document.addEventListener('languageChange', this.pinPadLanguageChangeListener);
+  }
+
+  /**
+   * Close pin pad when viewport resizes (desktop panel position breaks; mobile sheet handles its own).
+   */
+  closeOnViewportResize() {
+    const mobileOpen = this.isMobile && this.bottomSheet?.isOpen;
+    const desktopOpen =
+      !this.isMobile && this.desktopElement && this.desktopElement.style.display === 'block';
+    if (mobileOpen || desktopOpen) {
+      this.close();
+    }
   }
 
   /**
@@ -425,6 +439,7 @@ export class VirtualPinPad {
    * Destroy component
    */
   destroy() {
+    window.removeEventListener('resize', this.boundCloseOnResize);
     document.removeEventListener('languageChange', this.pinPadLanguageChangeListener);
     if (VirtualPinPad.activeInstance === this) {
       VirtualPinPad.activeInstance = null;

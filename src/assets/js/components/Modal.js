@@ -59,6 +59,10 @@ export class Modal {
    * Rebuild when crossing the mobile breakpoint (single resize listener).
    */
   handleResize() {
+    if (this.isOpen) {
+      this.close();
+    }
+
     const nextMobile = window.innerWidth <= 768;
     if (nextMobile === this.isMobile) return;
     this.destroyCurrentUi();

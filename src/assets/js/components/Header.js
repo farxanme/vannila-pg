@@ -443,9 +443,8 @@ export class Header {
    * Attach events
    */
   attachEvents() {
-    // Handle mobile card animation
     window.addEventListener('resize', () => {
-      this.handleResize();
+      this.closeAllHeaderMenus?.();
     });
   }
 
