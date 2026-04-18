@@ -74,7 +74,7 @@ export default {
   'form.captchaAudioUnavailable': 'Bu sürümde sesli captcha yok',
   'form.cancel': 'İptal',
   'form.showReceipt': 'Fişi Göster',
-  'form.title': 'Ödeme Bilgileri',
+  'form.title': 'Kart bilgilerinizi girin',
   'form.submit': 'Gönder',
   'form.captcha': 'Güvenlik Kodu',
   'form.captcha.placeholder': 'Kodu girin',
@@ -172,6 +172,7 @@ export default {
 
   // Pin Pad
   'pinPad.title': 'PIN Gir',
+  'pinPad.secureKeyboardTitle': 'Güvenli klavye',
   'pinPad.clear': 'Temizle',
 
   // Timer

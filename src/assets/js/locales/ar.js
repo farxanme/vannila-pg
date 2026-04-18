@@ -74,7 +74,7 @@ export default {
   'form.captchaAudioUnavailable': 'الصوت غير متاح لهذا الإصدار',
   'form.cancel': 'إلغاء',
   'form.showReceipt': 'عرض الإيصال',
-  'form.title': 'معلومات الدفع',
+  'form.title': 'أدخل بيانات بطاقتك',
   'form.submit': 'إرسال',
   'form.captcha': 'رمز الأمان',
   'form.captcha.placeholder': 'أدخل الرمز',
@@ -172,6 +172,7 @@ export default {
 
   // Pin Pad
   'pinPad.title': 'أدخل PIN',
+  'pinPad.secureKeyboardTitle': 'لوحة مفاتيح آمنة',
   'pinPad.clear': 'مسح',
 
   // Timer

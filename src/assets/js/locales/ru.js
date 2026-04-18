@@ -74,7 +74,7 @@ export default {
   'form.captchaAudioUnavailable': 'Аудио капчи недоступно в этой сборке',
   'form.cancel': 'Отмена',
   'form.showReceipt': 'Показать квитанцию',
-  'form.title': 'Информация об оплате',
+  'form.title': 'Введите данные карты',
   'form.submit': 'Отправить',
   'form.captcha': 'Код безопасности',
   'form.captcha.placeholder': 'Введите код',
@@ -172,6 +172,7 @@ export default {
 
   // Pin Pad
   'pinPad.title': 'Введите PIN',
+  'pinPad.secureKeyboardTitle': 'Безопасная клавиатура',
   'pinPad.clear': 'Очистить',
 
   // Timer

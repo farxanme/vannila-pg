@@ -1,4 +1,15 @@
 import { BottomSheet } from './BottomSheet.js';
+import { i18n } from '../utils/i18n.js';
+
+// Apply i18n keys onto modal options (mutates options).
+function resolveModalOptionStrings(options) {
+  if (options.titleKey) options.title = i18n.t(options.titleKey);
+  if (options.descriptionKey) options.description = i18n.t(options.descriptionKey);
+  if (options.imageAltKey) options.imageAlt = i18n.t(options.imageAltKey);
+  if (options.closeButtonAriaLabelKey) {
+    options.closeButtonAriaLabel = i18n.t(options.closeButtonAriaLabelKey);
+  }
+}
 
 /**
  * Modal Component — desktop uses centered dialog; mobile uses BottomSheet.
@@ -6,6 +17,10 @@ import { BottomSheet } from './BottomSheet.js';
 export class Modal {
   constructor(options = {}) {
     this.options = {
+      titleKey: options.titleKey || '',
+      descriptionKey: options.descriptionKey || '',
+      imageAltKey: options.imageAltKey || '',
+      closeButtonAriaLabelKey: options.closeButtonAriaLabelKey || '',
       title: options.title || '',
       description: options.description || '',
       content: options.content || '',
@@ -14,21 +29,29 @@ export class Modal {
       showCloseButton: options.showCloseButton !== false,
       closeButtonAriaLabel: options.closeButtonAriaLabel || 'Close',
       buttons: options.buttons || [],
+      // Full-width stacked buttons (e.g. cancel confirmation).
+      buttonsStacked: options.buttonsStacked === true,
       onClose: options.onClose || null,
       ...options,
     };
 
+    resolveModalOptionStrings(this.options);
+
+    this.modalImageRef = null;
+    this.modalCloseButton = null;
+    this.boundResizeListener = this.handleResize.bind(this);
+    this.boundKeyDownListener = this.handleKeyDown.bind(this);
+    this.boundLanguageChangeListener = () => {
+      if (this.isOpen) this.syncModalI18n();
+    };
+
     this.isMobile = window.innerWidth <= 768;
-    /** @type {BottomSheet | null} */
     this.modalInstance = null;
     this.modalElement = null;
     this.backdrop = null;
     this.isOpen = false;
 
-    this._onResize = this.handleResize.bind(this);
-    this._onKeyDown = this.handleKeyDown.bind(this);
-
-    window.addEventListener('resize', this._onResize);
+    window.addEventListener('resize', this.boundResizeListener);
     this.buildLayout();
   }
 
@@ -44,6 +67,7 @@ export class Modal {
   }
 
   buildLayout() {
+    resolveModalOptionStrings(this.options);
     if (this.isMobile) {
       this.initBottomSheet();
     } else {
@@ -61,7 +85,7 @@ export class Modal {
       return;
     }
     if (!this.isMobile) {
-      document.removeEventListener('keydown', this._onKeyDown);
+      document.removeEventListener('keydown', this.boundKeyDownListener);
       if (this.backdrop?.parentNode) {
         this.backdrop.parentNode.removeChild(this.backdrop);
       }
@@ -81,14 +105,19 @@ export class Modal {
     this.modalInstance = new BottomSheet({
       title: this.options.title,
       content: this.createMobileContent(),
-      buttons: [...this.options.buttons],
+      buttons: this.normalizeButtonsForSheet(),
+      buttonsStacked: this.options.buttonsStacked,
       onClose: this.options.onClose,
     });
   }
 
   /**
-   * @returns {HTMLElement}
+   * Clone button configs for BottomSheet (same shape as desktop).
    */
+  normalizeButtonsForSheet() {
+    return this.options.buttons.map((b) => ({ ...b }));
+  }
+
   createMobileContent() {
     const container = document.createElement('div');
     container.className = 'modal-content-mobile';
@@ -98,6 +127,9 @@ export class Modal {
       img.src = this.options.image;
       img.alt = this.options.imageAlt || this.options.title || '';
       img.className = 'modal-image';
+      if (this.options.imageAltKey) {
+        img.setAttribute('data-i18n-alt', this.options.imageAltKey);
+      }
       container.appendChild(img);
     }
 
@@ -105,6 +137,9 @@ export class Modal {
       const desc = document.createElement('p');
       desc.className = 'modal-description';
       desc.textContent = this.options.description;
+      if (this.options.descriptionKey) {
+        desc.setAttribute('data-i18n', this.options.descriptionKey);
+      }
       container.appendChild(desc);
     }
 
@@ -124,7 +159,7 @@ export class Modal {
    */
   initModal() {
     this.createModalHTML();
-    document.addEventListener('keydown', this._onKeyDown);
+    document.addEventListener('keydown', this.boundKeyDownListener);
   }
 
   createModalHTML() {
@@ -149,6 +184,7 @@ export class Modal {
       closeBtn.innerHTML = '×';
       closeBtn.setAttribute('aria-label', this.options.closeButtonAriaLabel);
       closeBtn.onclick = () => this.close();
+      this.modalCloseButton = closeBtn;
       content.appendChild(closeBtn);
     }
 
@@ -157,14 +193,10 @@ export class Modal {
       title.id = 'modal-title';
       title.className = 'modal-title';
       title.textContent = this.options.title;
+      if (this.options.titleKey) {
+        title.setAttribute('data-i18n', this.options.titleKey);
+      }
       content.appendChild(title);
-    }
-
-    if (this.options.description) {
-      const desc = document.createElement('p');
-      desc.className = 'modal-description';
-      desc.textContent = this.options.description;
-      content.appendChild(desc);
     }
 
     if (this.options.image) {
@@ -172,7 +204,21 @@ export class Modal {
       img.src = this.options.image;
       img.alt = this.options.imageAlt || this.options.title || '';
       img.className = 'modal-image';
+      this.modalImageRef = img;
+      if (this.options.imageAltKey) {
+        img.setAttribute('data-i18n-alt', this.options.imageAltKey);
+      }
       content.appendChild(img);
+    }
+
+    if (this.options.description) {
+      const desc = document.createElement('p');
+      desc.className = 'modal-description';
+      desc.textContent = this.options.description;
+      if (this.options.descriptionKey) {
+        desc.setAttribute('data-i18n', this.options.descriptionKey);
+      }
+      content.appendChild(desc);
     }
 
     const body = document.createElement('div');
@@ -189,6 +235,9 @@ export class Modal {
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'modal-buttons';
+      if (this.options.buttonsStacked) {
+        buttonsContainer.classList.add('modal-buttons--stacked');
+      }
 
       this.options.buttons.forEach((button) => {
         const btn = document.createElement('button');
@@ -198,7 +247,11 @@ export class Modal {
         if (button.className) {
           btn.className += ` ${button.className}`;
         }
-        btn.textContent = button.text || '';
+        const btnLabel = button.textKey ? i18n.t(button.textKey) : button.text || '';
+        btn.textContent = btnLabel;
+        if (button.textKey) {
+          btn.setAttribute('data-i18n', button.textKey);
+        }
 
         if (button.icon) {
           const icon = document.createElement('span');
@@ -230,8 +283,34 @@ export class Modal {
   }
 
   /**
-   * @param {KeyboardEvent} e
+   * Update visible strings when language changes while dialog is open.
    */
+  syncModalI18n() {
+    if (this.isMobile && this.modalInstance) {
+      if (this.options.titleKey) {
+        this.modalInstance.updateTitle(i18n.t(this.options.titleKey));
+      }
+      const sheet = this.modalInstance.sheetElement;
+      if (sheet) {
+        i18n.applyDataI18n(sheet);
+      }
+      const img = this.modalInstance.contentElement?.querySelector('.modal-image');
+      if (img && this.options.imageAltKey) {
+        img.alt = i18n.t(this.options.imageAltKey);
+      }
+      return;
+    }
+    if (this.modalElement) {
+      i18n.applyDataI18n(this.modalElement);
+    }
+    if (this.modalImageRef && this.options.imageAltKey) {
+      this.modalImageRef.alt = i18n.t(this.options.imageAltKey);
+    }
+    if (this.modalCloseButton && this.options.closeButtonAriaLabelKey) {
+      this.modalCloseButton.setAttribute('aria-label', i18n.t(this.options.closeButtonAriaLabelKey));
+    }
+  }
+
   handleKeyDown(e) {
     if (e.key !== 'Escape') return;
     if (this.isMobile) return;
@@ -241,9 +320,12 @@ export class Modal {
   }
 
   open() {
+    document.removeEventListener('languageChange', this.boundLanguageChangeListener);
+    document.addEventListener('languageChange', this.boundLanguageChangeListener);
     if (this.isMobile) {
       if (this.modalInstance) {
         this.modalInstance.open();
+        this.isOpen = true;
       }
       return;
     }
@@ -263,7 +345,9 @@ export class Modal {
   }
 
   close() {
+    document.removeEventListener('languageChange', this.boundLanguageChangeListener);
     if (this.isMobile) {
+      this.isOpen = false;
       if (this.modalInstance) {
         this.modalInstance.close();
       }
@@ -287,7 +371,8 @@ export class Modal {
    * Remove listeners and DOM (full teardown).
    */
   destroy() {
-    window.removeEventListener('resize', this._onResize);
+    document.removeEventListener('languageChange', this.boundLanguageChangeListener);
+    window.removeEventListener('resize', this.boundResizeListener);
     this.destroyCurrentUi();
   }
 }

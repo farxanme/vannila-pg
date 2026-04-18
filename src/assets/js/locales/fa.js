@@ -74,7 +74,7 @@ export default {
   'form.captchaAudioUnavailable': 'پخش صوتی کپچا در این نسخه در دسترس نیست',
   'form.cancel': 'انصراف',
   'form.showReceipt': 'نمایش رسید',
-  'form.title': 'اطلاعات پرداخت',
+  'form.title': 'اطلاعات کارت خود را وارد کنید',
   'form.submit': 'ارسال',
   'form.captcha': 'کد امنیتی',
   'form.captcha.placeholder': 'کد را وارد کنید',
@@ -172,6 +172,7 @@ export default {
 
   // Pin Pad
   'pinPad.title': 'ورود رمز',
+  'pinPad.secureKeyboardTitle': 'صفحه کلید امن',
   'pinPad.clear': 'پاک کردن',
 
   // Timer

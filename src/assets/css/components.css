@@ -420,6 +420,7 @@
   font-size: var(--font-size-lg);
   font-weight: 600;
   border-bottom: 1px solid var(--color-stroke);
+  text-align: center;
 }
 
 .bottom-sheet-content {
@@ -438,6 +439,15 @@
   gap: var(--spacing-sm);
   padding: var(--spacing-md);
   border-top: 1px solid var(--color-stroke);
+}
+
+.bottom-sheet-buttons--stacked {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.bottom-sheet-buttons--stacked .btn {
+  width: 100%;
 }
 
 @media (min-width: 769px) {
@@ -519,11 +529,16 @@
   font-size: var(--font-size-xl);
   font-weight: 600;
   margin-bottom: var(--spacing-sm);
+  text-align: center;
+  padding-inline: calc(var(--size-icon-lg) + var(--spacing-md));
 }
 
 .modal-description {
   color: var(--color-text-secondary);
   margin-bottom: var(--spacing-md);
+  text-align: justify;
+  text-justify: inter-word;
+  line-height: 1.55;
 }
 
 .modal-image {
@@ -543,6 +558,16 @@
   flex-wrap: wrap;
   gap: var(--spacing-sm);
   justify-content: flex-end;
+}
+
+.modal-buttons--stacked {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: stretch;
+}
+
+.modal-buttons--stacked .btn {
+  width: 100%;
 }
 
 @media (max-width: 768px) {
@@ -667,6 +692,51 @@
   box-shadow: var(--shadow-lg);
   padding: 0;
   box-sizing: border-box;
+  overflow: hidden;
+}
+
+.pin-pad-desktop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: 1px solid var(--color-stroke);
+  background: var(--color-bg-light);
+}
+
+.pin-pad-desktop-title {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  flex: 1;
+  min-width: 0;
+}
+
+.pin-pad-desktop-close {
+  flex-shrink: 0;
+  width: var(--size-icon-lg);
+  height: var(--size-icon-lg);
+  border: none;
+  background: transparent;
+  font-size: var(--font-size-xl);
+  line-height: 1;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  padding: 0;
+}
+
+.pin-pad-desktop-close:hover {
+  background: var(--color-bg-white);
+  color: var(--color-text-primary);
+}
+
+.pin-pad-desktop-body {
+  padding: 0;
 }
 
 /* Loading Screen */
@@ -776,6 +846,7 @@
   height: var(--height-control-md);
   min-height: var(--height-control-md);
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .btn:focus-visible {

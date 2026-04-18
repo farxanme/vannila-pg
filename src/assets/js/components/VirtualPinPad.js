@@ -7,6 +7,9 @@ import { i18n } from '../main.js';
  * Mobile: BottomSheet, Desktop: Dropdown below input
  */
 export class VirtualPinPad {
+  /** Only one pin pad may be open at a time (desktop or mobile). */
+  static activeInstance = null;
+
   constructor(inputElement, options = {}) {
     this.inputElement =
       typeof inputElement === 'string' ? document.querySelector(inputElement) : inputElement;
@@ -21,11 +24,12 @@ export class VirtualPinPad {
     this.currentValue = '';
     this.numbers = this.generateRandomNumbers();
     this.init();
+    this.pinPadLanguageChangeListener = () => this.applyPinPadI18n();
+    document.addEventListener('languageChange', this.pinPadLanguageChangeListener);
   }
 
   /**
-   * Generate random numbers array (0-9)
-   * @returns {Array} - Shuffled numbers array
+   * Generate random numbers array (0-9), shuffled.
    */
   generateRandomNumbers() {
     const numbers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -55,12 +59,15 @@ export class VirtualPinPad {
     const content = this.createPinPadContent();
 
     this.bottomSheet = new BottomSheet({
-      title: i18n.t('pinPad.title'),
+      title: i18n.t('pinPad.secureKeyboardTitle'),
       content: content,
       scrollable: false,
       onClose: () => {
         // Reset on close
         this.currentValue = '';
+        if (VirtualPinPad.activeInstance === this) {
+          VirtualPinPad.activeInstance = null;
+        }
       },
     });
   }
@@ -74,8 +81,7 @@ export class VirtualPinPad {
   }
 
   /**
-   * Create pin pad content
-   * @returns {HTMLElement} - Pin pad element
+   * Create pin pad content (root element for the grid).
    */
   createPinPadContent() {
     const container = document.createElement('div');
@@ -159,8 +165,36 @@ export class VirtualPinPad {
     pinPad.className = 'pin-pad-desktop';
     pinPad.style.display = 'none';
 
-    const content = this.createPinPadContent();
-    pinPad.appendChild(content);
+    const header = document.createElement('div');
+    header.className = 'pin-pad-desktop-header';
+
+    const titleEl = document.createElement('span');
+    titleEl.className = 'pin-pad-desktop-title';
+    titleEl.textContent = i18n.t('pinPad.secureKeyboardTitle');
+    this.desktopTitleElement = titleEl;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'pin-pad-desktop-close';
+    closeBtn.setAttribute('aria-label', i18n.t('common.close'));
+    this.desktopCloseButton = closeBtn;
+    closeBtn.innerHTML = '×';
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.close();
+    });
+
+    header.appendChild(titleEl);
+    header.appendChild(closeBtn);
+
+    const body = document.createElement('div');
+    body.className = 'pin-pad-desktop-body';
+    body.appendChild(this.createPinPadContent());
+
+    pinPad.appendChild(header);
+    pinPad.appendChild(body);
+    this.desktopBodyElement = body;
 
     // Attach to input wrapper (same pattern as card dropdown).
     let wrapper = this.inputElement?.closest('.input-wrapper');
@@ -305,6 +339,11 @@ export class VirtualPinPad {
    * Open pin pad
    */
   open() {
+    if (VirtualPinPad.activeInstance && VirtualPinPad.activeInstance !== this) {
+      VirtualPinPad.activeInstance.close();
+    }
+    VirtualPinPad.activeInstance = this;
+
     if (this.isMobile) {
       // Regenerate random numbers
       this.numbers = this.generateRandomNumbers();
@@ -316,7 +355,10 @@ export class VirtualPinPad {
       this.bottomSheet.open();
     } else {
       this.numbers = this.generateRandomNumbers();
-      if (this.desktopElement) {
+      if (this.desktopBodyElement) {
+        this.desktopBodyElement.innerHTML = '';
+        this.desktopBodyElement.appendChild(this.createPinPadContent());
+      } else if (this.desktopElement) {
         this.desktopElement.innerHTML = '';
         this.desktopElement.appendChild(this.createPinPadContent());
       }
@@ -328,12 +370,38 @@ export class VirtualPinPad {
    * Close pin pad
    */
   close() {
+    if (VirtualPinPad.activeInstance === this) {
+      VirtualPinPad.activeInstance = null;
+    }
     if (this.isMobile) {
       if (this.bottomSheet) {
         this.bottomSheet.close();
       }
     } else {
       this.hideDesktop();
+    }
+  }
+
+  /**
+   * Refresh visible strings when language changes (keeps pin pad in sync with i18n).
+   */
+  applyPinPadI18n() {
+    if (this.desktopTitleElement) {
+      this.desktopTitleElement.textContent = i18n.t('pinPad.secureKeyboardTitle');
+    }
+    if (this.desktopCloseButton) {
+      this.desktopCloseButton.setAttribute('aria-label', i18n.t('common.close'));
+    }
+    if (this.desktopBodyElement) {
+      this.desktopBodyElement
+        .querySelector('.pin-pad-clear')
+        ?.setAttribute('aria-label', i18n.t('pinPad.clear'));
+    }
+    if (this.bottomSheet) {
+      this.bottomSheet.updateTitle(i18n.t('pinPad.secureKeyboardTitle'));
+      this.bottomSheet.contentElement
+        ?.querySelector('.pin-pad-clear')
+        ?.setAttribute('aria-label', i18n.t('pinPad.clear'));
     }
   }
 
@@ -357,6 +425,10 @@ export class VirtualPinPad {
    * Destroy component
    */
   destroy() {
+    document.removeEventListener('languageChange', this.pinPadLanguageChangeListener);
+    if (VirtualPinPad.activeInstance === this) {
+      VirtualPinPad.activeInstance = null;
+    }
     if (this.isMobile) {
       if (this.bottomSheet) {
         this.bottomSheet.destroy();

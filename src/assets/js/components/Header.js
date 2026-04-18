@@ -118,8 +118,8 @@ export class Header {
   }
 
   /**
-   * Settings dropdown (grouped; collapsible when multiple groups — see settingsPanel.js)
-   * @param {HTMLElement} container - Toolbar element
+   * Settings dropdown (grouped; collapsible when multiple groups — see settingsPanel.js).
+   * Container: toolbar element.
    */
   async createSettingsDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
@@ -157,8 +157,8 @@ export class Header {
     const accordion = descriptors.length > 1;
 
     const syncThemeFromWindow = () => {
-      if (typeof this._settingsMenuThemeSync === 'function') {
-        this._settingsMenuThemeSync();
+      if (typeof this.settingsMenuThemeSync === 'function') {
+        this.settingsMenuThemeSync();
       }
     };
 
@@ -177,7 +177,7 @@ export class Header {
     });
 
     const menuThemeBody = bodies.find((b) => b.themeButtons && b.themeButtons.length > 0) || bodies[0];
-    this._settingsMenuThemeSync = menuThemeBody.syncThemeSelection;
+    this.settingsMenuThemeSync = menuThemeBody.syncThemeSelection;
     window.addEventListener('themePreferenceChange', syncThemeFromWindow);
 
     const refreshSettingsI18n = () => {
@@ -262,8 +262,7 @@ export class Header {
   }
 
   /**
-   * Create language dropdown
-   * @param {HTMLElement} container - Toolbar element
+   * Create language dropdown. Container: toolbar element.
    */
   async createLanguageDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
@@ -395,8 +394,7 @@ export class Header {
   }
 
   /**
-   * Update title
-   * @param {string} title - New title
+   * Update title text.
    */
   updateTitle(title) {
     const titleElement = this.element?.querySelector('.header-title');
@@ -406,8 +404,7 @@ export class Header {
   }
 
   /**
-   * Update card content
-   * @param {string|HTMLElement} content - New content
+   * Update card content (HTML string or element).
    */
   updateCard(content) {
     if (this.cardElement) {

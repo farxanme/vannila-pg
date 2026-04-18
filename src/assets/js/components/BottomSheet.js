@@ -1,3 +1,5 @@
+import { i18n } from '../utils/i18n.js';
+
 /**
  * Bottom Sheet Component (Mobile only with swipe down to close)
  */
@@ -8,6 +10,7 @@ export class BottomSheet {
       content: options.content || '',
       buttons: options.buttons || [],
       scrollable: options.scrollable !== false,
+      buttonsStacked: options.buttonsStacked === true,
       onClose: options.onClose || null,
       ...options,
     };
@@ -51,12 +54,14 @@ export class BottomSheet {
     sheet.appendChild(handleBar);
 
     // Title
+    this.titleElement = null;
     if (this.options.title) {
       const title = document.createElement('div');
       title.id = 'bottom-sheet-title';
       title.className = 'bottom-sheet-title';
       title.textContent = this.options.title;
       sheet.appendChild(title);
+      this.titleElement = title;
     }
 
     // Content
@@ -76,6 +81,9 @@ export class BottomSheet {
     if (this.options.buttons && this.options.buttons.length > 0) {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'bottom-sheet-buttons';
+      if (this.options.buttonsStacked) {
+        buttonsContainer.classList.add('bottom-sheet-buttons--stacked');
+      }
 
       this.options.buttons.forEach((button, _index) => {
         const btn = document.createElement('button');
@@ -85,7 +93,11 @@ export class BottomSheet {
         if (button.className) {
           btn.className += ` ${button.className}`;
         }
-        btn.textContent = button.text || '';
+        const label = button.textKey ? i18n.t(button.textKey) : button.text || '';
+        btn.textContent = label;
+        if (button.textKey) {
+          btn.setAttribute('data-i18n', button.textKey);
+        }
 
         if (button.icon) {
           const icon = document.createElement('span');
@@ -226,6 +238,17 @@ export class BottomSheet {
         this.options.onClose();
       }
     }, 300);
+  }
+
+  /**
+   * Update title (e.g. after language change).
+   * @param {string} title - New title text
+   */
+  updateTitle(title) {
+    this.options.title = title;
+    if (this.titleElement) {
+      this.titleElement.textContent = title;
+    }
   }
 
   /**

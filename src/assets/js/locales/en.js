@@ -74,7 +74,7 @@ export default {
   'form.captchaAudioUnavailable': 'Captcha audio is not available in this build',
   'form.cancel': 'Cancel',
   'form.showReceipt': 'Show Receipt',
-  'form.title': 'Payment Information',
+  'form.title': 'Enter your card details',
   'form.submit': 'Submit',
   'form.captcha': 'Security Code',
   'form.captcha.placeholder': 'Enter code',
@@ -176,6 +176,7 @@ export default {
 
   // Pin Pad
   'pinPad.title': 'Enter PIN',
+  'pinPad.secureKeyboardTitle': 'Secure keyboard',
   'pinPad.clear': 'Clear',
 
   // Timer
