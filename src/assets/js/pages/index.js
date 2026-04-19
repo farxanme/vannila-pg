@@ -14,6 +14,7 @@ import {
   validateMobile,
   validateEmail,
   validateOTP,
+  validateExpiryDate,
 } from '../utils/validators.js';
 import {
   detectBank,
@@ -50,6 +51,9 @@ let header,
   timer,
   cardNumberInput,
   cvv2Input,
+  expiryMonthInput,
+  expiryYearInput,
+  /** Composite: validate, clearValidation, setValue, focus, element (first field). */
   expiryDateInput,
   captchaInput,
   otpInput,
@@ -286,8 +290,9 @@ function syncGetOtpButtonState() {
 }
 
 function getExpiryDateForApi() {
-  const n = extractNumbers(expiryDateInput.getValue());
-  return n.length === 4 ? n : '';
+  const m = extractNumbers(expiryMonthInput?.getValue?.() || '');
+  const y = extractNumbers(expiryYearInput?.getValue?.() || '');
+  return m.length === 2 && y.length === 2 ? `${m}${y}` : '';
 }
 
 function handlePaymentInitLanguageChange() {
@@ -833,22 +838,30 @@ function initializeFormInputs() {
   };
 
   const getExpiryEditActionButton = () => {
-    return expiryDateInput?.wrapper?.querySelector('.input-action-right') || null;
+    return expiryYearInput?.wrapper?.querySelector('.input-action-right') || null;
   };
 
   const setExpiryDateLocked = (locked) => {
-    if (!expiryDateInput || !expiryDateInput.element) return;
+    if (!expiryMonthInput?.element || !expiryYearInput?.element) return;
     isExpiryDateLockedFromCard = Boolean(locked);
-    const inputEl = expiryDateInput.element;
-    inputEl.disabled = Boolean(locked);
-    inputEl.setAttribute('aria-disabled', locked ? 'true' : 'false');
-    // Keep options.disabled false so the edit action remains clickable while field is locked.
-    expiryDateInput.options.disabled = false;
-    if (expiryDateInput.wrapper) {
-      expiryDateInput.wrapper.classList.toggle('disabled', Boolean(locked));
-    }
-    if (expiryDateInput.inputContainer) {
-      expiryDateInput.inputContainer.classList.toggle('disabled', Boolean(locked));
+    for (const inp of [expiryMonthInput, expiryYearInput]) {
+      inp.element.disabled = Boolean(locked);
+      inp.element.setAttribute('aria-disabled', locked ? 'true' : 'false');
+      // Keep options.disabled false so the edit action remains clickable while field is locked.
+      inp.options.disabled = false;
+      if (inp.wrapper) {
+        inp.wrapper.classList.toggle('disabled', Boolean(locked));
+      }
+      if (inp.inputContainer) {
+        inp.inputContainer.classList.toggle('disabled', Boolean(locked));
+      }
+      if (inp.clearButton) {
+        if (locked) {
+          inp.clearButton.style.display = 'none';
+        } else {
+          inp.updateClearButton();
+        }
+      }
     }
     const editActionBtn = getExpiryEditActionButton();
     if (editActionBtn) {
@@ -857,15 +870,8 @@ function initializeFormInputs() {
       editActionBtn.setAttribute('aria-disabled', 'false');
       editActionBtn.tabIndex = 0;
     }
-    if (expiryDateInput.clearButton) {
-      if (locked) {
-        expiryDateInput.clearButton.style.display = 'none';
-      } else {
-        expiryDateInput.updateClearButton();
-      }
-    }
     if (locked) {
-      expiryDateInput.clearValidation?.();
+      expiryDateInput?.clearValidation?.();
     }
   };
 
@@ -1231,20 +1237,132 @@ function initializeFormInputs() {
   });
   syncCvv2Constraints();
 
-  // Expiry Date Input (MM/YY format)
+  // Expiry: separate Jalali month (01–12) and 2-digit year fields; one shared error row
   const expiryDateContainer = document.getElementById('expiry-date-container');
-  expiryDateInput = new Input(expiryDateContainer, {
-    id: 'expiry-date',
-    name: 'expiryDate',
+  expiryDateContainer.replaceChildren();
+  expiryDateContainer.classList.add('expiry-date-group');
+
+  const expiryGroupLabel = document.createElement('label');
+  expiryGroupLabel.id = 'expiry-date-group-label';
+  expiryGroupLabel.className = 'input-label';
+  expiryGroupLabel.setAttribute('for', 'expiry-month');
+  expiryGroupLabel.textContent = i18n.t('form.expiryDate');
+
+  const expiryFieldsRow = document.createElement('div');
+  expiryFieldsRow.className = 'expiry-date-fields-row';
+  const expiryMonthSlot = document.createElement('div');
+  expiryMonthSlot.className = 'expiry-date-slot expiry-date-slot-month';
+  const expiryYearSlot = document.createElement('div');
+  expiryYearSlot.className = 'expiry-date-slot expiry-date-slot-year';
+  expiryFieldsRow.appendChild(expiryMonthSlot);
+  expiryFieldsRow.appendChild(expiryYearSlot);
+
+  const groupError = document.createElement('div');
+  groupError.id = 'expiry-date-group-error';
+  groupError.className = 'input-error';
+  groupError.setAttribute('role', 'alert');
+  groupError.setAttribute('aria-live', 'polite');
+  groupError.style.visibility = 'hidden';
+
+  expiryDateContainer.appendChild(expiryGroupLabel);
+  expiryDateContainer.appendChild(expiryFieldsRow);
+
+  function clearExpiryGroupValidation() {
+    groupError.textContent = '';
+    groupError.style.visibility = 'hidden';
+    for (const inp of [expiryMonthInput, expiryYearInput]) {
+      if (!inp) continue;
+      inp.wrapper?.classList.remove('error');
+      inp.inputContainer?.classList.remove('error');
+      inp.element?.setAttribute('aria-invalid', 'false');
+    }
+  }
+
+  function applyExpiryGroupValidation(result) {
+    if (!expiryMonthInput || !expiryYearInput) return;
+    const ok = result.valid;
+    for (const inp of [expiryMonthInput, expiryYearInput]) {
+      inp.wrapper.classList.toggle('error', !ok);
+      if (inp.inputContainer) inp.inputContainer.classList.toggle('error', !ok);
+      inp.element.setAttribute('aria-invalid', ok ? 'false' : 'true');
+    }
+    if (ok) {
+      groupError.textContent = '';
+      groupError.style.visibility = 'hidden';
+    } else {
+      groupError.textContent = result.message;
+      groupError.style.visibility = 'visible';
+    }
+  }
+
+  function validateExpiryDateGroup() {
+    if (!expiryMonthInput || !expiryYearInput) return true;
+    if (!shouldSendExpiryDateInPayRequest()) {
+      clearExpiryGroupValidation();
+      return true;
+    }
+    const result = validateExpiryDate(expiryMonthInput.getValue(), expiryYearInput.getValue());
+    applyExpiryGroupValidation(result);
+    if (!result.valid && navigator.vibrate) {
+      navigator.vibrate(200);
+    }
+    return result.valid;
+  }
+
+  expiryMonthInput = new Input(expiryMonthSlot, {
+    id: 'expiry-month',
+    name: 'expiryMonth',
     type: 'password',
     autocomplete: 'off',
-    label: i18n.t('form.expiryDate'),
-    placeholder: i18n.t('form.expiryPlaceholder'),
-    required: true,
-    requiredMessage: i18n.t('common.required'),
+    label: '',
+    ariaLabel: i18n.t('form.expiryMonth'),
+    placeholder: i18n.t('form.expiryMonthPlaceholder'),
+    required: false,
     clearButtonAriaLabel: i18n.t('common.clear'),
     inputMode: 'numeric',
-    maxLength: 5,
+    maxLength: 2,
+    omitInnerError: true,
+    skipBlurValidate: true,
+    liveValidation: false,
+    maskWithPasswordFont: true,
+    onInput: (value) => {
+      const digits = extractNumbers(value).slice(0, 2);
+      if (digits !== value) {
+        expiryMonthInput.setValue(digits);
+      } else if (digits.length >= 2) {
+        focusNextVisibleInputField(expiryMonthInput.element);
+      }
+      validateExpiryDateGroup();
+    },
+    onBlur: () => {
+      let digits = extractNumbers(expiryMonthInput.getValue());
+      if (digits.length === 1) {
+        const n = parseInt(digits, 10);
+        if (n >= 1 && n <= 9) {
+          digits = digits.padStart(2, '0');
+          expiryMonthInput.setValue(digits);
+        }
+      }
+      validateExpiryDateGroup();
+    },
+  });
+
+  expiryYearInput = new Input(expiryYearSlot, {
+    id: 'expiry-year',
+    name: 'expiryYear',
+    type: 'password',
+    autocomplete: 'off',
+    label: '',
+    ariaLabel: i18n.t('form.expiryYear'),
+    placeholder: i18n.t('form.expiryYearPlaceholder'),
+    required: false,
+    clearButtonAriaLabel: i18n.t('common.clear'),
+    inputMode: 'numeric',
+    maxLength: 2,
+    omitInnerError: true,
+    skipBlurValidate: true,
+    liveValidation: false,
+    maskWithPasswordFont: true,
     rightAction: {
       icon: '<img src="/assets/images/icons/icn-calendar.svg" alt="" aria-hidden="true" />',
       label: i18n.t('common.edit'),
@@ -1252,46 +1370,60 @@ function initializeFormInputs() {
         if (!isExpiryDateLockedFromCard) return;
         hasUserEnabledExpiryDateEdit = true;
         applyExpiryDateModeForSelectedCard();
-        expiryDateInput.focus();
+        expiryMonthInput.focus();
       },
     },
     onInput: (value) => {
-      // Auto-format as MM/YY
-      const numbers = extractNumbers(value);
-      let formatted = numbers;
-      if (numbers.length >= 2) {
-        formatted = numbers.substring(0, 2) + '/' + numbers.substring(2, 4);
+      const digits = extractNumbers(value).slice(0, 2);
+      if (digits !== value) {
+        expiryYearInput.setValue(digits);
+      } else if (digits.length >= 2) {
+        focusNextVisibleInputField(expiryYearInput.element);
       }
-      if (formatted !== value) {
-        expiryDateInput.setValue(formatted);
-      }
-      if (numbers.length >= 4) {
-        focusNextVisibleInputField(expiryDateInput.element);
-      }
+      validateExpiryDateGroup();
     },
-    validator: (value) => {
-      if (!shouldSendExpiryDateInPayRequest()) {
-        return { valid: true, message: '' };
+    onBlur: () => {
+      let digits = extractNumbers(expiryYearInput.getValue());
+      if (digits.length === 1) {
+        expiryYearInput.setValue(digits.padStart(2, '0'));
       }
-      const numbers = extractNumbers(value);
-      if (numbers.length !== 4) {
-        return { valid: false, message: i18n.t('form.expiryDate.invalid') };
-      }
-      const month = parseInt(numbers.substring(0, 2));
-      const year = parseInt(numbers.substring(2, 4));
-      if (month < 1 || month > 12) {
-        return { valid: false, message: i18n.t('form.expiryDate.invalidMonth') };
-      }
-      // Validate expiry date (not expired)
-      const currentDate = new Date();
-      const currentYear = currentDate.getFullYear() % 100;
-      const currentMonth = currentDate.getMonth() + 1;
-      if (year < currentYear || (year === currentYear && month < currentMonth)) {
-        return { valid: false, message: i18n.t('form.expiryDate.expired') };
-      }
-      return { valid: true, message: '' };
+      validateExpiryDateGroup();
     },
   });
+
+  expiryDateContainer.appendChild(groupError);
+  expiryMonthInput.element.setAttribute('aria-describedby', 'expiry-date-group-error');
+  expiryYearInput.element.setAttribute('aria-describedby', 'expiry-date-group-error');
+
+  expiryDateInput = {
+    validate: validateExpiryDateGroup,
+    clearValidation: clearExpiryGroupValidation,
+    setValue(v) {
+      const n = extractNumbers(v || '');
+      if (n.length >= 4) {
+        expiryMonthInput.setValue(n.slice(0, 2));
+        expiryYearInput.setValue(n.slice(2, 4));
+      } else {
+        expiryMonthInput.setValue('');
+        expiryYearInput.setValue('');
+      }
+      clearExpiryGroupValidation();
+    },
+    focus: () => {
+      const m = extractNumbers(expiryMonthInput.getValue());
+      const y = extractNumbers(expiryYearInput.getValue());
+      if (m.length < 2) {
+        expiryMonthInput.focus();
+      } else if (y.length < 2) {
+        expiryYearInput.focus();
+      } else {
+        expiryMonthInput.focus();
+      }
+    },
+    get element() {
+      return expiryMonthInput.element;
+    },
+  };
   applyExpiryDateModeForSelectedCard();
 
   // Captcha Input
@@ -2315,10 +2447,18 @@ function updatePageContent() {
     cvv2Input.setPlaceholder(i18n.t('form.cvv2.placeholder'));
     cvv2Input.setHint(i18n.t('form.cvv2.hint'));
   }
-  if (expiryDateInput) {
-    expiryDateInput.setLabel(i18n.t('form.expiryDate'));
-    expiryDateInput.setPlaceholder(i18n.t('form.expiryPlaceholder'));
-    const expiryEditBtn = expiryDateInput.wrapper?.querySelector('.input-action-right');
+  const expiryGroupLabelEl = document.getElementById('expiry-date-group-label');
+  if (expiryGroupLabelEl) {
+    expiryGroupLabelEl.textContent = i18n.t('form.expiryDate');
+  }
+  if (expiryMonthInput) {
+    expiryMonthInput.setPlaceholder(i18n.t('form.expiryMonthPlaceholder'));
+    expiryMonthInput.setAriaLabel(i18n.t('form.expiryMonth'));
+  }
+  if (expiryYearInput) {
+    expiryYearInput.setPlaceholder(i18n.t('form.expiryYearPlaceholder'));
+    expiryYearInput.setAriaLabel(i18n.t('form.expiryYear'));
+    const expiryEditBtn = expiryYearInput.wrapper?.querySelector('.input-action-right');
     if (expiryEditBtn) {
       expiryEditBtn.setAttribute('aria-label', i18n.t('common.edit'));
     }

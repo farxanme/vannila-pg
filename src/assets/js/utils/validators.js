@@ -1,5 +1,6 @@
 import { extractNumbers } from './numberConverter.js';
 import { i18n } from './i18n.js';
+import { getCurrentJalaliYearMonth, resolveJalaliYearFromCardYy } from './jalaliDate.js';
 
 /**
  * Validation Rules
@@ -155,30 +156,34 @@ export function validateCVV2(cvv, expectedLength = null) {
 }
 
 /**
- * Validate expiry date
- * @param {string} month - Month (01-12)
- * @param {string} year - Year (YY or YYYY)
+ * Validate card expiry (Jalali month/year, YY last two digits of شمسی year).
+ * @param {string} month - Month digits (01–12)
+ * @param {string} year - Year digits (00–99)
  * @returns {Object} - { valid: boolean, message: string }
  */
 export function validateExpiryDate(month, year) {
-  const monthNum = parseInt(extractNumbers(month));
-  const yearNum = parseInt(extractNumbers(year));
+  const monthDigits = extractNumbers(month || '');
+  const yearDigits = extractNumbers(year || '');
 
-  if (!month || !year) {
+  if (monthDigits.length === 0 && yearDigits.length === 0) {
     return { valid: false, message: i18n.t('form.expiryDate.required') };
   }
+
+  if (monthDigits.length !== 2 || yearDigits.length !== 2) {
+    return { valid: false, message: i18n.t('form.expiryDate.incomplete') };
+  }
+
+  const monthNum = parseInt(monthDigits, 10);
+  const yy = parseInt(yearDigits, 10);
 
   if (monthNum < 1 || monthNum > 12) {
     return { valid: false, message: i18n.t('form.expiryDate.invalidMonth') };
   }
 
-  // Convert 2-digit year to 4-digit
-  const fullYear = yearNum < 100 ? 2000 + yearNum : yearNum;
-  const currentDate = new Date();
-  const currentYear = currentDate.getFullYear();
-  const currentMonth = currentDate.getMonth() + 1;
+  const { year: currentJy, month: currentJm } = getCurrentJalaliYearMonth();
+  const fullJy = resolveJalaliYearFromCardYy(yy, currentJy);
 
-  if (fullYear < currentYear || (fullYear === currentYear && monthNum < currentMonth)) {
+  if (fullJy < currentJy || (fullJy === currentJy && monthNum < currentJm)) {
     return { valid: false, message: i18n.t('form.expiryDate.expired') };
   }
 

@@ -29,6 +29,9 @@ export class Input {
       pattern: options.pattern || null,
       maxLength: options.maxLength || null,
       maskWithPasswordFont: options.maskWithPasswordFont || false,
+      omitInnerError: options.omitInnerError || false,
+      skipBlurValidate: options.skipBlurValidate || false,
+      ariaLabel: options.ariaLabel || '',
       requiredMessage: options.requiredMessage || 'This field is required',
       clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
       /** If set (e.g. `'off'`), applied as the input `autocomplete` attribute. */
@@ -135,6 +138,10 @@ export class Input {
       input.classList.add('input-password-mask');
     }
 
+    if (this.options.ariaLabel) {
+      input.setAttribute('aria-label', this.options.ariaLabel);
+    }
+
     inputContainer.appendChild(input);
     this.element = input;
 
@@ -190,12 +197,16 @@ export class Input {
       this.hintElement = hint;
     }
 
-    // Error message
-    const error = document.createElement('div');
-    error.className = 'input-error';
-    error.setAttribute('role', 'alert');
-    wrapper.appendChild(error);
-    this.errorElement = error;
+    // Error message (optional: parent shows a shared error row)
+    if (!this.options.omitInnerError) {
+      const error = document.createElement('div');
+      error.className = 'input-error';
+      error.setAttribute('role', 'alert');
+      wrapper.appendChild(error);
+      this.errorElement = error;
+    } else {
+      this.errorElement = null;
+    }
 
     this.container.appendChild(wrapper);
     this.wrapper = wrapper;
@@ -240,7 +251,9 @@ export class Input {
       if (this.options.onBlur) {
         this.options.onBlur(e, this);
       }
-      this.validate();
+      if (!this.options.skipBlurValidate) {
+        this.validate();
+      }
     });
   }
 
@@ -299,8 +312,10 @@ export class Input {
     } else {
       this.wrapper.classList.add('error');
       if (this.inputContainer) this.inputContainer.classList.add('error');
-      this.errorElement.textContent = this.errorMessage;
-      this.errorElement.style.visibility = 'visible';
+      if (this.errorElement) {
+        this.errorElement.textContent = this.errorMessage;
+        this.errorElement.style.visibility = 'visible';
+      }
 
       if (navigator.vibrate) {
         navigator.vibrate(200);
@@ -314,8 +329,10 @@ export class Input {
   clearValidation() {
     this.wrapper.classList.remove('error');
     if (this.inputContainer) this.inputContainer.classList.remove('error');
-    this.errorElement.textContent = '';
-    this.errorElement.style.visibility = 'hidden';
+    if (this.errorElement) {
+      this.errorElement.textContent = '';
+      this.errorElement.style.visibility = 'hidden';
+    }
   }
 
   /**
@@ -404,6 +421,21 @@ export class Input {
     }
     if (this.labelElement) {
       this.labelElement.textContent = label;
+    }
+  }
+
+  /**
+   * Update accessible name when there is no visible label.
+   * @param {string} ariaLabelText
+   */
+  setAriaLabel(ariaLabelText) {
+    this.options.ariaLabel = ariaLabelText || '';
+    if (this.element) {
+      if (this.options.ariaLabel) {
+        this.element.setAttribute('aria-label', this.options.ariaLabel);
+      } else {
+        this.element.removeAttribute('aria-label');
+      }
     }
   }
 

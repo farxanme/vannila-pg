@@ -544,3 +544,25 @@ html.app-ready #app .main-content {
   direction: ltr;
   unicode-bidi: plaintext;
 }
+
+/* Jalali expiry: month + year side by side, shared error below */
+.expiry-date-group {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.expiry-date-fields-row {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.expiry-date-slot {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.expiry-date-slot-year {
+  flex: 1.15 1 0;
+}
