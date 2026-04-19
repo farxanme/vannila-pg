@@ -4,6 +4,8 @@
  * Multiple groups: accordion, all panels collapsed by default.
  */
 
+import { createAppIcon, iconUrl } from '../utils/icons.js';
+
 export function getSettingsGroupDescriptors() {
   return [
     { id: 'theme', titleKey: 'settings.theme' },
@@ -11,14 +13,10 @@ export function getSettingsGroupDescriptors() {
   ];
 }
 
-function getThemeOptionIconSvg(mode) {
-  if (mode === 'light') {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 4a1 1 0 0 1 1 1v1.5a1 1 0 1 1-2 0V5a1 1 0 0 1 1-1Zm0 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8-5a1 1 0 1 1 0 2h-1.5a1 1 0 1 1 0-2H20ZM6.5 11a1 1 0 1 1 0 2H5a1 1 0 1 1 0-2h1.5Zm9.07-4.66a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L15.57 7.75a1 1 0 0 1 0-1.41Zm-7.14 7.14a1 1 0 0 1 1.41 0l1.06 1.06a1 1 0 1 1-1.41 1.41L8.43 14.9a1 1 0 0 1 0-1.41Zm8.2 2.47a1 1 0 0 1 1.41 0 1 1 0 0 1 0 1.41l-1.06 1.06a1 1 0 1 1-1.41-1.41l1.06-1.06Zm-7.14-7.14a1 1 0 0 1 1.41-1.41 1 1 0 0 1 0 1.41L8.84 9.88a1 1 0 1 1-1.41-1.41l1.06-1.06Z"/></svg>';
-  }
-  if (mode === 'dark') {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14.6 2.4a1 1 0 0 1 .7 1.68 7.5 7.5 0 1 0 8.62 8.62 1 1 0 0 1 1.68.7A9.5 9.5 0 1 1 14.6 2.4Z"/></svg>';
-  }
-  return '<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M4 5.5A2.5 2.5 0 0 1 6.5 3h11A2.5 2.5 0 0 1 20 5.5v7A2.5 2.5 0 0 1 17.5 15h-11A2.5 2.5 0 0 1 4 12.5v-7Zm2.5-.5a.5.5 0 0 0-.5.5v7c0 .28.22.5.5.5h11a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.5-.5h-11ZM8 19a1 1 0 0 1 1-1h6a1 1 0 1 1 0 2H9a1 1 0 0 1-1-1Z"/></svg>';
+function getThemeOptionIconFile(mode) {
+  if (mode === 'light') return 'icn-sun.svg';
+  if (mode === 'dark') return 'icn-moon.svg';
+  return 'icn-display.svg';
 }
 
 const themeModeDefs = [
@@ -65,7 +63,11 @@ export function createThemeRadiogroup(options) {
     const icon = document.createElement('span');
     icon.className = 'settings-theme-icon';
     icon.setAttribute('aria-hidden', 'true');
-    icon.innerHTML = getThemeOptionIconSvg(value);
+    const glyph = document.createElement('span');
+    glyph.className = 'app-icon settings-theme-icon-inner';
+    glyph.style.setProperty('--app-icon-src', `url('${iconUrl(getThemeOptionIconFile(value))}')`);
+    glyph.setAttribute('aria-hidden', 'true');
+    icon.appendChild(glyph);
     const label = document.createElement('span');
     label.setAttribute('data-i18n', i18nKey);
     label.textContent = i18n.t(i18nKey);
@@ -121,14 +123,20 @@ export function mountSettingsGroupsLayout(container, ctx) {
 
   if (!accordion) {
     const only = descriptors[0];
+    const heading = document.createElement('div');
+    heading.className = 'settings-dropdown-section-heading';
+    if (only.id === 'theme') {
+      heading.appendChild(createAppIcon('icn-brush.svg', 'settings-section-heading-icon app-icon--muted'));
+    }
     const sectionTitle = document.createElement('div');
     sectionTitle.className = 'settings-dropdown-section-title';
     sectionTitle.id = `${menuId}-section-${only.id}`;
     sectionTitle.setAttribute('data-i18n', only.titleKey);
     sectionTitle.textContent = i18n.t(only.titleKey);
+    heading.appendChild(sectionTitle);
 
     const body = buildBody(only, { ...ctx, themeLabelledById: sectionTitle.id });
-    container.appendChild(sectionTitle);
+    container.appendChild(heading);
     container.appendChild(body.radiogroup);
     return { bodies: [body] };
   }
@@ -156,6 +164,10 @@ export function mountSettingsGroupsLayout(container, ctx) {
     titleSpan.className = 'settings-group-header-text';
     titleSpan.setAttribute('data-i18n', desc.titleKey);
     titleSpan.textContent = i18n.t(desc.titleKey);
+
+    if (desc.id === 'theme') {
+      header.appendChild(createAppIcon('icn-brush.svg', 'settings-group-header-icon app-icon--muted'));
+    }
 
     const chevron = document.createElement('span');
     chevron.className = 'settings-group-header-chevron';

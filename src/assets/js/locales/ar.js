@@ -3,20 +3,15 @@
  */
 export default {
   // Common
-  'common.submit': 'إرسال',
   'common.cancel': 'إلغاء',
   'common.close': 'إغلاق',
-  'common.confirm': 'تأكيد',
   'common.help': 'مساعدة',
   'common.delete': 'حذف',
   'common.edit': 'تعديل',
-  'common.save': 'حفظ',
-  'common.loading': 'جاري التحميل...',
-  'common.error': 'خطأ',
-  'common.success': 'نجح',
   'common.clear': 'مسح',
   'common.required': 'هذا الحقل مطلوب',
   'common.processing': 'جاري المعالجة...',
+  'common.loading': 'جاري التحميل...',
 
   // Redirect
   'redirect.loading': 'جاري التحويل...',
@@ -47,14 +42,10 @@ export default {
   'form.expiryMonth': 'الشهر',
   'form.expiryYear': 'السنة',
   'form.expiryDate.required': 'تاريخ الانتهاء مطلوب',
-  'form.expiryDate.invalid': 'تاريخ الانتهاء غير صالح',
   'form.expiryDate.invalidMonth': 'الشهر غير صالح',
   'form.expiryDate.expired': 'انتهت صلاحية البطاقة',
   'form.expiryDate.incomplete': 'أدخل شهرًا وسنة من رقمين لكل منهما',
-  'form.expiryMonthPlaceholder': '01',
-  'form.expiryYearPlaceholder': '05',
   'form.securityCode': 'رمز الأمان',
-  'form.securityCode.required': 'رمز الأمان مطلوب',
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP مطلوب',
@@ -74,12 +65,8 @@ export default {
   'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
   'form.pay.processing': 'جارٍ الاتصال بالبنك...',
   'form.pay.success': 'تم الدفع بنجاح',
-  'form.captchaAudioUnavailable': 'الصوت غير متاح لهذا الإصدار',
   'form.cancel': 'إلغاء',
-  'form.showReceipt': 'عرض الإيصال',
   'form.title': 'أدخل بيانات بطاقتك',
-  'form.submit': 'إرسال',
-  'form.captcha': 'رمز الأمان',
   'form.captcha.placeholder': 'أدخل الرمز',
   'form.validation.error': 'يرجى ملء جميع الحقول بشكل صحيح',
   'form.showCards': 'عرض البطاقات',
@@ -98,9 +85,13 @@ export default {
   'cancelConfirm.imageAlt': 'توضيح إلغاء الدفع',
   'cancelConfirm.continuePay': 'متابعة الدفع',
   'cancelConfirm.confirmLeave': 'إلغاء الدفع',
-  'form.expiryPlaceholder': 'شهر/سنة',
   'form.giftCardNotice': 'هذه بطاقة هدية',
   'form.showReceiptToggle': 'البريد أو الجوال لاستلام الإيصال (اختياري)',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'تعذر بدء الدفع',
+  'paymentInit.error.description':
+    'بيانات جلسة الدفع غير مكتملة أو غير صالحة. يرجى فتح البوابة عبر الرابط الصحيح أو المحاولة لاحقاً.',
 
   // Accessibility
   'accessibility.selectLanguage': 'اختيار اللغة',
@@ -115,21 +106,13 @@ export default {
   // Card List
   'cardList.addNew': 'إضافة بطاقة جديدة',
   'cardList.manage': 'إدارة البطاقات',
-  'cardList.pin': 'تثبيت',
-  'cardList.unpin': 'إلغاء التثبيت',
-  'cardList.delete': 'حذف',
-  'cardList.deleteConfirm': 'هل أنت متأكد من حذف هذه البطاقة؟',
   'cardList.empty': 'لا توجد بطاقة محفوظة للعرض',
 
   // Receipt
   'receipt.success': 'نجحت المعاملة',
   'receipt.failed': 'فشلت المعاملة',
-  'receipt.pending': 'قيد المعالجة',
-  'receipt.amount': 'المبلغ',
-  'receipt.transactionType': 'نوع المعاملة',
   'receipt.merchant': 'التاجر',
   'receipt.terminal': 'الطرفية',
-  'receipt.site': 'موقع التاجر',
   'receipt.share': 'مشاركة',
   'receipt.save': 'حفظ في المعرض',
   'receipt.paymentSuccessDesc': 'تم الدفع بنجاح',
@@ -155,6 +138,9 @@ export default {
   'transaction.terminal': 'رقم التاجر / الطرفية',
   'transaction.site': 'موقع التاجر',
   'transaction.transactionType': 'نوع المعاملة',
+  'transaction.description': 'الوصف',
+  'transaction.descriptionExpand': 'عرض الوصف كاملاً',
+  'transaction.descriptionCollapse': 'عرض أقل',
   'transaction.type.balance': 'استعلام الرصيد',
   'transaction.type.purchase': 'شراء',
   'transaction.type.thirdParty': 'الطرف الثالث',
@@ -180,7 +166,6 @@ export default {
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
-  'pinPad.title': 'أدخل PIN',
   'pinPad.secureKeyboardTitle': 'لوحة مفاتيح آمنة',
   'pinPad.clear': 'مسح',
 
@@ -188,13 +173,7 @@ export default {
   'timer.title': 'الوقت المتبقي',
   'timer.expired': 'انتهى الوقت',
 
-  // Payment init (SSR session)
-  'paymentInit.error.title': 'تعذر بدء الدفع',
-  'paymentInit.error.description':
-    'بيانات جلسة الدفع غير مكتملة أو غير صالحة. يرجى فتح البوابة عبر الرابط الصحيح أو المحاولة لاحقاً.',
-
   // Errors
   'error.network': 'خطأ في الشبكة',
-  'error.invalidData': 'بيانات غير صالحة',
   'error.unknown': 'خطأ غير معروف',
 };

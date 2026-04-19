@@ -88,6 +88,10 @@
   outline: none;
 }
 
+.input-field::placeholder {
+  font-size: var(--font-size-xs);
+}
+
 /* Extra inline padding toward action/clear strip (same in LTR & RTL via logical props) */
 .input-container:has(.input-right-container) .input-field {
   padding-inline-end: calc(var(--spacing-3) + var(--spacing-xs));
@@ -108,7 +112,7 @@
 .input-password-mask::placeholder,
 .input-password-mask:placeholder-shown {
   font-family: var(--font-family-base);
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-xs);
   letter-spacing: 0;
 }
 
@@ -163,9 +167,12 @@
 }
 
 .input-action img,
-.input-clear img {
+.input-action .app-icon,
+.input-clear img,
+.input-clear .app-icon {
   width: 24px;
   height: 24px;
+  --app-icon-size: 24px;
 }
 
 .input-action:disabled {
@@ -231,6 +238,10 @@
   border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
+.dropdown-search::placeholder {
+  font-size: var(--font-size-xs);
+}
+
 .dropdown-list {
   list-style: none;
   padding: var(--spacing-xs);
@@ -266,6 +277,7 @@
 }
 
 .dropdown-empty-state-img {
+  --app-icon-size: 48px;
   width: 48px;
   height: 48px;
   opacity: 0.65;
@@ -525,6 +537,12 @@
   color: var(--color-text-primary);
 }
 
+.modal-close .modal-close-icon {
+  --app-icon-size: 20px;
+  display: block;
+  pointer-events: none;
+}
+
 .modal-title {
   font-size: var(--font-size-xl);
   font-weight: 600;
@@ -547,6 +565,21 @@
   object-fit: contain;
   margin-bottom: var(--spacing-md);
   border-radius: var(--radius-md);
+}
+
+/* Lead illustration (e.g. cancel payment): fixed tile, color from theme via .app-icon */
+.modal-image.modal-image--icon-lead {
+  width: 64px;
+  height: 64px;
+  max-height: none;
+  object-fit: none;
+  --app-icon-size: 64px;
+}
+
+.modal-image.app-icon {
+  max-height: none;
+  object-fit: unset;
+  flex-shrink: 0;
 }
 
 .modal-body {
@@ -586,6 +619,15 @@
   max-width: 200px;
   margin: 0 auto var(--spacing-md);
   opacity: 0.5;
+}
+
+.empty-state-image.app-icon {
+  display: block;
+  width: min(160px, 100%);
+  height: min(160px, 100%);
+  max-width: 200px;
+  --app-icon-size: min(160px, 25vw);
+  box-sizing: border-box;
 }
 
 .empty-state-title {
@@ -735,6 +777,15 @@
   color: var(--color-text-primary);
 }
 
+.pin-pad-desktop-close img,
+.pin-pad-desktop-close .app-icon {
+  width: 20px;
+  height: 20px;
+  --app-icon-size: 20px;
+  display: block;
+  pointer-events: none;
+}
+
 .pin-pad-desktop-body {
   padding: 0;
 }
@@ -770,6 +821,12 @@
 .payment-init-error .empty-state-image {
   max-width: 120px;
   opacity: 0.9;
+}
+
+.payment-init-error .empty-state-image.app-icon {
+  width: 120px;
+  height: 120px;
+  --app-icon-size: 120px;
 }
 
 .loading-container {
@@ -1056,4 +1113,13 @@
 
 .error-toast-close:hover {
   color: var(--color-text-primary);
+}
+
+.error-toast-close img,
+.error-toast-close .app-icon {
+  width: 18px;
+  height: 18px;
+  --app-icon-size: 18px;
+  display: block;
+  pointer-events: none;
 }

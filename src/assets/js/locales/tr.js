@@ -3,20 +3,15 @@
  */
 export default {
   // Common
-  'common.submit': 'Gönder',
   'common.cancel': 'İptal',
   'common.close': 'Kapat',
-  'common.confirm': 'Onayla',
   'common.help': 'Yardım',
   'common.delete': 'Sil',
   'common.edit': 'Düzenle',
-  'common.save': 'Kaydet',
-  'common.loading': 'Yükleniyor...',
-  'common.error': 'Hata',
-  'common.success': 'Başarılı',
   'common.clear': 'Temizle',
   'common.required': 'Bu alan zorunludur',
   'common.processing': 'İşleniyor...',
+  'common.loading': 'Yükleniyor...',
 
   // Redirect
   'redirect.loading': 'Yönlendiriliyor...',
@@ -47,14 +42,10 @@ export default {
   'form.expiryMonth': 'Ay',
   'form.expiryYear': 'Yıl',
   'form.expiryDate.required': 'Son kullanma tarihi gereklidir',
-  'form.expiryDate.invalid': 'Geçersiz son kullanma tarihi',
   'form.expiryDate.invalidMonth': 'Geçersiz ay',
   'form.expiryDate.expired': 'Kartın süresi dolmuş',
   'form.expiryDate.incomplete': 'Ay ve yılı ikişer hane girin',
-  'form.expiryMonthPlaceholder': '01',
-  'form.expiryYearPlaceholder': '05',
   'form.securityCode': 'Güvenlik Kodu',
-  'form.securityCode.required': 'Güvenlik kodu gereklidir',
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP gereklidir',
@@ -74,12 +65,8 @@ export default {
   'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
   'form.pay.processing': 'Banka ile bağlantı kuruluyor...',
   'form.pay.success': 'Ödeme başarıyla tamamlandı',
-  'form.captchaAudioUnavailable': 'Bu sürümde sesli captcha yok',
   'form.cancel': 'İptal',
-  'form.showReceipt': 'Fişi Göster',
   'form.title': 'Kart bilgilerinizi girin',
-  'form.submit': 'Gönder',
-  'form.captcha': 'Güvenlik Kodu',
   'form.captcha.placeholder': 'Kodu girin',
   'form.validation.error': 'Lütfen tüm alanları doğru şekilde doldurun',
   'form.showCards': 'Kartları göster',
@@ -98,9 +85,13 @@ export default {
   'cancelConfirm.imageAlt': 'Ödemeden çıkış görseli',
   'cancelConfirm.continuePay': 'Ödemeye devam et',
   'cancelConfirm.confirmLeave': 'Ödemeyi iptal et',
-  'form.expiryPlaceholder': 'AA/YY',
   'form.giftCardNotice': 'Bu bir hediye kartıdır',
   'form.showReceiptToggle': 'Makbuz için e-posta veya cep (isteğe bağlı)',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'Ödeme başlatılamadı',
+  'paymentInit.error.description':
+    'Ödeme oturum verileri eksik veya geçersiz. Lütfen geçit için doğru bağlantıyı kullanın veya daha sonra tekrar deneyin.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Dil seçin',
@@ -115,21 +106,13 @@ export default {
   // Card List
   'cardList.addNew': 'Yeni Kart Ekle',
   'cardList.manage': 'Kartları Yönet',
-  'cardList.pin': 'Sabitle',
-  'cardList.unpin': 'Sabitlemeyi Kaldır',
-  'cardList.delete': 'Sil',
-  'cardList.deleteConfirm': 'Bu kartı silmek istediğinizden emin misiniz?',
   'cardList.empty': 'Gösterilecek kayıtlı kart yok',
 
   // Receipt
   'receipt.success': 'İşlem Başarılı',
   'receipt.failed': 'İşlem Başarısız',
-  'receipt.pending': 'İşleniyor',
-  'receipt.amount': 'Tutar',
-  'receipt.transactionType': 'İşlem Türü',
   'receipt.merchant': 'Satıcı',
   'receipt.terminal': 'Terminal',
-  'receipt.site': 'Satıcı Sitesi',
   'receipt.share': 'Paylaş',
   'receipt.save': 'Galeriye Kaydet',
   'receipt.paymentSuccessDesc': 'Ödeme başarıyla tamamlandı',
@@ -155,6 +138,9 @@ export default {
   'transaction.terminal': 'Satıcı / Terminal Numarası',
   'transaction.site': 'Satıcı Sitesi',
   'transaction.transactionType': 'Islem Turu',
+  'transaction.description': 'Açıklama',
+  'transaction.descriptionExpand': 'Tam açıklamayı göster',
+  'transaction.descriptionCollapse': 'Daha az göster',
   'transaction.type.balance': 'Bakiye Sorgulama',
   'transaction.type.purchase': 'Satin Alma',
   'transaction.type.thirdParty': 'Ucuncu Taraf',
@@ -180,7 +166,6 @@ export default {
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
-  'pinPad.title': 'PIN Gir',
   'pinPad.secureKeyboardTitle': 'Güvenli klavye',
   'pinPad.clear': 'Temizle',
 
@@ -188,13 +173,7 @@ export default {
   'timer.title': 'Kalan Süre',
   'timer.expired': 'Süre doldu',
 
-  // Payment init (SSR session)
-  'paymentInit.error.title': 'Ödeme başlatılamadı',
-  'paymentInit.error.description':
-    'Ödeme oturum verileri eksik veya geçersiz. Lütfen geçit için doğru bağlantıyı kullanın veya daha sonra tekrar deneyin.',
-
   // Errors
   'error.network': 'Ağ hatası',
-  'error.invalidData': 'Geçersiz veri',
   'error.unknown': 'Bilinmeyen hata',
 };

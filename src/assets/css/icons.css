@@ -1,0 +1,37 @@
+/**
+ * Themeable monochrome icons: SVG assets use #000 shapes; color comes from CSS mask.
+ * Override --color-icon / --color-icon-muted in themes (see variables.css).
+ */
+.app-icon {
+  display: inline-block;
+  flex-shrink: 0;
+  vertical-align: middle;
+  width: var(--app-icon-size, var(--size-icon-md, 24px));
+  height: var(--app-icon-size, var(--size-icon-md, 24px));
+  background-color: var(--color-icon);
+  -webkit-mask-image: var(--app-icon-src);
+  mask-image: var(--app-icon-src);
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
+
+.app-icon--muted {
+  background-color: var(--color-icon-muted);
+}
+
+.app-icon--primary {
+  background-color: var(--color-icon-primary);
+}
+
+.app-icon--on-primary {
+  background-color: var(--color-icon-on-primary);
+}
+
+.app-icon--block {
+  display: block;
+  margin-inline: auto;
+}

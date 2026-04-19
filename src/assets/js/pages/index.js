@@ -41,6 +41,7 @@ import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
 import { Modal } from '../components/Modal.js';
 import { shareContent } from '../utils/share.js';
+import { appIconHtml, createAppIcon, setAppIconFile } from '../utils/icons.js';
 
 // Initialize sound manager
 soundManager.init();
@@ -473,15 +474,11 @@ function isMobileCardListViewport() {
 function buildCardEmptyStateElement() {
   const wrap = document.createElement('div');
   wrap.className = 'dropdown-empty-state';
-  const img = document.createElement('img');
-  img.className = 'dropdown-empty-state-img';
-  img.src = '/assets/images/icons/icn-credit-card.svg';
-  img.alt = '';
-  img.setAttribute('aria-hidden', 'true');
+  const icon = createAppIcon('icn-credit-card.svg', 'dropdown-empty-state-img app-icon--muted');
   const title = document.createElement('p');
   title.className = 'dropdown-empty-state-title';
   title.textContent = i18n.t('cardList.empty');
-  wrap.appendChild(img);
+  wrap.appendChild(icon);
   wrap.appendChild(title);
   return wrap;
 }
@@ -504,7 +501,7 @@ function buildCardDropdownItems(typedDigits) {
     const removeButtonHtml = isCardListManageMode
       ? `
                 <button type="button" class="dropdown-card-remove-btn" data-card-value="${rowKey.replace(/"/g, '&quot;')}" aria-label="${i18n.t('common.delete')}">
-                  <img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />
+                  ${appIconHtml('icn-x.svg', 'dropdown-card-remove-icon')}
                 </button>`
       : '';
     return {
@@ -794,9 +791,9 @@ function initializeFormInputs() {
     const saveCardEl = document.getElementById('save-card-checkbox');
     if (saveCardEl) {
       saveCardEl.checked = false;
-      const saveCardIcon = document.querySelector('.save-card-icon img');
+      const saveCardIcon = document.querySelector('.save-card-icon .app-icon');
       if (saveCardIcon) {
-        saveCardIcon.src = '/assets/images/icons/icn-square-plus.svg';
+        setAppIconFile(saveCardIcon, 'icn-square-plus.svg');
       }
     }
 
@@ -808,9 +805,9 @@ function initializeFormInputs() {
     if (receiptFields) {
       receiptFields.classList.remove('show');
     }
-    const showReceiptIcon = document.querySelector('.show-receipt-icon img');
+    const showReceiptIcon = document.querySelector('.show-receipt-icon .app-icon');
     if (showReceiptIcon) {
-      showReceiptIcon.src = '/assets/images/icons/icn-square-plus.svg';
+      setAppIconFile(showReceiptIcon, 'icn-square-plus.svg');
     }
   };
 
@@ -863,6 +860,19 @@ function initializeFormInputs() {
         }
       }
     }
+    if (locked) {
+      expiryMonthInput.setValue('');
+      expiryYearInput.setValue('');
+      expiryMonthInput.setPlaceholder('\u2022\u2022');
+      expiryYearInput.setPlaceholder('\u2022\u2022');
+      expiryMonthInput.wrapper.classList.add('expiry-date-field--locked-placeholder');
+      expiryYearInput.wrapper.classList.add('expiry-date-field--locked-placeholder');
+    } else {
+      expiryMonthInput.wrapper.classList.remove('expiry-date-field--locked-placeholder');
+      expiryYearInput.wrapper.classList.remove('expiry-date-field--locked-placeholder');
+      expiryMonthInput.setPlaceholder(i18n.t('form.expiryMonth'));
+      expiryYearInput.setPlaceholder(i18n.t('form.expiryYear'));
+    }
     const editActionBtn = getExpiryEditActionButton();
     if (editActionBtn) {
       editActionBtn.style.display = locked ? 'inline-flex' : 'none';
@@ -895,13 +905,13 @@ function initializeFormInputs() {
     label: cardNumberLabel,
     placeholder: i18n.t('form.cardNumber.placeholder'),
     required: true,
-    requiredMessage: i18n.t('common.required'),
+    requiredMessageKey: 'form.cardNumber.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateCardNumber,
     maxLength: 19, // 16 digits + 3 spaces
     rightAction: hasCardListUi
       ? {
-          icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" aria-hidden="true" />',
+          icon: appIconHtml('icn-credit-card.svg'),
           label: i18n.t('form.showCards'),
           onClick: () => toggleCardList(),
         }
@@ -955,7 +965,7 @@ function initializeFormInputs() {
             {
               text: i18n.t('common.cancel'),
               className: 'dropdown-footer-btn-cancel',
-              icon: '<img src="/assets/images/icons/icn-x.svg" alt="" />',
+              icon: appIconHtml('icn-x.svg'),
               onClick: () => {
                 isCardListManageMode = false;
                 syncCardDropdownAfterListChange();
@@ -971,7 +981,7 @@ function initializeFormInputs() {
             {
               text: i18n.t('cardList.addNew'),
               className: 'dropdown-footer-btn-add',
-              icon: '<img src="/assets/images/icons/icn-square-plus.svg" alt="" />',
+              icon: appIconHtml('icn-square-plus.svg'),
               onClick: () => {
                 selectedSavedCardForApi = null;
                 hasUserEnabledExpiryDateEdit = false;
@@ -992,7 +1002,7 @@ function initializeFormInputs() {
             {
               text: i18n.t('cardList.manage'),
               className: 'dropdown-footer-btn-manage',
-              icon: '<img src="/assets/images/icons/icn-credit-card.svg" alt="" />',
+              icon: appIconHtml('icn-credit-card.svg'),
               onClick: () => {
                 isCardListManageMode = true;
                 syncCardDropdownAfterListChange();
@@ -1181,7 +1191,7 @@ function initializeFormInputs() {
     placeholder: i18n.t('form.cvv2.placeholder'),
     hint: i18n.t('form.cvv2.hint'),
     required: true,
-    requiredMessage: i18n.t('form.cvv2.required'),
+    requiredMessageKey: 'form.cvv2.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: (value) => {
       const constraints = getCvv2Constraints();
@@ -1220,7 +1230,7 @@ function initializeFormInputs() {
       }
     },
     rightAction: {
-      icon: '<img src="/assets/images/icons/icn-pinpad.svg" alt="" aria-hidden="true" />',
+      icon: appIconHtml('icn-pinpad.svg'),
       label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!cvv2PinPad) {
@@ -1312,11 +1322,11 @@ function initializeFormInputs() {
   expiryMonthInput = new Input(expiryMonthSlot, {
     id: 'expiry-month',
     name: 'expiryMonth',
-    type: 'password',
+    type: 'tel',
     autocomplete: 'off',
     label: '',
     ariaLabel: i18n.t('form.expiryMonth'),
-    placeholder: i18n.t('form.expiryMonthPlaceholder'),
+    placeholder: i18n.t('form.expiryMonth'),
     required: false,
     clearButtonAriaLabel: i18n.t('common.clear'),
     inputMode: 'numeric',
@@ -1324,7 +1334,6 @@ function initializeFormInputs() {
     omitInnerError: true,
     skipBlurValidate: true,
     liveValidation: false,
-    maskWithPasswordFont: true,
     onInput: (value) => {
       const digits = extractNumbers(value).slice(0, 2);
       if (digits !== value) {
@@ -1350,11 +1359,11 @@ function initializeFormInputs() {
   expiryYearInput = new Input(expiryYearSlot, {
     id: 'expiry-year',
     name: 'expiryYear',
-    type: 'password',
+    type: 'tel',
     autocomplete: 'off',
     label: '',
     ariaLabel: i18n.t('form.expiryYear'),
-    placeholder: i18n.t('form.expiryYearPlaceholder'),
+    placeholder: i18n.t('form.expiryYear'),
     required: false,
     clearButtonAriaLabel: i18n.t('common.clear'),
     inputMode: 'numeric',
@@ -1362,9 +1371,8 @@ function initializeFormInputs() {
     omitInnerError: true,
     skipBlurValidate: true,
     liveValidation: false,
-    maskWithPasswordFont: true,
     rightAction: {
-      icon: '<img src="/assets/images/icons/icn-calendar.svg" alt="" aria-hidden="true" />',
+      icon: appIconHtml('icn-calendar.svg'),
       label: i18n.t('common.edit'),
       onClick: () => {
         if (!isExpiryDateLockedFromCard) return;
@@ -1453,7 +1461,7 @@ function initializeFormInputs() {
     label: '',
     placeholder: i18n.t('form.captcha.placeholder'),
     required: true,
-    requiredMessage: i18n.t('common.required'),
+    requiredMessageKey: 'common.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
     maxLength: 6,
     inputMode: 'numeric',
@@ -1467,7 +1475,7 @@ function initializeFormInputs() {
       }
     },
     rightAction: {
-      icon: '<img src="/assets/images/icons/icn-refresh.svg" alt="" aria-hidden="true" />',
+      icon: appIconHtml('icn-refresh.svg'),
       label: i18n.t('form.reloadCaptcha'),
       onClick: () => {
         loadCaptchaImage(captchaImage);
@@ -1503,7 +1511,7 @@ function initializeFormInputs() {
   captchaAudio.innerHTML = `
     <span class="captcha-audio-btn-label" data-i18n="form.audioPlay">${i18n.t('form.audioPlay')}</span>
     <span class="btn-icon" aria-hidden="true">
-      <img src="/assets/images/icons/icn-volume.svg" alt="" />
+      ${appIconHtml('icn-volume.svg')}
     </span>
   `;
   captchaAudio.onclick = async () => {
@@ -1556,7 +1564,7 @@ function initializeFormInputs() {
     label: '',
     placeholder: i18n.t('form.otp.placeholder'),
     required: true,
-    requiredMessage: i18n.t('common.required'),
+    requiredMessageKey: 'form.otp.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: validateOTP,
     inputMode: 'numeric',
@@ -1572,7 +1580,7 @@ function initializeFormInputs() {
       }
     },
     rightAction: {
-      icon: '<img src="/assets/images/icons/icn-pinpad.svg" alt="" aria-hidden="true" />',
+      icon: appIconHtml('icn-pinpad.svg'),
       label: i18n.t('form.virtualPinPad'),
       onClick: () => {
         if (!otpPinPad) {
@@ -1794,6 +1802,10 @@ async function initializeTransactionInfo() {
       i18n.t('transaction.demo.siteHost'),
   };
 
+  const transactionDescriptionRaw =
+    txPayload?.merchant?.merchantDescription ?? txPayload?.merchant?.description ?? '';
+  const transactionDescription = String(transactionDescriptionRaw).replace(/\r\n/g, '\n').trim();
+
   const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
   const merchantLogoUrl = resolveMerchantLogoUrl(txPayload?.merchant?.merchantLogoUri);
   const prCodeCandidate = txPayload?.appSettings?.prCodesPanLimits?.prCode;
@@ -1817,12 +1829,13 @@ async function initializeTransactionInfo() {
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToWordsByLang(amountInTomans, i18n.getLanguage());
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
+  const txTypeIconMask = `<span class="app-icon" style="--app-icon-src:url('${transactionTypeInfo.icon}')" aria-hidden="true"></span>`;
 
   container.innerHTML = `
     <div class="transaction-summary-card">
       <div class="transaction-info-item">
         <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-shopping-bag.svg" alt="" aria-hidden="true" />
+          ${appIconHtml('icn-shopping-bag.svg')}
         </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="merchant">${i18n.t('transaction.merchant')}</div>
@@ -1831,7 +1844,7 @@ async function initializeTransactionInfo() {
       </div>
       <div class="transaction-info-item">
         <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-cash-banknote.svg" alt="" aria-hidden="true" />
+          ${appIconHtml('icn-cash-banknote.svg')}
         </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="amount">${i18n.t('transaction.amount')}</div>
@@ -1845,7 +1858,16 @@ async function initializeTransactionInfo() {
     <div class="more-content" id="more-transaction-info">
       <div class="transaction-info-item">
         <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-shop.svg" alt="" aria-hidden="true" />
+          ${txTypeIconMask}
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label" data-transaction-field="transactionType">${i18n.t('transaction.transactionType')}</div>
+          <div class="transaction-info-value" id="transaction-type-value">${transactionTypeInfo.label}</div>
+        </div>
+      </div>
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">
+          ${appIconHtml('icn-shop.svg')}
         </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="terminal">${i18n.t('transaction.terminal')}</div>
@@ -1854,20 +1876,25 @@ async function initializeTransactionInfo() {
       </div>
       <div class="transaction-info-item">
         <div class="transaction-info-icon">
-          <img src="/assets/images/icons/icn-world.svg" alt="" aria-hidden="true" />
+          ${appIconHtml('icn-world.svg')}
         </div>
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="site">${i18n.t('transaction.site')}</div>
           <div class="transaction-info-value">${transactionData.site}</div>
         </div>
       </div>
-      <div class="transaction-info-item">
+      <div class="transaction-info-item transaction-description-item" id="transaction-description-block" hidden>
         <div class="transaction-info-icon">
-          <img src="${transactionTypeInfo.icon}" alt="" aria-hidden="true" />
+          ${appIconHtml('icn-square-info.svg')}
         </div>
         <div class="transaction-info-content">
-          <div class="transaction-info-label" data-transaction-field="transactionType">${i18n.t('transaction.transactionType')}</div>
-          <div class="transaction-info-value" id="transaction-type-value">${transactionTypeInfo.label}</div>
+          <div class="transaction-info-label" data-transaction-field="description">${i18n.t('transaction.description')}</div>
+          <div class="transaction-description-wrap">
+            <div id="transaction-description-text" class="transaction-info-value transaction-description-value is-collapsed"></div>
+            <button type="button" class="transaction-description-toggle" id="transaction-description-toggle" hidden aria-expanded="false">
+              ${appIconHtml('icn-square-plus.svg')}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -1889,6 +1916,9 @@ async function initializeTransactionInfo() {
       }
     };
   }
+
+  wireTransactionDescriptionUi(transactionDescription);
+
   // Initialize pay button label with current amount
   setPayButtonState('active');
 
@@ -1912,6 +1942,7 @@ const transactionFieldToI18nKey = {
   terminal: 'transaction.terminal',
   site: 'transaction.site',
   transactionType: 'transaction.transactionType',
+  description: 'transaction.description',
   merchant: 'transaction.merchant',
   amount: 'transaction.amount',
 };
@@ -1971,64 +2002,109 @@ function setPayButtonState(state) {
   }
 }
 
-function initializePartnerLogos(merchantLogoUrl) {
-  const container = document.getElementById('partner-logos');
-  const section = document.getElementById('partner-logos-section');
+/** Fallback when merchant logo is missing or fails to load (SVG). */
+const DEFAULT_MERCHANT_LOGO_URL = '/assets/images/logo-mini.svg';
 
-  const logos = merchantLogoUrl
-    ? [merchantLogoUrl]
-    : ['/assets/images/partners/logo1.svg', '/assets/images/partners/logo2.svg'];
+const TRANSACTION_DESCRIPTION_MAX_CHARS = 800;
 
-  // Hide section if no logos
-  if (!logos || logos.length === 0) {
-    if (section) {
-      section.classList.add('hidden');
-    }
+/**
+ * Multi-line transaction description under type: clamp to 2 lines unless expanded; toggle only if overflow.
+ * @param {string} descriptionText
+ */
+function wireTransactionDescriptionUi(descriptionText) {
+  const block = document.getElementById('transaction-description-block');
+  const textEl = document.getElementById('transaction-description-text');
+  const toggle = document.getElementById('transaction-description-toggle');
+  const icon = toggle?.querySelector('.app-icon') ?? null;
+  if (!block || !textEl || !toggle || !icon) return;
+
+  const normalized = String(descriptionText ?? '')
+    .replace(/\r\n/g, '\n')
+    .trim();
+  const clipped =
+    normalized.length > TRANSACTION_DESCRIPTION_MAX_CHARS
+      ? `${normalized.slice(0, TRANSACTION_DESCRIPTION_MAX_CHARS)}…`
+      : normalized;
+
+  if (!clipped) {
+    block.hidden = true;
+    textEl.textContent = '';
+    toggle.hidden = true;
     return;
   }
 
-  // Show section if logos exist
-  if (section) {
-    section.classList.remove('hidden');
-  }
+  block.hidden = false;
+  textEl.textContent = clipped;
+  textEl.classList.remove('is-expanded');
+  textEl.classList.add('is-collapsed');
+  toggle.hidden = true;
+  setAppIconFile(icon, 'icn-square-plus.svg');
+  toggle.setAttribute('aria-expanded', 'false');
+  toggle.setAttribute('aria-label', i18n.t('transaction.descriptionExpand'));
 
-  // Clear container first
+  const applyOverflow = () => {
+    textEl.classList.add('is-collapsed');
+    textEl.classList.remove('is-expanded');
+    const overflow = textEl.scrollHeight - textEl.clientHeight > 2;
+    if (overflow) {
+      toggle.hidden = false;
+      toggle.setAttribute('aria-label', i18n.t('transaction.descriptionExpand'));
+    } else {
+      textEl.classList.remove('is-collapsed');
+      toggle.hidden = true;
+    }
+  };
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(applyOverflow);
+  });
+
+  toggle.onclick = () => {
+    const expand = !textEl.classList.contains('is-expanded');
+    textEl.classList.toggle('is-expanded', expand);
+    textEl.classList.toggle('is-collapsed', !expand);
+    setAppIconFile(icon, expand ? 'icn-square-minus.svg' : 'icn-square-plus.svg');
+    toggle.setAttribute('aria-expanded', expand ? 'true' : 'false');
+    toggle.setAttribute(
+      'aria-label',
+      i18n.t(expand ? 'transaction.descriptionCollapse' : 'transaction.descriptionExpand')
+    );
+  };
+}
+
+function initializePartnerLogos(merchantLogoUrl) {
+  const container = document.getElementById('partner-logos');
+  const section = document.getElementById('partner-logos-section');
+  if (!container || !section) return;
+
+  const primarySrc = merchantLogoUrl || DEFAULT_MERCHANT_LOGO_URL;
+  const logos = [primarySrc];
+
+  section.classList.remove('hidden');
   container.innerHTML = '';
 
-  // Add logos (max 2 logos side by side)
-  logos.slice(0, 2).forEach((src) => {
+  logos.forEach((src) => {
     const img = document.createElement('img');
     img.src = src;
     img.className = 'partner-logo';
     img.alt = i18n.t('accessibility.partnerLogo');
-    img.onerror = () => {
-      // Hide image if it fails to load
-      img.classList.add('hidden');
-    };
+    img.addEventListener(
+      'error',
+      () => {
+        if (img.dataset.fallbackApplied === '1') return;
+        img.dataset.fallbackApplied = '1';
+        img.src = DEFAULT_MERCHANT_LOGO_URL;
+      },
+      { once: true }
+    );
     container.appendChild(img);
   });
 
-  // Hide section if no valid logos were added
-  const visibleLogos = Array.from(container.children).filter(
-    (img) => !img.classList.contains('hidden')
-  );
-  if (visibleLogos.length === 0) {
-    if (section) {
-      section.classList.add('hidden');
-    }
-    return;
-  }
-
-  // Add class for single logo (center it)
-  if (visibleLogos.length === 1) {
-    container.classList.add('single-logo');
-  } else {
-    container.classList.remove('single-logo');
-  }
+  container.classList.add('single-logo');
 }
 
 /** Illustration for cancel confirmation (served from Vite root `src/assets`). */
-const cancelConfirmImageUrl = '/assets/images/icons/icn-square-help.svg';
+const cancelConfirmImageUrl = '/assets/images/icons/icn-logout.svg';
 
 /**
  * Open cancel confirmation: desktop = modal, mobile = bottom sheet (via Modal).
@@ -2039,6 +2115,7 @@ function openCancelPaymentConfirm() {
     title: i18n.t('cancelConfirm.title'),
     description: i18n.t('cancelConfirm.description'),
     image: cancelConfirmImageUrl,
+    imageExtraClass: 'modal-image--icon-lead',
     imageAlt: i18n.t('cancelConfirm.imageAlt'),
     closeButtonAriaLabel: i18n.t('common.close'),
     buttons: [
@@ -2362,31 +2439,32 @@ function attachFormEvents() {
   });
 
   if (showReceiptToggle) {
-    const iconWrapper = document.querySelector('.show-receipt-icon img');
+    const iconWrapper = document.querySelector('.show-receipt-icon .app-icon');
 
     showReceiptToggle.addEventListener('change', () => {
       const isChecked = showReceiptToggle.checked;
       if (isChecked) {
         receiptFields.classList.add('show');
         if (iconWrapper) {
-          iconWrapper.src = '/assets/images/icons/icn-square-minus.svg';
+          setAppIconFile(iconWrapper, 'icn-square-minus.svg');
         }
       } else {
         receiptFields.classList.remove('show');
         if (iconWrapper) {
-          iconWrapper.src = '/assets/images/icons/icn-square-plus.svg';
+          setAppIconFile(iconWrapper, 'icn-square-plus.svg');
         }
       }
     });
   }
 
   if (saveCardCheckbox) {
-    const saveCardIcon = document.querySelector('.save-card-icon img');
+    const saveCardIcon = document.querySelector('.save-card-icon .app-icon');
     const updateSaveCardIcon = () => {
       if (!saveCardIcon) return;
-      saveCardIcon.src = saveCardCheckbox.checked
-        ? '/assets/images/icons/icn-square-minus.svg'
-        : '/assets/images/icons/icn-square-plus.svg';
+      setAppIconFile(
+        saveCardIcon,
+        saveCardCheckbox.checked ? 'icn-square-minus.svg' : 'icn-square-plus.svg'
+      );
     };
     updateSaveCardIcon();
     saveCardCheckbox.addEventListener('change', updateSaveCardIcon);
@@ -2402,8 +2480,26 @@ function attachFormEvents() {
 /**
  * Handle language change event
  */
-function handleLanguageChange(event) {
+function handleLanguageChange() {
   updatePageContent();
+}
+
+/** Re-run validators for fields still in error state so messages match the active language. */
+function revalidateVisibleFormErrorsAfterLanguageChange() {
+  cardNumberInput?.revalidateIfShowingError?.();
+  cvv2Input?.revalidateIfShowingError?.();
+  captchaInput?.revalidateIfShowingError?.();
+  otpInput?.revalidateIfShowingError?.();
+  mobileInput?.revalidateIfShowingError?.();
+  emailInput?.revalidateIfShowingError?.();
+  const groupErr = document.getElementById('expiry-date-group-error');
+  if (
+    groupErr &&
+    groupErr.style.visibility === 'visible' &&
+    typeof expiryDateInput?.validate === 'function'
+  ) {
+    expiryDateInput.validate();
+  }
 }
 
 /**
@@ -2435,6 +2531,7 @@ function updatePageContent() {
     );
     cardNumberInput.setPlaceholder(i18n.t('form.cardNumber.placeholder'));
     cardNumberInput.setRightActionAriaLabel(i18n.t('form.showCards'));
+    cardNumberInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   if (cardDropdown) {
     cardDropdown.updateItems(buildCardDropdownItems());
@@ -2446,25 +2543,32 @@ function updatePageContent() {
     cvv2Input.setLabel(i18n.t('form.cvv2'));
     cvv2Input.setPlaceholder(i18n.t('form.cvv2.placeholder'));
     cvv2Input.setHint(i18n.t('form.cvv2.hint'));
+    cvv2Input.setRightActionAriaLabel(i18n.t('form.virtualPinPad'));
+    cvv2Input.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   const expiryGroupLabelEl = document.getElementById('expiry-date-group-label');
   if (expiryGroupLabelEl) {
     expiryGroupLabelEl.textContent = i18n.t('form.expiryDate');
   }
   if (expiryMonthInput) {
-    expiryMonthInput.setPlaceholder(i18n.t('form.expiryMonthPlaceholder'));
+    expiryMonthInput.setPlaceholder(
+      isExpiryDateLockedFromCard ? '\u2022\u2022' : i18n.t('form.expiryMonth')
+    );
     expiryMonthInput.setAriaLabel(i18n.t('form.expiryMonth'));
+    expiryMonthInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   if (expiryYearInput) {
-    expiryYearInput.setPlaceholder(i18n.t('form.expiryYearPlaceholder'));
+    expiryYearInput.setPlaceholder(
+      isExpiryDateLockedFromCard ? '\u2022\u2022' : i18n.t('form.expiryYear')
+    );
     expiryYearInput.setAriaLabel(i18n.t('form.expiryYear'));
-    const expiryEditBtn = expiryYearInput.wrapper?.querySelector('.input-action-right');
-    if (expiryEditBtn) {
-      expiryEditBtn.setAttribute('aria-label', i18n.t('common.edit'));
-    }
+    expiryYearInput.setRightActionAriaLabel(i18n.t('common.edit'));
+    expiryYearInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   if (captchaInput) {
     captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
+    captchaInput.setRightActionAriaLabel(i18n.t('form.reloadCaptcha'));
+    captchaInput.setClearButtonAriaLabel(i18n.t('common.clear'));
     if (captchaLabelElement) {
       captchaLabelElement.textContent = i18n.t('form.securityCode');
     }
@@ -2475,6 +2579,8 @@ function updatePageContent() {
   if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
     otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+    otpInput.setRightActionAriaLabel(i18n.t('form.virtualPinPad'));
+    otpInput.setClearButtonAriaLabel(i18n.t('common.clear'));
     // Update separate OTP label
     if (otpLabelElement) {
       otpLabelElement.textContent = i18n.t('form.otp');
@@ -2483,10 +2589,12 @@ function updatePageContent() {
   if (mobileInput) {
     mobileInput.setLabel(i18n.t('form.mobile'));
     mobileInput.setPlaceholder(i18n.t('form.mobile.placeholder'));
+    mobileInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   if (emailInput) {
     emailInput.setLabel(i18n.t('form.email'));
     emailInput.setPlaceholder(i18n.t('form.email.placeholder'));
+    emailInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
 
   // Buttons are now updated via data-i18n above
@@ -2501,6 +2609,16 @@ function updatePageContent() {
   });
   refreshTransactionTypeValue();
   refreshTransactionAmountValues();
+
+  const descToggle = document.getElementById('transaction-description-toggle');
+  const descTextEl = document.getElementById('transaction-description-text');
+  if (descToggle && !descToggle.hidden && descTextEl) {
+    const expanded = descTextEl.classList.contains('is-expanded');
+    descToggle.setAttribute(
+      'aria-label',
+      i18n.t(expanded ? 'transaction.descriptionCollapse' : 'transaction.descriptionExpand')
+    );
+  }
 
   // Update more/less toggle button
   const moreToggle = document.getElementById('more-toggle');
@@ -2527,4 +2645,6 @@ function updatePageContent() {
 
   // Ensure pay button label uses current language and amount
   setPayButtonState('active');
+
+  revalidateVisibleFormErrorsAfterLanguageChange();
 }

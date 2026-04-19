@@ -3,20 +3,15 @@
  */
 export default {
   // Common
-  'common.submit': 'Submit',
   'common.cancel': 'Cancel',
   'common.close': 'Close',
-  'common.confirm': 'Confirm',
   'common.help': 'Help',
   'common.delete': 'Delete',
   'common.edit': 'Edit',
-  'common.save': 'Save',
-  'common.loading': 'Loading...',
-  'common.error': 'Error',
-  'common.success': 'Success',
   'common.clear': 'Clear',
   'common.required': 'This field is required',
   'common.processing': 'Processing...',
+  'common.loading': 'Loading...',
 
   // Redirect
   'redirect.loading': 'Redirecting...',
@@ -47,14 +42,10 @@ export default {
   'form.expiryMonth': 'Month',
   'form.expiryYear': 'Year',
   'form.expiryDate.required': 'Expiry date is required',
-  'form.expiryDate.invalid': 'Invalid expiry date',
   'form.expiryDate.invalidMonth': 'Invalid month',
   'form.expiryDate.expired': 'Card has expired',
   'form.expiryDate.incomplete': 'Enter 2-digit month and 2-digit year',
-  'form.expiryMonthPlaceholder': '01',
-  'form.expiryYearPlaceholder': '05',
   'form.securityCode': 'Security Code',
-  'form.securityCode.required': 'Security code is required',
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP is required',
@@ -74,12 +65,8 @@ export default {
   'form.pay.disabled': 'Please complete all information',
   'form.pay.processing': 'Connecting to bank...',
   'form.pay.success': 'Payment completed successfully',
-  'form.captchaAudioUnavailable': 'Captcha audio is not available in this build',
   'form.cancel': 'Cancel',
-  'form.showReceipt': 'Show Receipt',
   'form.title': 'Enter your card details',
-  'form.submit': 'Submit',
-  'form.captcha': 'Security Code',
   'form.captcha.placeholder': 'Enter code',
   'form.validation.error': 'Please fill all fields correctly',
   'form.showCards': 'Show cards',
@@ -98,8 +85,8 @@ export default {
   'cancelConfirm.imageAlt': 'Illustration for leaving payment',
   'cancelConfirm.continuePay': 'Continue payment',
   'cancelConfirm.confirmLeave': 'Leave payment',
-  'form.expiryPlaceholder': 'MM/YY',
   'form.giftCardNotice': 'This is a gift card',
+  'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
 
   // Payment init (SSR session)
   'paymentInit.error.title': 'Cannot start payment',
@@ -119,21 +106,13 @@ export default {
   // Card List
   'cardList.addNew': 'Add New Card',
   'cardList.manage': 'Manage Cards',
-  'cardList.pin': 'Pin',
-  'cardList.unpin': 'Unpin',
-  'cardList.delete': 'Delete',
-  'cardList.deleteConfirm': 'Are you sure you want to delete this card?',
   'cardList.empty': 'No saved card to display',
 
   // Receipt
   'receipt.success': 'Transaction Successful',
   'receipt.failed': 'Transaction Failed',
-  'receipt.pending': 'Processing',
-  'receipt.amount': 'Amount',
-  'receipt.transactionType': 'Transaction Type',
   'receipt.merchant': 'Merchant',
   'receipt.terminal': 'Terminal',
-  'receipt.site': 'Merchant Site',
   'receipt.share': 'Share',
   'receipt.save': 'Save to Gallery',
   'receipt.paymentSuccessDesc': 'Payment completed successfully',
@@ -159,6 +138,9 @@ export default {
   'transaction.terminal': 'Merchant / Terminal Number',
   'transaction.site': 'Merchant Site',
   'transaction.transactionType': 'Transaction Type',
+  'transaction.description': 'Description',
+  'transaction.descriptionExpand': 'Show full description',
+  'transaction.descriptionCollapse': 'Show less',
   'transaction.type.balance': 'Balance Inquiry',
   'transaction.type.purchase': 'Purchase',
   'transaction.type.thirdParty': 'Third Party',
@@ -184,7 +166,6 @@ export default {
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
-  'pinPad.title': 'Enter PIN',
   'pinPad.secureKeyboardTitle': 'Secure keyboard',
   'pinPad.clear': 'Clear',
 
@@ -192,10 +173,7 @@ export default {
   'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
 
-  'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
-
   // Errors
   'error.network': 'Network error',
-  'error.invalidData': 'Invalid data',
   'error.unknown': 'Unknown error',
 };

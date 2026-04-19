@@ -1,5 +1,33 @@
 import { BottomSheet } from './BottomSheet.js';
 import { i18n } from '../utils/i18n.js';
+import { appIconHtml } from '../utils/icons.js';
+
+function buildModalLeadVisual(options) {
+  if (!options.image) return null;
+  const useMask =
+    options.imageAsMaskIcon === true ||
+    (options.imageAsMaskIcon !== false && /\.svg(\?|$)/i.test(String(options.image)));
+  if (useMask) {
+    const span = document.createElement('span');
+    span.className = ['modal-image', 'app-icon', 'app-icon--block', options.imageExtraClass || '']
+      .filter(Boolean)
+      .join(' ');
+    span.style.setProperty('--app-icon-src', `url('${options.image}')`);
+    span.setAttribute('role', 'img');
+    if (options.imageAlt) span.setAttribute('aria-label', options.imageAlt);
+    else span.setAttribute('aria-hidden', 'true');
+    if (options.imageAltKey) span.setAttribute('data-i18n-aria-label', options.imageAltKey);
+    return span;
+  }
+  const img = document.createElement('img');
+  img.src = options.image;
+  img.alt = options.imageAlt || options.title || '';
+  img.className = ['modal-image', options.imageExtraClass || ''].filter(Boolean).join(' ');
+  if (options.imageAltKey) {
+    img.setAttribute('data-i18n-alt', options.imageAltKey);
+  }
+  return img;
+}
 
 // Apply i18n keys onto modal options (mutates options).
 function resolveModalOptionStrings(options) {
@@ -25,6 +53,8 @@ export class Modal {
       description: options.description || '',
       content: options.content || '',
       image: options.image || null,
+      imageExtraClass: options.imageExtraClass || '',
+      imageAsMaskIcon: options.imageAsMaskIcon,
       imageAlt: options.imageAlt || '',
       showCloseButton: options.showCloseButton !== false,
       closeButtonAriaLabel: options.closeButtonAriaLabel || 'Close',
@@ -127,14 +157,8 @@ export class Modal {
     container.className = 'modal-content-mobile';
 
     if (this.options.image) {
-      const img = document.createElement('img');
-      img.src = this.options.image;
-      img.alt = this.options.imageAlt || this.options.title || '';
-      img.className = 'modal-image';
-      if (this.options.imageAltKey) {
-        img.setAttribute('data-i18n-alt', this.options.imageAltKey);
-      }
-      container.appendChild(img);
+      const lead = buildModalLeadVisual(this.options);
+      if (lead) container.appendChild(lead);
     }
 
     if (this.options.description) {
@@ -185,7 +209,7 @@ export class Modal {
       const closeBtn = document.createElement('button');
       closeBtn.type = 'button';
       closeBtn.className = 'modal-close';
-      closeBtn.innerHTML = '×';
+      closeBtn.innerHTML = appIconHtml('icn-x.svg', 'modal-close-icon');
       closeBtn.setAttribute('aria-label', this.options.closeButtonAriaLabel);
       closeBtn.onclick = () => this.close();
       this.modalCloseButton = closeBtn;
@@ -204,15 +228,9 @@ export class Modal {
     }
 
     if (this.options.image) {
-      const img = document.createElement('img');
-      img.src = this.options.image;
-      img.alt = this.options.imageAlt || this.options.title || '';
-      img.className = 'modal-image';
-      this.modalImageRef = img;
-      if (this.options.imageAltKey) {
-        img.setAttribute('data-i18n-alt', this.options.imageAltKey);
-      }
-      content.appendChild(img);
+      const lead = buildModalLeadVisual(this.options);
+      this.modalImageRef = lead;
+      if (lead) content.appendChild(lead);
     }
 
     if (this.options.description) {
@@ -298,9 +316,11 @@ export class Modal {
       if (sheet) {
         i18n.applyDataI18n(sheet);
       }
-      const img = this.modalInstance.contentElement?.querySelector('.modal-image');
-      if (img && this.options.imageAltKey) {
-        img.alt = i18n.t(this.options.imageAltKey);
+      const lead = this.modalInstance.contentElement?.querySelector('.modal-image');
+      if (lead && this.options.imageAltKey) {
+        const t = i18n.t(this.options.imageAltKey);
+        if (lead.tagName === 'IMG') lead.alt = t;
+        else lead.setAttribute('aria-label', t);
       }
       return;
     }
@@ -308,7 +328,9 @@ export class Modal {
       i18n.applyDataI18n(this.modalElement);
     }
     if (this.modalImageRef && this.options.imageAltKey) {
-      this.modalImageRef.alt = i18n.t(this.options.imageAltKey);
+      const t = i18n.t(this.options.imageAltKey);
+      if (this.modalImageRef.tagName === 'IMG') this.modalImageRef.alt = t;
+      else this.modalImageRef.setAttribute('aria-label', t);
     }
     if (this.modalCloseButton && this.options.closeButtonAriaLabelKey) {
       this.modalCloseButton.setAttribute('aria-label', i18n.t(this.options.closeButtonAriaLabelKey));

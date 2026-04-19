@@ -10,6 +10,7 @@ Before fulfilling any prompt, check and follow these rules.
 ## 1. Standard Naming
 
 - **Classes (CSS)**: Use only `kebab-case` (e.g. `card-title`, `payment-form`).
+- **CSS selector / class / ID names**: Do not use underscores (`_`) or double hyphens (`--`) in names (avoid `snake_case`, BEM `block__element`, or `block--modifier`). Use single-hyphen segments only (e.g. `modal-image-icon-lead`, not `modal-image--icon-lead`). **Exception:** CSS custom properties must use the required `--` prefix (e.g. `--color-primary`).
 - **Functions and variables (JS)**: Use only `camelCase` (e.g. `getTranslation`, `currentLang`).
 - **Constants**: Use `camelCase`, or `UPPER_SNAKE_CASE` only for true constants (e.g. env config).
 - Do not use `UPPERCASE` for normal class, function, or variable names.
@@ -65,4 +66,4 @@ let userName = '';
 
 ---
 
-**Summary**: For every prompt, first consider naming, clean code, reusability, accessibility, i18n, English-only comments, and cleaning up unused dependencies, then apply changes accordingly.
+**Summary**: For every prompt, first consider naming (including CSS: no `_` or `--` in class/ID names except custom properties), clean code, reusability, accessibility, i18n, English-only comments, and cleaning up unused dependencies, then apply changes accordingly.

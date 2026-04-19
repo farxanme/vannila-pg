@@ -3,20 +3,15 @@
  */
 export default {
   // Common
-  'common.submit': 'Отправить',
   'common.cancel': 'Отмена',
   'common.close': 'Закрыть',
-  'common.confirm': 'Подтвердить',
   'common.help': 'Помощь',
   'common.delete': 'Удалить',
   'common.edit': 'Редактировать',
-  'common.save': 'Сохранить',
-  'common.loading': 'Загрузка...',
-  'common.error': 'Ошибка',
-  'common.success': 'Успешно',
   'common.clear': 'Очистить',
   'common.required': 'Обязательное поле',
   'common.processing': 'Обработка...',
+  'common.loading': 'Загрузка...',
 
   // Redirect
   'redirect.loading': 'Перенаправление...',
@@ -47,14 +42,10 @@ export default {
   'form.expiryMonth': 'Месяц',
   'form.expiryYear': 'Год',
   'form.expiryDate.required': 'Срок действия обязателен',
-  'form.expiryDate.invalid': 'Неверный срок действия',
   'form.expiryDate.invalidMonth': 'Неверный месяц',
   'form.expiryDate.expired': 'Срок действия карты истёк',
   'form.expiryDate.incomplete': 'Введите месяц и год (по 2 цифры)',
-  'form.expiryMonthPlaceholder': '01',
-  'form.expiryYearPlaceholder': '05',
   'form.securityCode': 'Код безопасности',
-  'form.securityCode.required': 'Код безопасности обязателен',
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP обязателен',
@@ -74,12 +65,8 @@ export default {
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
   'form.pay.processing': 'Подключение к банку...',
   'form.pay.success': 'Платёж успешно выполнен',
-  'form.captchaAudioUnavailable': 'Аудио капчи недоступно в этой сборке',
   'form.cancel': 'Отмена',
-  'form.showReceipt': 'Показать квитанцию',
   'form.title': 'Введите данные карты',
-  'form.submit': 'Отправить',
-  'form.captcha': 'Код безопасности',
   'form.captcha.placeholder': 'Введите код',
   'form.validation.error': 'Пожалуйста, заполните все поля правильно',
   'form.showCards': 'Показать карты',
@@ -98,9 +85,13 @@ export default {
   'cancelConfirm.imageAlt': 'Иллюстрация: отмена оплаты',
   'cancelConfirm.continuePay': 'Продолжить оплату',
   'cancelConfirm.confirmLeave': 'Покинуть оплату',
-  'form.expiryPlaceholder': 'ММ/ГГ',
   'form.giftCardNotice': 'Это подарочная карта',
   'form.showReceiptToggle': 'Электронная почта или телефон для квитанции (необязательно)',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'Невозможно начать оплату',
+  'paymentInit.error.description':
+    'Данные платёжной сессии отсутствуют или недействительны. Откройте шлюз по правильной ссылке или повторите попытку позже.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Выбрать язык',
@@ -115,21 +106,13 @@ export default {
   // Card List
   'cardList.addNew': 'Добавить новую карту',
   'cardList.manage': 'Управление картами',
-  'cardList.pin': 'Закрепить',
-  'cardList.unpin': 'Открепить',
-  'cardList.delete': 'Удалить',
-  'cardList.deleteConfirm': 'Вы уверены, что хотите удалить эту карту?',
   'cardList.empty': 'Нет сохранённой карты для отображения',
 
   // Receipt
   'receipt.success': 'Транзакция успешна',
   'receipt.failed': 'Транзакция не удалась',
-  'receipt.pending': 'Обработка',
-  'receipt.amount': 'Сумма',
-  'receipt.transactionType': 'Тип транзакции',
   'receipt.merchant': 'Торговец',
   'receipt.terminal': 'Терминал',
-  'receipt.site': 'Сайт торговца',
   'receipt.share': 'Поделиться',
   'receipt.save': 'Сохранить в галерею',
   'receipt.paymentSuccessDesc': 'Оплата успешно завершена',
@@ -155,6 +138,9 @@ export default {
   'transaction.terminal': 'Номер торговца / Терминал',
   'transaction.site': 'Сайт торговца',
   'transaction.transactionType': 'Тип транзакции',
+  'transaction.description': 'Описание',
+  'transaction.descriptionExpand': 'Показать полностью',
+  'transaction.descriptionCollapse': 'Свернуть',
   'transaction.type.balance': 'Запрос баланса',
   'transaction.type.purchase': 'Покупка',
   'transaction.type.thirdParty': 'Сторонние организации',
@@ -180,7 +166,6 @@ export default {
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
-  'pinPad.title': 'Введите PIN',
   'pinPad.secureKeyboardTitle': 'Безопасная клавиатура',
   'pinPad.clear': 'Очистить',
 
@@ -188,13 +173,7 @@ export default {
   'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
 
-  // Payment init (SSR session)
-  'paymentInit.error.title': 'Невозможно начать оплату',
-  'paymentInit.error.description':
-    'Данные платёжной сессии отсутствуют или недействительны. Откройте шлюз по правильной ссылке или повторите попытку позже.',
-
   // Errors
   'error.network': 'Ошибка сети',
-  'error.invalidData': 'Неверные данные',
   'error.unknown': 'Неизвестная ошибка',
 };

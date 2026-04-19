@@ -2,6 +2,9 @@
  * Input Component
  * Supports: label, hint, validation errors, action buttons, clear button
  */
+import { appIconHtml } from '../utils/icons.js';
+import { i18n } from '../utils/i18n.js';
+
 export class Input {
   constructor(container, options = {}) {
     this.container = typeof container === 'string' ? document.querySelector(container) : container;
@@ -32,6 +35,8 @@ export class Input {
       omitInnerError: options.omitInnerError || false,
       skipBlurValidate: options.skipBlurValidate || false,
       ariaLabel: options.ariaLabel || '',
+      /** When set, empty-required errors use `i18n.t(key)` on each validate (survives language changes). */
+      requiredMessageKey: options.requiredMessageKey || '',
       requiredMessage: options.requiredMessage || 'This field is required',
       clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
       /** If set (e.g. `'off'`), applied as the input `autocomplete` attribute. */
@@ -154,7 +159,7 @@ export class Input {
       const clearBtn = document.createElement('button');
       clearBtn.type = 'button';
       clearBtn.className = 'input-clear';
-      clearBtn.innerHTML = '<img src="/assets/images/icons/icn-x.svg" alt="" aria-hidden="true" />';
+      clearBtn.innerHTML = appIconHtml('icn-x.svg');
       clearBtn.setAttribute('aria-label', this.options.clearButtonAriaLabel);
       clearBtn.style.visibility = 'hidden';
       clearBtn.style.pointerEvents = 'none';
@@ -284,7 +289,10 @@ export class Input {
     let validationResult = { valid: true, message: '' };
 
     if (this.options.required && !value) {
-      validationResult = { valid: false, message: this.options.requiredMessage };
+      const requiredMsg = this.options.requiredMessageKey
+        ? i18n.t(this.options.requiredMessageKey)
+        : this.options.requiredMessage;
+      validationResult = { valid: false, message: requiredMsg };
     }
     // Custom validator
     else if (this.options.validator && value) {
@@ -462,6 +470,26 @@ export class Input {
     if (rightBtn) {
       rightBtn.setAttribute('aria-label', label || '');
     }
+  }
+
+  /**
+   * Update clear button accessible name (e.g. after language change).
+   * @param {string} label
+   */
+  setClearButtonAriaLabel(label) {
+    this.options.clearButtonAriaLabel = label || '';
+    if (this.clearButton) {
+      this.clearButton.setAttribute('aria-label', label || '');
+    }
+  }
+
+  /**
+   * Re-run validation when the field is invalid so messages track the active language.
+   * @returns {boolean}
+   */
+  revalidateIfShowingError() {
+    if (!this.wrapper?.classList.contains('error')) return true;
+    return this.validate();
   }
 
   /**

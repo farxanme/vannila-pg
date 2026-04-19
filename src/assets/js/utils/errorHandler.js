@@ -2,6 +2,8 @@
  * Error Display Handler
  * Supports 3 modes: Toast, Page Element, DOM Change
  */
+import { appIconHtml } from './icons.js';
+
 class ErrorHandler {
   constructor() {
     this.toastContainer = null;
@@ -78,7 +80,7 @@ class ErrorHandler {
     // Add close button
     const closeBtn = document.createElement('button');
     closeBtn.className = 'error-toast-close';
-    closeBtn.innerHTML = '×';
+    closeBtn.innerHTML = appIconHtml('icn-x.svg');
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.onclick = () => this.removeToast(toast);
     toast.appendChild(closeBtn);

@@ -3,20 +3,15 @@
  */
 export default {
   // Common
-  'common.submit': 'ارسال',
   'common.cancel': 'انصراف',
   'common.close': 'بستن',
-  'common.confirm': 'تایید',
   'common.help': 'راهنما',
   'common.delete': 'حذف',
   'common.edit': 'ویرایش',
-  'common.save': 'ذخیره',
-  'common.loading': 'در حال بارگذاری...',
-  'common.error': 'خطا',
-  'common.success': 'موفق',
   'common.clear': 'پاک کردن',
   'common.required': 'این فیلد الزامی است',
   'common.processing': 'در حال پردازش...',
+  'common.loading': 'در حال بارگذاری...',
 
   // Redirect
   'redirect.loading': 'در حال انتقال...',
@@ -47,17 +42,13 @@ export default {
   'form.expiryMonth': 'ماه',
   'form.expiryYear': 'سال',
   'form.expiryDate.required': 'تاریخ انقضا الزامی است',
-  'form.expiryDate.invalid': 'تاریخ انقضا نامعتبر است',
   'form.expiryDate.invalidMonth': 'ماه نامعتبر است',
   'form.expiryDate.expired': 'اعتبار کارت به پایان رسیده است',
   'form.expiryDate.incomplete': 'ماه و سال را دو رقمی وارد کنید',
-  'form.expiryMonthPlaceholder': '۰۱',
-  'form.expiryYearPlaceholder': '۰۵',
   'form.securityCode': 'کد امنیتی',
-  'form.securityCode.required': 'کد امنیتی الزامی است',
   'form.otp': 'رمز پویا',
-  'form.otp.placeholder': 'رمز یک‌بارمصرف',
-  'form.otp.required': 'رمز دوم پویا الزامی است',
+  'form.otp.placeholder': 'رمز پویا',
+  'form.otp.required': 'رمز پویا الزامی است',
   'form.otp.mustBe6Digits': 'رمز پویا باید ۶ رقم باشد',
   'form.mobile': 'شماره موبایل',
   'form.mobile.placeholder': '09123456789',
@@ -74,12 +65,8 @@ export default {
   'form.pay.disabled': 'لطفاً اطلاعات را کامل وارد کنید',
   'form.pay.processing': 'در حال اتصال به بانک...',
   'form.pay.success': 'پرداخت با موفقیت ثبت شد',
-  'form.captchaAudioUnavailable': 'پخش صوتی کپچا در این نسخه در دسترس نیست',
   'form.cancel': 'انصراف',
-  'form.showReceipt': 'نمایش رسید',
   'form.title': 'اطلاعات کارت خود را وارد کنید',
-  'form.submit': 'ارسال',
-  'form.captcha': 'کد امنیتی',
   'form.captcha.placeholder': 'کد را وارد کنید',
   'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
   'form.showCards': 'نمایش کارت‌ها',
@@ -92,15 +79,19 @@ export default {
   'form.captchaImageAlt': 'کد امنیتی',
   'form.captchaAudio': 'پخش صدای کد امنیتی',
   'form.audioPlay': 'پخش صوتی',
-  'form.showReceiptToggle': 'ایمیل یا شماره همراه برای ارسال رسید پرداخت (اختیاری)',
-  'form.giftCardNotice': 'این کارت هدیه است',
   'cancelConfirm.title': 'انصراف از پرداخت؟',
   'cancelConfirm.description':
     'اگر همین حالا ترک کنید، پرداخت شما ممکن است ناتمام بماند. برای اطمینان، یکی از گزینه‌ها را انتخاب کنید.',
   'cancelConfirm.imageAlt': 'راهنمای انصراف از پرداخت',
   'cancelConfirm.continuePay': 'ادامه پرداخت',
   'cancelConfirm.confirmLeave': 'انصراف از پرداخت',
-  'form.expiryPlaceholder': 'ماه/سال',
+  'form.giftCardNotice': 'این کارت هدیه است',
+  'form.showReceiptToggle': 'ایمیل یا شماره موبایل برای ارسال رسید پرداخت (اختیاری)',
+
+  // Payment init (SSR session)
+  'paymentInit.error.title': 'خطا در شروع پرداخت',
+  'paymentInit.error.description':
+    'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفاً از مسیر صحیح وارد درگاه شوید یا بعداً دوباره تلاش کنید.',
 
   // Accessibility
   'accessibility.selectLanguage': 'انتخاب زبان',
@@ -115,21 +106,13 @@ export default {
   // Card List
   'cardList.addNew': 'افزودن کارت جدید',
   'cardList.manage': 'مدیریت کارت‌ها',
-  'cardList.pin': 'پین',
-  'cardList.unpin': 'حذف پین',
-  'cardList.delete': 'حذف',
-  'cardList.deleteConfirm': 'آیا از حذف این کارت اطمینان دارید؟',
   'cardList.empty': 'کارتی جهت نمایش وجود ندارد',
 
   // Receipt
   'receipt.success': 'تراکنش موفق',
   'receipt.failed': 'تراکنش ناموفق',
-  'receipt.pending': 'در حال پردازش',
-  'receipt.amount': 'مبلغ',
-  'receipt.transactionType': 'نوع تراکنش',
   'receipt.merchant': 'پذیرنده',
   'receipt.terminal': 'ترمینال',
-  'receipt.site': 'سایت پذیرنده',
   'receipt.share': 'اشتراک‌گذاری',
   'receipt.save': 'ذخیره در گالری',
   'receipt.paymentSuccessDesc': 'پرداخت با موفقیت انجام شد',
@@ -155,6 +138,9 @@ export default {
   'transaction.terminal': 'شماره پذیرنده / ترمینال',
   'transaction.site': 'سایت پذیرنده',
   'transaction.transactionType': 'نوع تراکنش',
+  'transaction.description': 'توضیحات',
+  'transaction.descriptionExpand': 'نمایش کامل توضیحات',
+  'transaction.descriptionCollapse': 'نمایش کمتر',
   'transaction.type.balance': 'مانده گیری',
   'transaction.type.purchase': 'خرید',
   'transaction.type.thirdParty': 'موسسات سوم',
@@ -180,7 +166,6 @@ export default {
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad
-  'pinPad.title': 'ورود رمز',
   'pinPad.secureKeyboardTitle': 'صفحه کلید امن',
   'pinPad.clear': 'پاک کردن',
 
@@ -188,13 +173,7 @@ export default {
   'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
 
-  // Payment init (SSR session)
-  'paymentInit.error.title': 'خطا در شروع پرداخت',
-  'paymentInit.error.description':
-    'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفاً از مسیر صحیح وارد درگاه شوید یا بعداً دوباره تلاش کنید.',
-
   // Errors
   'error.network': 'خطا در ارتباط با سرور',
-  'error.invalidData': 'اطلاعات نامعتبر',
   'error.unknown': 'خطای ناشناخته',
 };

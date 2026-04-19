@@ -414,10 +414,9 @@ html.app-ready #app .main-content {
   pointer-events: none;
 }
 
-.show-receipt-icon img,
-.save-card-icon img {
-  width: var(--size-icon-md);
-  height: var(--size-icon-md);
+.show-receipt-icon .app-icon,
+.save-card-icon .app-icon {
+  --app-icon-size: var(--size-icon-md);
 }
 
 /* Dropdown card item styles */
@@ -563,6 +562,73 @@ html.app-ready #app .main-content {
   min-width: 0;
 }
 
-.expiry-date-slot-year {
-  flex: 1.15 1 0;
+/* Equal month/year width (both slots use flex: 1 1 0) */
+
+/* Locked expiry: empty value, bullet placeholder in password-style font */
+.expiry-date-field--locked-placeholder .input-field:disabled::placeholder {
+  font-family: 'password', 'Lucida Grande', sans-serif;
+  font-size: var(--font-size-xs);
+  letter-spacing: 0.12em;
+  -webkit-text-security: disc;
+  text-security: disc;
+}
+
+.expiry-date-field--locked-placeholder .input-field:disabled {
+  font-family: var(--font-family-base);
+  -webkit-text-security: none;
+  text-security: none;
+}
+
+/* Transaction description (multi-line, optional expand) */
+.transaction-description-item .transaction-description-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-xs);
+  min-width: 0;
+}
+
+.transaction-description-value {
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.45;
+}
+
+.transaction-description-value.is-collapsed {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+.transaction-description-value.is-expanded {
+  display: block;
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+.transaction-description-toggle {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--color-card-soft-bg);
+  cursor: pointer;
+  color: var(--color-text-secondary);
+}
+
+.transaction-description-toggle:hover {
+  color: var(--color-primary);
+  background: var(--color-bg-light);
+}
+
+.transaction-description-toggle img {
+  width: 22px;
+  height: 22px;
+  display: block;
 }

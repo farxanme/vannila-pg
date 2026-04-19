@@ -1,4 +1,5 @@
 @import './variables.css';
+@import './icons.css';
 @import './fonts/vazirmatn-font-face.css';
 @import './fonts/vazirmatn-fd-font-face.css';
 @import './fonts/password-font-face.css';
@@ -25,6 +26,8 @@
 [dir='ltr'] {
   direction: ltr;
   text-align: left;
+  /* Latin / LTR locales: standard Vazirmatn (Western digits); RTL keeps VazirmatnFD via :root. */
+  --font-family-base: var(--font-family-vazirmatn);
 }
 
 /* Utility Classes */

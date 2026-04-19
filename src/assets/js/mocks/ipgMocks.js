@@ -15,6 +15,8 @@ export const mockGetTransactionResponse = {
       merchantName: 'تست توسعه',
       merchantLogoUri: '/images/6060666dc75745e6b9c0fc8eae397283.gif',
       merchantWebSite: 'https://dev.net',
+      merchantDescription:
+        'توضیحات نمونه برای نمایش چندخطی. این بخش می‌تواند چند خط باشد تا دکمهٔ بیشتر/کمتر نمایش داده شود.',
     },
     appSettings: {
       cardViewTimeOut: '00:10:00',

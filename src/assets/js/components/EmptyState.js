@@ -29,13 +29,25 @@ export class EmptyState {
     const emptyState = document.createElement('div');
     emptyState.className = 'empty-state';
 
-    // Image
+    // Image / SVG as CSS mask (monochrome SVG + theme color via .app-icon)
     if (this.options.image) {
-      const img = document.createElement('img');
-      img.src = this.options.image;
-      img.alt = this.options.title || 'Empty state';
-      img.className = 'empty-state-image';
-      emptyState.appendChild(img);
+      const imageStr = String(this.options.image);
+      const useMask = /\.svg(\?|$)/i.test(imageStr);
+      if (useMask) {
+        const span = document.createElement('span');
+        span.className = 'empty-state-image app-icon app-icon--block';
+        const safeUrl = imageStr.replace(/'/g, "\\'");
+        span.style.setProperty('--app-icon-src', `url('${safeUrl}')`);
+        span.setAttribute('role', 'img');
+        span.setAttribute('aria-label', this.options.title || 'Empty state');
+        emptyState.appendChild(span);
+      } else {
+        const img = document.createElement('img');
+        img.src = this.options.image;
+        img.alt = this.options.title || 'Empty state';
+        img.className = 'empty-state-image';
+        emptyState.appendChild(img);
+      }
     }
 
     // Title

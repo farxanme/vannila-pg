@@ -1,5 +1,6 @@
 import { BottomSheet } from './BottomSheet.js';
 import { i18n } from '../main.js';
+import { appIconHtml } from '../utils/icons.js';
 
 /**
  * Virtual Pin Pad Component
@@ -192,7 +193,7 @@ export class VirtualPinPad {
     closeBtn.className = 'pin-pad-desktop-close';
     closeBtn.setAttribute('aria-label', i18n.t('common.close'));
     this.desktopCloseButton = closeBtn;
-    closeBtn.innerHTML = '×';
+    closeBtn.innerHTML = appIconHtml('icn-x.svg');
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
       e.stopPropagation();

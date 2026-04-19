@@ -129,6 +129,7 @@ export class Header {
       buildSettingsGroupBody,
       mountSettingsGroupsLayout,
     } = await import('./settingsPanel.js');
+    const { appIconHtml } = await import('../utils/icons.js');
 
     const wrap = document.createElement('div');
     wrap.className = 'header-settings-dropdown';
@@ -141,11 +142,7 @@ export class Header {
     button.setAttribute('aria-expanded', 'false');
     button.setAttribute('aria-controls', `header-settings-menu-${Header.settingsMenuIdSeq++}`);
 
-    button.innerHTML = `
-      <svg class="settings-dropdown-btn-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.65.87.12.064.243.123.367.18.338.154.73.26 1.125.26.17 0 .34-.02.505-.06l1.28-.256a1.125 1.125 0 011.315.63l.621 1.29c.15.307.09.67-.15.92l-.855.93a1.125 1.125 0 011.315 1.595l.855.93c.24.25.3.613.15.92l-.621 1.29a1.125 1.125 0 01-1.315.63l-1.28-.256a1.125 1.125 0 00-.505.06c-.385.07-.76.157-1.125.26-.124.057-.247.116-.367.18-.337.184-.587.496-.65.87l-.213 1.281c-.09.542-.56.94-1.11.94h-2.593c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.063-.374-.313-.686-.65-.87a5.71 5.71 0 01-.367-.18 1.125 1.125 0 01-1.125-.26l-1.28.256a1.125 1.125 0 01-1.315-.63l-.621-1.29a1.125 1.125 0 01.15-.92l.855-.93a1.125 1.125 0 01-1.315-1.595l.855-.93a1.125 1.125 0 01-.15-.92l.621-1.29a1.125 1.125 0 011.315-.63l1.28.256c.168.038.337.058.505.06.385.07.76.157 1.125.26.124.057.247.116.367.18.337.184.587.496.65.87l.213 1.281z" />
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>`;
+    button.innerHTML = appIconHtml('icn-config.svg', 'settings-dropdown-btn-icon');
 
     const menu = document.createElement('div');
     menu.className = 'settings-dropdown-menu';

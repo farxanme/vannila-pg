@@ -180,6 +180,12 @@
   --size-icon-md: 24px;
   --size-icon-lg: 32px;
 
+  /* Icons (mask-based .app-icon); tune per theme */
+  --color-icon: var(--color-gray-8);
+  --color-icon-muted: var(--color-text-secondary);
+  --color-icon-primary: var(--color-primary);
+  --color-icon-on-primary: #ffffff;
+
   /* Shadows (portal / Tailwind default card shadow) */
   --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
   --shadow-color: rgba(0, 0, 0, 0.05);
@@ -208,6 +214,10 @@
 }
 
 [data-theme='dark'] {
+  --color-icon: #e2e5e8;
+  --color-icon-muted: #b0b0b0;
+  --color-icon-on-primary: #0f172a;
+
   --color-light: #121212;
   --color-bg-light: #121212;
   --color-bg-white: #1e1e1e;
