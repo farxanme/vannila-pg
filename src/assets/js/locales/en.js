@@ -142,6 +142,12 @@ export default {
   'receipt.plain.merchant': 'Merchant:',
   'receipt.plain.transactionId': 'Transaction ID:',
   'receipt.plain.date': 'Date:',
+  'receipt.plain.card': 'Card number:',
+  'receipt.sectionMerchant': 'Acceptor details',
+  'receipt.sectionTransaction': 'Transaction details',
+  'receipt.traceNo': 'Trace number',
+  'receipt.rrn': 'RRN',
+  'receipt.pTraceNo': 'Terminal trace',
   'receipt.demo.transactionType': 'Purchase',
 
   // Transaction

@@ -138,6 +138,12 @@ export default {
   'receipt.plain.merchant': 'Торговец:',
   'receipt.plain.transactionId': 'Номер операции:',
   'receipt.plain.date': 'Дата:',
+  'receipt.plain.card': 'Номер карты:',
+  'receipt.sectionMerchant': 'Данные продавца',
+  'receipt.sectionTransaction': 'Данные транзакции',
+  'receipt.traceNo': 'Номер следа',
+  'receipt.rrn': 'RRN',
+  'receipt.pTraceNo': 'След терминала',
   'receipt.demo.transactionType': 'Покупка',
 
   // Transaction

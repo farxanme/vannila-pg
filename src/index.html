@@ -27,6 +27,7 @@
     <link rel="stylesheet" href="/assets/css/components.css" />
     <link rel="stylesheet" href="/assets/css/layout.css" />
     <link rel="stylesheet" href="/assets/css/pages/index.css" />
+    <link rel="stylesheet" href="/assets/css/pages/receipt.css" />
   </head>
   <body>
     <div id="app">
@@ -65,7 +66,7 @@
               </div>
 
               <div id="payment-form-region" class="payment-form-region">
-              <form id="payment-form" class="payment-form">
+              <form id="payment-form" class="payment-form" method="post" autocomplete="off">
                 <!-- Card Number -->
                 <div class="form-group">
                   <div id="card-number-input-container"></div>
@@ -92,7 +93,12 @@
                 <!-- Save Card Checkbox -->
                 <div class="form-group">
                   <label class="save-card-toggle">
-                    <input type="checkbox" id="save-card-checkbox" class="save-card-checkbox" />
+                    <input
+                      type="checkbox"
+                      id="save-card-checkbox"
+                      class="save-card-checkbox"
+                      autocomplete="off"
+                    />
                     <span class="save-card-icon" aria-hidden="true">
                       <img src="/assets/images/icons/icn-square-plus.svg" alt="" />
                     </span>
@@ -125,7 +131,12 @@
                 <!-- Show Receipt -->
                 <div class="form-group show-receipt-wrapper">
                   <label class="show-receipt-toggle">
-                    <input type="checkbox" id="show-receipt-toggle" class="show-receipt-checkbox" />
+                    <input
+                      type="checkbox"
+                      id="show-receipt-toggle"
+                      class="show-receipt-checkbox"
+                      autocomplete="off"
+                    />
                     <span class="show-receipt-icon" aria-hidden="true">
                       <img src="/assets/images/icons/icn-square-plus.svg" alt="" />
                     </span>
@@ -168,6 +179,89 @@
               </div>
             </div>
           </div>
+          </section>
+
+          <!-- Successful pay: full-width receipt (same layout as receipt.html; filled from pay API). -->
+          <section
+            id="payment-receipt-section"
+            class="init-error-section payment-receipt-section"
+            hidden
+            aria-labelledby="payment-receipt-title"
+          >
+            <div class="init-error-container receipt-container">
+              <div class="card init-error-card" id="payment-receipt-card">
+                <div class="receipt-header">
+                  <div class="receipt-status">
+                    <span class="badge badge-success" id="payment-receipt-status-badge"></span>
+                  </div>
+                  <h1 class="receipt-title" id="payment-receipt-title"></h1>
+                  <p class="receipt-subtitle" id="payment-receipt-subtitle"></p>
+                  <div class="receipt-amount" id="payment-receipt-amount"></div>
+                  <div class="receipt-type" id="payment-receipt-type"></div>
+                </div>
+
+                <div class="transaction-divider"></div>
+
+                <div class="transaction-info">
+                  <h3 class="transaction-info-section-title" data-i18n="receipt.sectionMerchant">
+                    اطلاعات پذیرنده
+                  </h3>
+                  <div class="transaction-info-item">
+                    <span class="transaction-info-label" data-i18n="receipt.merchant">پذیرنده:</span>
+                    <span class="transaction-info-value" id="payment-receipt-merchant-name"></span>
+                  </div>
+                </div>
+
+                <div class="transaction-divider"></div>
+
+                <div class="transaction-info">
+                  <h3 class="transaction-info-section-title" data-i18n="receipt.sectionTransaction">
+                    اطلاعات تراکنش
+                  </h3>
+                  <div class="transaction-info-item">
+                    <span class="transaction-info-label" data-i18n="receipt.traceNo">شماره پیگیری:</span>
+                    <span class="transaction-info-value" id="payment-receipt-trace"></span>
+                  </div>
+                  <div class="transaction-info-item" id="payment-receipt-row-rrn" hidden>
+                    <span class="transaction-info-label" data-i18n="receipt.rrn">شماره مرجع:</span>
+                    <span class="transaction-info-value" id="payment-receipt-rrn"></span>
+                  </div>
+                  <div class="transaction-info-item" id="payment-receipt-row-ptrace" hidden>
+                    <span class="transaction-info-label" data-i18n="receipt.pTraceNo">شماره پیگیری ترمینال:</span>
+                    <span class="transaction-info-value" id="payment-receipt-ptrace"></span>
+                  </div>
+                  <div class="transaction-info-item" id="payment-receipt-row-terminal" hidden>
+                    <span class="transaction-info-label" data-i18n="receipt.terminal">ترمینال:</span>
+                    <span class="transaction-info-value" id="payment-receipt-terminal"></span>
+                  </div>
+                  <div class="transaction-info-item">
+                    <span class="transaction-info-label" data-i18n="receipt.plain.date">تاریخ:</span>
+                    <span class="transaction-info-value" id="payment-receipt-date"></span>
+                  </div>
+                  <div class="transaction-info-item">
+                    <span class="transaction-info-label" data-i18n="receipt.plain.card">شماره کارت:</span>
+                    <span class="transaction-info-value" id="payment-receipt-card-number"></span>
+                  </div>
+                </div>
+
+                <div class="transaction-divider"></div>
+
+                <div class="receipt-actions">
+                  <button type="button" class="btn btn-primary btn-bordered" id="payment-receipt-share-button">
+                    <span class="btn-icon" aria-hidden="true">📤</span>
+                    <span data-i18n="receipt.share">اشتراک‌گذاری</span>
+                  </button>
+                  <button type="button" class="btn btn-success" id="payment-receipt-save-button">
+                    <span class="btn-icon" aria-hidden="true">💾</span>
+                    <span data-i18n="receipt.save">ذخیره در گالری</span>
+                  </button>
+                </div>
+
+                <div class="receipt-logo">
+                  <img src="/assets/images/logo-small.png" alt="" />
+                </div>
+              </div>
+            </div>
           </section>
 
           <!-- Init error: single main column (same layout pattern as receipt.html) -->

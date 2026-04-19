@@ -39,6 +39,7 @@ import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
 import { Modal } from '../components/Modal.js';
+import { shareContent } from '../utils/share.js';
 
 // Initialize sound manager
 soundManager.init();
@@ -85,6 +86,12 @@ const otpCooldownUntilByCardKey = Object.create(null);
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
+
+/** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
+let paymentReceiptMerchantContext = null;
+
+/** Last `paymentReceipt` from pay API when inline receipt is shown (for i18n refresh). */
+let lastPaymentReceiptData = null;
 let refreshCardDropdownFooterButtons = null;
 let isCardListManageMode = false;
 
@@ -878,6 +885,7 @@ function initializeFormInputs() {
     id: 'card-number',
     name: 'cardNumber',
     type: 'text',
+    autocomplete: 'off',
     label: cardNumberLabel,
     placeholder: i18n.t('form.cardNumber.placeholder'),
     required: true,
@@ -1162,6 +1170,7 @@ function initializeFormInputs() {
     id: 'cvv2',
     name: 'cvv2',
     type: 'password',
+    autocomplete: 'off',
     label: i18n.t('form.cvv2'),
     placeholder: i18n.t('form.cvv2.placeholder'),
     hint: i18n.t('form.cvv2.hint'),
@@ -1228,6 +1237,7 @@ function initializeFormInputs() {
     id: 'expiry-date',
     name: 'expiryDate',
     type: 'password',
+    autocomplete: 'off',
     label: i18n.t('form.expiryDate'),
     placeholder: i18n.t('form.expiryPlaceholder'),
     required: true,
@@ -1307,6 +1317,7 @@ function initializeFormInputs() {
     id: 'captcha',
     name: 'captcha',
     type: 'text',
+    autocomplete: 'off',
     label: '',
     placeholder: i18n.t('form.captcha.placeholder'),
     required: true,
@@ -1409,6 +1420,7 @@ function initializeFormInputs() {
     id: 'otp',
     name: 'otp',
     type: 'password',
+    autocomplete: 'off',
     label: '',
     placeholder: i18n.t('form.otp.placeholder'),
     required: true,
@@ -1529,6 +1541,7 @@ function initializeFormInputs() {
     id: 'mobile',
     name: 'mobile',
     type: 'tel',
+    autocomplete: 'off',
     label: i18n.t('form.mobile'),
     placeholder: i18n.t('form.mobile.placeholder'),
     validator: validateMobile,
@@ -1550,6 +1563,7 @@ function initializeFormInputs() {
     id: 'email',
     name: 'email',
     type: 'email',
+    autocomplete: 'off',
     label: i18n.t('form.email'),
     placeholder: i18n.t('form.email.placeholder'),
     validator: validateEmail,
@@ -1745,6 +1759,11 @@ async function initializeTransactionInfo() {
   }
   // Initialize pay button label with current amount
   setPayButtonState('active');
+
+  paymentReceiptMerchantContext = {
+    merchant: transactionData.merchant,
+  };
+
   return { durationSeconds, merchantLogoUrl };
 }
 
@@ -1912,6 +1931,198 @@ function openCancelPaymentConfirm() {
   modalRef.open();
 }
 
+function getPaymentReceiptCardDisplay(paymentReceipt) {
+  if (paymentReceipt?.maskedPan != null && String(paymentReceipt.maskedPan).trim() !== '') {
+    return String(paymentReceipt.maskedPan).replace(/\*/g, '●');
+  }
+  const digits = extractNumbers(cardNumberInput?.getValue?.() || '');
+  if (digits.length >= 4) {
+    return `****${digits.slice(-4)}`;
+  }
+  return '—';
+}
+
+function formatPaymentReceiptDate(isoStr) {
+  if (!isoStr) return '—';
+  const ms = Date.parse(isoStr);
+  if (Number.isNaN(ms)) {
+    return String(isoStr);
+  }
+  const locale = getNumberLocaleForLang(i18n.getLanguage());
+  return new Date(ms).toLocaleString(locale);
+}
+
+function setPaymentReceiptOptionalRow(rowId, valueElId, value) {
+  const row = document.getElementById(rowId);
+  const el = document.getElementById(valueElId);
+  if (!row || !el) return;
+  if (value != null && String(value).trim() !== '') {
+    el.textContent = String(value);
+    row.hidden = false;
+  } else {
+    row.hidden = true;
+  }
+}
+
+/**
+ * Fill inline success receipt from pay API `paymentReceipt` and merchant context.
+ */
+function fillPaymentReceiptFromService(paymentReceipt) {
+  if (!paymentReceipt) return;
+
+  lastPaymentReceiptData = { ...paymentReceipt };
+
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  const locale = getNumberLocaleForLang(lang);
+  const success = paymentReceipt.isSuccess !== false;
+
+  const statusBadge = document.getElementById('payment-receipt-status-badge');
+  const title = document.getElementById('payment-receipt-title');
+  const subtitle = document.getElementById('payment-receipt-subtitle');
+  const amountEl = document.getElementById('payment-receipt-amount');
+  const typeEl = document.getElementById('payment-receipt-type');
+  const merchantEl = document.getElementById('payment-receipt-merchant-name');
+  const traceEl = document.getElementById('payment-receipt-trace');
+  const dateEl = document.getElementById('payment-receipt-date');
+  const cardEl = document.getElementById('payment-receipt-card-number');
+
+  if (statusBadge) {
+    statusBadge.className = `badge badge-${success ? 'success' : 'danger'}`;
+    statusBadge.textContent = success ? i18n.t('receipt.success') : i18n.t('receipt.failed');
+  }
+  if (title) {
+    title.textContent = success ? i18n.t('receipt.success') : i18n.t('receipt.failed');
+  }
+  if (subtitle) {
+    const desc =
+      typeof paymentReceipt.resultDescription === 'string' &&
+      paymentReceipt.resultDescription.trim() !== ''
+        ? paymentReceipt.resultDescription
+        : success
+          ? i18n.t('receipt.paymentSuccessDesc')
+          : i18n.t('receipt.paymentFailedDesc');
+    subtitle.textContent = desc;
+  }
+
+  const rawAmount =
+    typeof paymentReceipt.totalAmount === 'number'
+      ? paymentReceipt.totalAmount
+      : typeof paymentReceipt.affectiveAmount === 'number'
+        ? paymentReceipt.affectiveAmount
+        : null;
+  if (amountEl && rawAmount != null && !Number.isNaN(rawAmount)) {
+    amountEl.textContent = `${rawAmount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  }
+
+  if (typeEl) {
+    const typeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
+    typeEl.textContent = typeInfo.label;
+  }
+
+  if (merchantEl) {
+    merchantEl.textContent =
+      paymentReceiptMerchantContext?.merchant ?? i18n.t('transaction.demo.merchantName');
+  }
+
+  const traceVal =
+    paymentReceipt.traceNo != null && String(paymentReceipt.traceNo).trim() !== ''
+      ? String(paymentReceipt.traceNo)
+      : paymentReceipt.ipgTransactionId != null
+        ? String(paymentReceipt.ipgTransactionId)
+        : '—';
+  if (traceEl) traceEl.textContent = traceVal;
+
+  if (dateEl) {
+    dateEl.textContent = formatPaymentReceiptDate(paymentReceipt.receiptDate);
+  }
+
+  if (cardEl) {
+    cardEl.textContent = getPaymentReceiptCardDisplay(paymentReceipt);
+  }
+
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-rrn',
+    'payment-receipt-rrn',
+    paymentReceipt.rrn != null ? String(paymentReceipt.rrn) : ''
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-ptrace',
+    'payment-receipt-ptrace',
+    paymentReceipt.pTraceNo != null ? String(paymentReceipt.pTraceNo) : ''
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-terminal',
+    'payment-receipt-terminal',
+    paymentReceipt.terminalNumber != null ? String(paymentReceipt.terminalNumber) : ''
+  );
+
+  i18n.applyDataI18n(document.getElementById('payment-receipt-card') || document);
+}
+
+function generatePaymentReceiptPlainText() {
+  const title = document.getElementById('payment-receipt-title')?.textContent ?? '';
+  const amount = document.getElementById('payment-receipt-amount')?.textContent ?? '';
+  const merchant = document.getElementById('payment-receipt-merchant-name')?.textContent ?? '';
+  const trace = document.getElementById('payment-receipt-trace')?.textContent ?? '';
+  const date = document.getElementById('payment-receipt-date')?.textContent ?? '';
+  const rrnRow = document.getElementById('payment-receipt-row-rrn');
+  const rrn = !rrnRow?.hidden
+    ? document.getElementById('payment-receipt-rrn')?.textContent ?? ''
+    : '';
+
+  let text = `${title}\n${i18n.t('receipt.plain.amount')} ${amount}\n${i18n.t('receipt.plain.merchant')} ${merchant}\n${i18n.t('receipt.traceNo')}: ${trace}\n${i18n.t('receipt.plain.date')} ${date}`.trim();
+  if (rrn) {
+    text += `\n${i18n.t('receipt.rrn')}: ${rrn}`;
+  }
+  return text;
+}
+
+/**
+ * Show full-width receipt section (same layout as init-error / receipt.html) and hide checkout grid.
+ */
+function showPaymentReceiptScreen(paymentReceipt) {
+  if (timer && typeof timer.stop === 'function') {
+    timer.stop();
+  }
+
+  const flow = document.getElementById('payment-flow-section');
+  const receiptSection = document.getElementById('payment-receipt-section');
+  if (flow) flow.hidden = true;
+  if (receiptSection) {
+    fillPaymentReceiptFromService(paymentReceipt);
+    receiptSection.hidden = false;
+  }
+}
+
+function attachPaymentReceiptActions() {
+  const shareBtn = document.getElementById('payment-receipt-share-button');
+  const saveBtn = document.getElementById('payment-receipt-save-button');
+  const card = document.getElementById('payment-receipt-card');
+  if (!shareBtn || shareBtn.dataset.bound === '1') return;
+  shareBtn.dataset.bound = '1';
+  saveBtn.dataset.bound = '1';
+
+  shareBtn.addEventListener('click', async () => {
+    const receiptText = generatePaymentReceiptPlainText();
+    const ok = await shareContent({ text: receiptText });
+    if (!ok) {
+      const { copyToClipboard } = await import('../utils/clipboard.js');
+      await copyToClipboard(receiptText);
+      alert(i18n.t('receipt.copied'));
+    }
+  });
+
+  saveBtn.addEventListener('click', async () => {
+    const ok = await shareContent({
+      element: card,
+      text: i18n.t('receipt.shareText'),
+    });
+    if (!ok) {
+      alert(i18n.t('receipt.saveError'));
+    }
+  });
+}
+
 function attachFormEvents() {
   const form = document.getElementById('payment-form');
   const saveCardCheckbox = document.getElementById('save-card-checkbox');
@@ -1978,7 +2189,7 @@ function attachFormEvents() {
         payBody.expiryDate = getExpiryDateForApi();
       }
 
-      await ipgService.payTransaction(payBody, {
+      const payRes = await ipgService.payTransaction(payBody, {
         captchaToken: captchaTokenKey,
         captchaResponse: captchaInput.getValue(),
       });
@@ -1987,6 +2198,17 @@ function attachFormEvents() {
       const redirectUrl = redirectRes?.data?.redirectUrl;
       if (redirectUrl) {
         window.location.href = redirectUrl;
+        return;
+      }
+
+      const paymentReceipt = payRes?.data?.paymentReceipt ?? null;
+      if (paymentReceipt) {
+        showPaymentReceiptScreen(paymentReceipt);
+        errorHandler.show({
+          message: i18n.t('form.pay.success'),
+          mode: 'toast',
+          type: 'success',
+        });
         return;
       }
 
@@ -2041,6 +2263,8 @@ function attachFormEvents() {
   document.getElementById('cancel-button').addEventListener('click', () => {
     openCancelPaymentConfirm();
   });
+
+  attachPaymentReceiptActions();
 }
 
 /**
@@ -2150,6 +2374,16 @@ function updatePageContent() {
   }
 
   // Checkbox label is now updated via data-i18n above
+
+  const receiptSection = document.getElementById('payment-receipt-section');
+  if (receiptSection && !receiptSection.hidden && lastPaymentReceiptData) {
+    fillPaymentReceiptFromService(lastPaymentReceiptData);
+  }
+
+  const receiptShareBtn = document.getElementById('payment-receipt-share-button');
+  const receiptSaveBtn = document.getElementById('payment-receipt-save-button');
+  if (receiptShareBtn) receiptShareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
+  if (receiptSaveBtn) receiptSaveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
 
   // Ensure pay button label uses current language and amount
   setPayButtonState('active');

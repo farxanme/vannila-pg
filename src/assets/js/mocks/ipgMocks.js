@@ -109,6 +109,7 @@ export const mockPayTransactionResponse = {
       resultDescription: 'پرداخت با موفقیت انجام شد',
       canRetry: false,
       isSuccess: true,
+      maskedPan: '5022**********1234',
     },
   },
   statusCode: 2000,
@@ -118,7 +119,8 @@ export const mockPayTransactionResponse = {
 
 export const mockReceiptRedirectParamsResponse = {
   data: {
-    redirectUrl: 'https://unit-test/return',
+    /** Set to a URL to test merchant redirect; omit or null to show inline receipt on index. */
+    redirectUrl: null,
     refNum: '9CCA4792E9F80F7E94513EC464412F4D97EF887A8B5300C95D2CD5E8ED5A8E56',
     receiptEnc:
       '613rzZczTIn/3y/IjJz0iqXwDSpjH6PwD3IFxRXhRYQ52iPDFMy4JCbeZ3i65mIy2AzdTsPxTqWl6A9W/ME9QSenkme5DKOXxQBaGqwBfpBzSmGkR2Wcq+TjmIbsWEZirlXjLt+N+dggEmF+F/j0yVoK//IMeuWrLaBHFeH1JzmJp1EF6PBwhHQxl6M0dwoEIweaKzCvxNcleEsGQujME942vo2WybO3IdKWAFwJPDih0QiwG0DeXsLtbGKOlxEAE+rtSY7/FIR+W/ct24v3QruID6/llZhvEbxJ6S5ngSlDmjlpOgGCcBKEDYSmmxnFsk1uR8LpOJPGu6Rh5f8M3hDshVqki1/ZEwXcdu2QyUw2zgZQP7irHbsw9zwKMKmbAUN4a5/Gyf7zMFyPpDAaJrmAr6P5YNqwHrLgfgBDUlHS2AEcygQvBzQ0LlzTcrVdo75iX+DjIlBv+88QjUy6Z4ZzPaIaTl5qnPzgDg==',

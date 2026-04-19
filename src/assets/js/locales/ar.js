@@ -138,6 +138,12 @@ export default {
   'receipt.plain.merchant': 'التاجر:',
   'receipt.plain.transactionId': 'رقم المعاملة:',
   'receipt.plain.date': 'التاريخ:',
+  'receipt.plain.card': 'رقم البطاقة:',
+  'receipt.sectionMerchant': 'بيانات التاجر',
+  'receipt.sectionTransaction': 'بيانات المعاملة',
+  'receipt.traceNo': 'رقم التتبع',
+  'receipt.rrn': 'الرقم المرجعي (RRN)',
+  'receipt.pTraceNo': 'تتبع الطرفية',
   'receipt.demo.transactionType': 'شراء',
 
   // Transaction

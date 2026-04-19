@@ -724,8 +724,10 @@
 
 /* Receipt */
 .receipt-container {
-  max-width: 600px;
+  width: 100%;
+  max-width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .receipt-header {

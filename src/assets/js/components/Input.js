@@ -31,6 +31,8 @@ export class Input {
       maskWithPasswordFont: options.maskWithPasswordFont || false,
       requiredMessage: options.requiredMessage || 'This field is required',
       clearButtonAriaLabel: options.clearButtonAriaLabel || 'Clear',
+      /** If set (e.g. `'off'`), applied as the input `autocomplete` attribute. */
+      autocomplete: options.autocomplete,
       ...options,
     };
 
@@ -120,6 +122,14 @@ export class Input {
 
     if (this.options.maxLength) {
       input.maxLength = this.options.maxLength;
+    }
+    if (typeof this.options.autocomplete === 'string' && this.options.autocomplete.length > 0) {
+      input.setAttribute('autocomplete', this.options.autocomplete);
+      if (this.options.autocomplete === 'off') {
+        input.setAttribute('spellcheck', 'false');
+        input.setAttribute('autocorrect', 'off');
+        input.setAttribute('autocapitalize', 'off');
+      }
     }
     if (this.options.maskWithPasswordFont) {
       input.classList.add('input-password-mask');

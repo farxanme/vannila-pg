@@ -138,6 +138,12 @@ export default {
   'receipt.plain.merchant': 'پذیرنده:',
   'receipt.plain.transactionId': 'شماره تراکنش:',
   'receipt.plain.date': 'تاریخ:',
+  'receipt.plain.card': 'شماره کارت:',
+  'receipt.sectionMerchant': 'اطلاعات پذیرنده',
+  'receipt.sectionTransaction': 'اطلاعات تراکنش',
+  'receipt.traceNo': 'شماره پیگیری',
+  'receipt.rrn': 'شماره مرجع (RRN)',
+  'receipt.pTraceNo': 'شماره پیگیری ترمینال',
   'receipt.demo.transactionType': 'خرید',
 
   // Transaction

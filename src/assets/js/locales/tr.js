@@ -138,6 +138,12 @@ export default {
   'receipt.plain.merchant': 'Satıcı:',
   'receipt.plain.transactionId': 'İşlem numarası:',
   'receipt.plain.date': 'Tarih:',
+  'receipt.plain.card': 'Kart numarası:',
+  'receipt.sectionMerchant': 'İşyeri bilgileri',
+  'receipt.sectionTransaction': 'İşlem bilgileri',
+  'receipt.traceNo': 'Takip numarası',
+  'receipt.rrn': 'RRN',
+  'receipt.pTraceNo': 'Terminal takip no',
   'receipt.demo.transactionType': 'Satın alma',
 
   // Transaction
