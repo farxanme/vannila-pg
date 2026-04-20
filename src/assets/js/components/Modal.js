@@ -4,12 +4,10 @@ import { appIconHtml } from '../utils/icons.js';
 
 function buildModalLeadVisual(options) {
   if (!options.image) return null;
-  const useMask =
-    options.imageAsMaskIcon === true ||
-    (options.imageAsMaskIcon !== false && /\.svg(\?|$)/i.test(String(options.image)));
+  const useMask = options.imageAsMaskIcon === true;
   if (useMask) {
     const span = document.createElement('span');
-    span.className = ['modal-image', 'app-icon', 'app-icon--block', options.imageExtraClass || '']
+    span.className = ['modal-image', 'app-icon', 'app-icon-block', options.imageExtraClass || '']
       .filter(Boolean)
       .join(' ');
     span.style.setProperty('--app-icon-src', `url('${options.image}')`);

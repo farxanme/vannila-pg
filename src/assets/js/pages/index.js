@@ -503,7 +503,7 @@ function getDefaultSelectableCard() {
 function buildCardEmptyStateElement() {
   const wrap = document.createElement('div');
   wrap.className = 'dropdown-empty-state';
-  const icon = createAppIcon('icn-credit-card.svg', 'dropdown-empty-state-img app-icon--muted');
+  const icon = createAppIcon('icn-credit-card.svg', 'dropdown-empty-state-img app-icon-muted');
   const title = document.createElement('p');
   title.className = 'dropdown-empty-state-title';
   title.textContent = i18n.t('cardList.empty');
@@ -964,8 +964,12 @@ function initializeFormInputs() {
     cardNumberInput.element.readOnly = isLocked;
     cardNumberInput.element.setAttribute('aria-readonly', isLocked ? 'true' : 'false');
     if (cardNumberInput.clearButton) {
-      cardNumberInput.clearButton.style.visibility = isLocked ? 'hidden' : '';
-      cardNumberInput.clearButton.style.pointerEvents = isLocked ? 'none' : '';
+      if (isLocked) {
+        cardNumberInput.clearButton.style.visibility = 'hidden';
+        cardNumberInput.clearButton.style.pointerEvents = 'none';
+      } else {
+        cardNumberInput.updateClearButton?.();
+      }
     }
   };
 
@@ -2204,7 +2208,7 @@ function openCancelPaymentConfirm() {
     title: i18n.t('cancelConfirm.title'),
     description: i18n.t('cancelConfirm.description'),
     image: cancelConfirmImageUrl,
-    imageExtraClass: 'modal-image--icon-lead',
+    imageExtraClass: 'modal-image-icon-lead',
     imageAlt: i18n.t('cancelConfirm.imageAlt'),
     closeButtonAriaLabel: i18n.t('common.close'),
     buttons: [

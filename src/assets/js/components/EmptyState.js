@@ -35,7 +35,7 @@ export class EmptyState {
       const useMask = /\.svg(\?|$)/i.test(imageStr);
       if (useMask) {
         const span = document.createElement('span');
-        span.className = 'empty-state-image app-icon app-icon--block';
+        span.className = 'empty-state-image app-icon app-icon-block';
         const safeUrl = imageStr.replace(/'/g, "\\'");
         span.style.setProperty('--app-icon-src', `url('${safeUrl}')`);
         span.setAttribute('role', 'img');

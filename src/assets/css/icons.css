@@ -19,19 +19,19 @@
   mask-position: center;
 }
 
-.app-icon--muted {
+.app-icon-muted {
   background-color: var(--color-icon-muted);
 }
 
-.app-icon--primary {
+.app-icon-primary {
   background-color: var(--color-icon-primary);
 }
 
-.app-icon--on-primary {
+.app-icon-on-primary {
   background-color: var(--color-icon-on-primary);
 }
 
-.app-icon--block {
+.app-icon-block {
   display: block;
   margin-inline: auto;
 }
