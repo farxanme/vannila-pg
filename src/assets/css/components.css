@@ -13,7 +13,7 @@
   font-size: var(--font-size-sm);
   font-weight: 500;
   line-height: 24px;
-  color: var(--color-gray-800);
+  color: var(--color-text-primary);
 }
 
 .input-required {
@@ -147,7 +147,8 @@
 }
 
 .input-action {
-  color: var(--color-text-secondary);
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
   background: transparent;
   border: none;
   cursor: pointer;
@@ -160,10 +161,12 @@
   min-height: 24px;
   padding: 0;
   flex: 0 0 24px;
+  transition: color var(--transition-base);
 }
 
 .input-action:hover:not(:disabled) {
-  color: var(--color-primary);
+  color: var(--color-primary-hover);
+  --color-icon: var(--color-primary-hover);
 }
 
 .input-action img,

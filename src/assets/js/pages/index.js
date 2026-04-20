@@ -471,6 +471,24 @@ function isMobileCardListViewport() {
   return window.matchMedia('(max-width: 768px)').matches;
 }
 
+function isLimitedCardSelectionOnlyMode() {
+  return cardList.some((card) => Boolean(card?.isLimited));
+}
+
+function getSelectableCards() {
+  const availableCards = cardList.filter((card) => card != null);
+  if (!isLimitedCardSelectionOnlyMode()) {
+    return availableCards;
+  }
+  return availableCards.filter((card) => Boolean(card.isLimited));
+}
+
+function getDefaultSelectableCard() {
+  const selectableCards = getSelectableCards();
+  if (selectableCards.length === 0) return null;
+  return selectableCards.find((card) => Boolean(card.selected)) || null;
+}
+
 function buildCardEmptyStateElement() {
   const wrap = document.createElement('div');
   wrap.className = 'dropdown-empty-state';
@@ -484,14 +502,15 @@ function buildCardEmptyStateElement() {
 }
 
 function buildCardDropdownItems(typedDigits) {
+  const selectableCards = getSelectableCards();
   const digits =
     typedDigits !== undefined
       ? String(typedDigits).replace(/\D/g, '')
       : getCardNumberFilterDigits(cardNumberInput?.getValue?.() || '');
   const filtered =
     digits.length > 0
-      ? cardList.filter((card) => savedCardMatchesTypedDigits(card.securePan, digits))
-      : cardList;
+      ? selectableCards.filter((card) => savedCardMatchesTypedDigits(card.securePan, digits))
+      : selectableCards;
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
   return filtered.map((card) => {
     const logoPath = getBankLogo(card.bankName);
@@ -891,6 +910,33 @@ function initializeFormInputs() {
     setExpiryDateLocked(lockByCard);
   };
 
+  const setCardInputTypingLocked = (locked) => {
+    if (!cardNumberInput?.element) return;
+    const isLocked = Boolean(locked);
+    cardNumberInput.element.readOnly = isLocked;
+    cardNumberInput.element.setAttribute('aria-readonly', isLocked ? 'true' : 'false');
+    if (cardNumberInput.clearButton) {
+      cardNumberInput.clearButton.style.visibility = isLocked ? 'hidden' : '';
+      cardNumberInput.clearButton.style.pointerEvents = isLocked ? 'none' : '';
+    }
+  };
+
+  const applySavedCardSelection = (card, { focusNext = false } = {}) => {
+    if (!card || !cardNumberInput) return;
+    resetFieldsOnCardChange();
+    selectedSavedCardForApi = card;
+    hasUserEnabledExpiryDateEdit = false;
+    cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
+    updateBankLogo({ name: card.bankName });
+    handleGiftCardNotificationFromPan(card.securePan);
+    applyExpiryDateModeForSelectedCard();
+    syncCvv2Constraints();
+    syncGetOtpButtonState();
+    if (focusNext) {
+      focusNextVisibleInputField(cardNumberInput.element);
+    }
+  };
+
   // Card Number Input
   const cardNumberContainer = document.getElementById('card-number-input-container');
   const hasCardListUi = isCardListUiEnabled();
@@ -958,7 +1004,8 @@ function initializeFormInputs() {
   };
 
   const buildCardDropdownFooterButtons = () => {
-    if (cardList.length === 0) return [];
+    if (isLimitedCardSelectionOnlyMode()) return [];
+    if (getSelectableCards().length === 0) return [];
     return [
       ...(isCardListManageMode
         ? [
@@ -1027,7 +1074,8 @@ function initializeFormInputs() {
     const content = document.createElement('div');
     content.className = 'card-list-sheet';
 
-    if (cardList.length === 0) {
+    const selectableCards = getSelectableCards();
+    if (selectableCards.length === 0) {
       content.appendChild(buildCardEmptyStateElement());
     } else {
       const ul = document.createElement('ul');
@@ -1044,18 +1092,9 @@ function initializeFormInputs() {
           if (isCardListManageMode) {
             return;
           }
-          const card = cardList.find((c) => getCardListKey(c) === itemDef.value);
+          const card = selectableCards.find((c) => getCardListKey(c) === itemDef.value);
           if (card) {
-            resetFieldsOnCardChange();
-            selectedSavedCardForApi = card;
-            hasUserEnabledExpiryDateEdit = false;
-            cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
-            updateBankLogo({ name: card.bankName });
-            handleGiftCardNotificationFromPan(card.securePan);
-            applyExpiryDateModeForSelectedCard();
-            syncCvv2Constraints();
-            syncGetOtpButtonState();
-            focusNextVisibleInputField(cardNumberInput.element);
+            applySavedCardSelection(card, { focusNext: true });
             if (cardListSheetRef) {
               cardListSheetRef.close();
             }
@@ -1066,11 +1105,11 @@ function initializeFormInputs() {
       content.appendChild(ul);
     }
 
-    if (cardList.length > 0) {
+    const footerDefs = buildCardDropdownFooterButtons();
+    if (footerDefs.length > 0) {
       const footer = document.createElement('div');
       footer.className = 'card-list-sheet-footer';
-      const defs = buildCardDropdownFooterButtons();
-      defs.forEach((buttonDef) => {
+      footerDefs.forEach((buttonDef) => {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = `dropdown-footer-btn ${buttonDef.className || ''}`.trim();
@@ -1119,19 +1158,9 @@ function initializeFormInputs() {
         if (isCardListManageMode) {
           return;
         }
-        const card = cardList.find((c) => getCardListKey(c) === item.value);
+        const card = getSelectableCards().find((c) => getCardListKey(c) === item.value);
         if (card) {
-          resetFieldsOnCardChange();
-          selectedSavedCardForApi = card;
-          hasUserEnabledExpiryDateEdit = false;
-          cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
-          // Use API bank name (Persian) for logo to avoid any BIN masking issues
-          updateBankLogo({ name: card.bankName });
-          handleGiftCardNotificationFromPan(card.securePan);
-          applyExpiryDateModeForSelectedCard();
-          syncCvv2Constraints();
-          syncGetOtpButtonState();
-          focusNextVisibleInputField(cardNumberInput.element);
+          applySavedCardSelection(card, { focusNext: true });
         }
       },
     });
@@ -1142,6 +1171,13 @@ function initializeFormInputs() {
       cardDropdown.renderFooterButtons();
     };
   }
+
+  const defaultCard = getDefaultSelectableCard();
+  if (defaultCard) {
+    applySavedCardSelection(defaultCard);
+  }
+  setCardInputTypingLocked(isLimitedCardSelectionOnlyMode());
+  syncCardDropdownAfterListChange();
 
   /**
    * Detect if card is a gift card based on PAN pattern.
@@ -1372,7 +1408,7 @@ function initializeFormInputs() {
     skipBlurValidate: true,
     liveValidation: false,
     rightAction: {
-      icon: appIconHtml('icn-calendar.svg'),
+      icon: appIconHtml('icn-edit.svg'),
       label: i18n.t('common.edit'),
       onClick: () => {
         if (!isExpiryDateLockedFromCard) return;

@@ -263,6 +263,7 @@ export class Header {
    */
   async createLanguageDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
+    const { appIconHtml } = await import('../utils/icons.js');
 
     const wrap = document.createElement('div');
     wrap.className = 'header-lang-dropdown';
@@ -277,7 +278,15 @@ export class Header {
     const currentLang = i18n.getLanguage();
     const languages = i18n.getAvailableLanguages();
     const currentLangObj = languages.find((l) => l.code === currentLang);
-    button.textContent = currentLangObj?.nativeName || currentLang.toUpperCase();
+    const updateLanguageButtonLabel = (labelText) => {
+      button.innerHTML = `
+        <span class="lang-dropdown-btn-icon" aria-hidden="true">
+          ${appIconHtml('icn-language.svg')}
+        </span>
+        <span class="lang-dropdown-btn-text">${labelText}</span>
+      `;
+    };
+    updateLanguageButtonLabel(currentLangObj?.nativeName || currentLang.toUpperCase());
 
     const dropdown = document.createElement('div');
     dropdown.className = 'lang-dropdown-menu';
@@ -300,7 +309,7 @@ export class Header {
       item.setAttribute('data-lang-code', lang.code);
       item.onclick = () => {
         i18n.setLanguage(lang.code);
-        button.textContent = lang.nativeName;
+        updateLanguageButtonLabel(lang.nativeName);
         dropdown.querySelectorAll('.lang-dropdown-item').forEach((dropdownItem) => {
           dropdownItem.classList.remove('active');
           dropdownItem.setAttribute('aria-checked', 'false');
@@ -350,7 +359,7 @@ export class Header {
           item.appendChild(checkSheet);
           item.onclick = () => {
             i18n.setLanguage(lang.code);
-            button.textContent = lang.nativeName;
+            updateLanguageButtonLabel(lang.nativeName);
             dropdown.querySelectorAll('.lang-dropdown-item').forEach((dropdownItem) => {
               const isActive = dropdownItem.getAttribute('data-lang-code') === lang.code;
               dropdownItem.classList.toggle('active', isActive);

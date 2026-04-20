@@ -83,7 +83,6 @@
   flex-direction: row;
   align-items: center;
   gap: var(--spacing-sm);
-  width: 110px;
   justify-content: space-between;
   padding: 0;
   border-radius: 999px;
@@ -101,6 +100,10 @@
 }
 
 .lang-dropdown-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
   height: 36px;
   min-width: 66px;
   padding: 0 12px;
@@ -110,12 +113,32 @@
   cursor: pointer;
   font-size: var(--font-size-sm);
   line-height: 1;
+  color: var(--color-text-muted);
+  --color-icon: var(--color-text-muted);
   transition: all var(--transition-base);
 }
 
 .lang-dropdown-btn:hover {
   background: var(--color-bg-white);
   border-color: var(--color-primary);
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
+}
+
+.lang-dropdown-btn .lang-dropdown-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.lang-dropdown-btn .lang-dropdown-btn-icon .app-icon {
+  --app-icon-size: 18px;
+}
+
+.lang-dropdown-btn .lang-dropdown-btn-text {
+  line-height: 1;
 }
 
 /* Shared shell for language + settings header dropdowns (min-width differs below). */
@@ -192,13 +215,16 @@
   border: 1px solid var(--color-stroke);
   border-radius: var(--radius-md);
   cursor: pointer;
-  color: var(--color-text-primary);
+  color: var(--color-text-muted);
+  --color-icon: var(--color-text-muted);
   transition: border-color var(--transition-base), background var(--transition-base);
 }
 
 .settings-dropdown-btn:hover {
   background: var(--color-bg-white);
   border-color: var(--color-primary);
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
 }
 
 .settings-dropdown-btn .settings-dropdown-btn-icon {
@@ -619,15 +645,17 @@
 .transaction-info-icon {
   font-size: var(--font-size-xl);
   flex-shrink: 0;
-  width: var(--size-icon-lg);
-  height: var(--size-icon-lg);
+  width: var(--size-icon-md);
+  height: var(--size-icon-md);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--color-text-muted);
+  --color-icon: var(--color-text-muted);
 }
 
 .transaction-info-icon .app-icon {
-  --app-icon-size: var(--size-icon-lg);
+  --app-icon-size: var(--size-icon-md);
 }
 
 .transaction-description-toggle .app-icon {
@@ -672,6 +700,11 @@
 .transaction-summary-card .transaction-info-value,
 .transaction-summary-card .transaction-amount-rial {
   color: var(--color-primary-800);
+}
+
+.transaction-summary-card .transaction-info-icon {
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
 }
 
 .transaction-summary-card .transaction-amount-toman {

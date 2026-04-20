@@ -372,6 +372,25 @@ html.app-ready #app .main-content {
   align-items: center;
   justify-content: center;
   align-self: flex-start;
+  color: var(--color-primary);
+  --color-icon: currentColor;
+}
+
+.captcha-container .captcha-input-row .captcha-audio-btn .btn-icon {
+  color: currentColor;
+}
+
+.captcha-container .captcha-input-row .captcha-audio-btn:hover:not(:disabled) {
+  color: var(--color-primary-hover);
+}
+
+.otp-input-container .otp-input-row .btn .btn-icon {
+  color: currentColor;
+}
+
+.otp-input-container .otp-input-row .btn .btn-icon .app-icon,
+.captcha-container .captcha-input-row .captcha-audio-btn .btn-icon .app-icon {
+  background-color: currentColor;
 }
 
 /* Receipt fields hidden by default */
@@ -417,6 +436,11 @@ html.app-ready #app .main-content {
 .show-receipt-icon .app-icon,
 .save-card-icon .app-icon {
   --app-icon-size: var(--size-icon-md);
+}
+
+.show-receipt-icon {
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
 }
 
 /* Dropdown card item styles */
@@ -592,6 +616,9 @@ html.app-ready #app .main-content {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.45;
+  font-weight: 400;
+  font-size: var(--font-size-sm);
+  text-align: justify;
 }
 
 .transaction-description-value.is-collapsed {
