@@ -42,7 +42,11 @@ export class Header {
     const container = document.createElement('div');
     container.className = 'container header-container';
 
-    // Toolbar: settings + language (floating)
+    // Toolbar row: toolbar + mobile title
+    const toolbarRow = document.createElement('div');
+    toolbarRow.className = 'header-toolbar-row';
+
+    // Toolbar: settings + language (floating on desktop)
     const toolbar = document.createElement('div');
     toolbar.className = 'header-toolbar';
     this.headerToolbar = toolbar;
@@ -54,6 +58,13 @@ export class Header {
     if (shouldShowLanguageSwitcher) {
       await this.createLanguageDropdown(toolbar);
     }
+    const toolbarTitle = document.createElement('span');
+    toolbarTitle.className = 'header-toolbar-title';
+    toolbarTitle.textContent = this.options.title || '';
+    this.headerToolbarTitleEl = toolbarTitle;
+
+    toolbarRow.appendChild(toolbarTitle);
+    container.appendChild(toolbarRow);
     header.appendChild(toolbar);
 
     this.closeAllHeaderMenus = () => {
@@ -114,6 +125,20 @@ export class Header {
     header.appendChild(container);
 
     this.element = header;
+    this.syncToolbarPlacement = () => {
+      if (!this.headerToolbar || !this.element) return;
+      const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+      if (isMobile) {
+        if (toolbarRow && this.headerToolbar.parentNode !== toolbarRow) {
+          toolbarRow.appendChild(this.headerToolbar);
+        }
+        return;
+      }
+      if (this.headerToolbar.parentNode !== this.element) {
+        this.element.appendChild(this.headerToolbar);
+      }
+    };
+    this.syncToolbarPlacement();
     document.body.insertBefore(header, document.body.firstChild);
   }
 
@@ -407,6 +432,9 @@ export class Header {
     if (titleElement) {
       titleElement.textContent = title;
     }
+    if (this.headerToolbarTitleEl) {
+      this.headerToolbarTitleEl.textContent = title;
+    }
   }
 
   /**
@@ -433,7 +461,7 @@ export class Header {
       const currentScrollY = window.scrollY;
       const header = this.element;
 
-      if (window.innerWidth <= 768) {
+      if (window.innerWidth <= 1024) {
         if (currentScrollY > lastScrollY && currentScrollY > 50) {
           header.classList.add('scrolled');
         } else {
@@ -451,6 +479,7 @@ export class Header {
   attachEvents() {
     window.addEventListener('resize', () => {
       this.closeAllHeaderMenus?.();
+      this.syncToolbarPlacement?.();
     });
   }
 

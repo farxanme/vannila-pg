@@ -731,13 +731,26 @@ function initializeTimer(durationSeconds = 900) {
   const timerHeader = document.getElementById('timer-header');
   const timerValue = timerContainer.querySelector('.timer-value');
   const total = Math.max(1, durationSeconds);
+  const defaultHeaderTitle = i18n.t('header.title');
+
+  const syncMobileHeaderTitleWithTimer = (timeLabel) => {
+    const headerTitleEl = header?.element?.querySelector('.header-title');
+    if (!headerTitleEl) return;
+    if (window.matchMedia('(max-width: 1024px)').matches) {
+      headerTitleEl.textContent = timeLabel;
+      return;
+    }
+    headerTitleEl.textContent = defaultHeaderTitle;
+  };
 
   timer = new Timer({
     duration: total,
     onTick: (remaining) => {
       const minutes = Math.floor(remaining / 60);
       const seconds = remaining % 60;
-      timerValue.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      const timeLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      timerValue.textContent = timeLabel;
+      syncMobileHeaderTitleWithTimer(timeLabel);
 
       // Update timer header style based on progress
       if (timerHeader) {
@@ -757,6 +770,7 @@ function initializeTimer(durationSeconds = 900) {
       if (timerHeader) timerHeader.classList.add('danger');
     },
     onEnd: () => {
+      syncMobileHeaderTitleWithTimer('00:00');
       errorHandler.show({
         message: i18n.t('timer.expired'),
         mode: 'toast',

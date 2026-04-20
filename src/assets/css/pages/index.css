@@ -544,21 +544,15 @@ html.app-ready #app .main-content {
     display: none;
   }
 
-  /* Timer card: hide title bar text; keep countdown; strip chrome when not warning/danger */
-  .card-small #timer-header .card-title {
+  /* Timer moves to mobile header title. */
+  .card-small #timer-header {
     display: none;
   }
+}
 
+@media (max-width: 1024px) {
   .card-small #timer-header {
-    margin-bottom: var(--spacing-md);
-    padding: var(--spacing-xs) var(--spacing-sm);
-    min-height: 0;
-    height: auto;
-    justify-content: center;
-  }
-
-  .card-small #timer-header:not(.warning):not(.danger) {
-    background: transparent;
+    display: none;
   }
 }
 
