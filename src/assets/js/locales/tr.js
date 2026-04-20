@@ -49,7 +49,7 @@ export default {
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP gereklidir',
-  'form.otp.mustBe6Digits': 'OTP 6 haneli olmalıdır',
+  'form.otp.invalidLengthRange': 'OTP {{min}} ile {{max}} hane arasında olmalıdır',
   'form.mobile': 'Cep Telefonu',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'Cep telefonu gereklidir',

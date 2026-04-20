@@ -34,6 +34,11 @@ import { getTransactionTypeInfo } from '../utils/transactionType.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
 import { getPaymentInitData, validatePaymentInitData } from '../services/paymentInitData.js';
+import {
+  getCaptchaCodeLength,
+  getDefaultLockCardNumberDuringOtpCooldown,
+  getOtpLengthConfig,
+} from '../config/env.js';
 import { fetchCaptcha, fetchCaptchaAudio } from '../services/captchaService.js';
 import * as ipgService from '../services/ipgService.js';
 import { i18n } from '../main.js';
@@ -82,6 +87,10 @@ let paymentInitErrorScreen = null;
 
 /** From GET /transaction `appSettings.otpSettings` (mutable `maxTries` is tracked per card below). */
 let transactionOtpSettings = { maxTries: 5, nextTrySeconds: 120 };
+/** Configurable: lock card input while OTP cooldown is active (default: enabled). */
+let lockCardNumberDuringOtpCooldown = getDefaultLockCardNumberDuringOtpCooldown();
+const otpLengthConfig = getOtpLengthConfig();
+const captchaCodeLength = getCaptchaCodeLength();
 
 /** Per-card OTP tries remaining (key → count). */
 const otpTriesRemainingByCardKey = Object.create(null);
@@ -99,6 +108,7 @@ let paymentReceiptMerchantContext = null;
 let lastPaymentReceiptData = null;
 let refreshCardDropdownFooterButtons = null;
 let isCardListManageMode = false;
+let syncOtpPrerequisiteFieldLock = () => {};
 
 /**
  * Reveal main content after loading and all setup (success, error, or failure paths).
@@ -233,9 +243,6 @@ function validateFieldsForOtpRequest() {
  * Updates OTP request button: cooldown timer, disabled state, exhausted tries.
  */
 function syncGetOtpButtonState() {
-  const btn = document.getElementById('get-otp-button');
-  if (!btn) return;
-
   const key = getOtpCardStateKey();
   if (key) {
     ensureOtpTriesForKey(key);
@@ -248,6 +255,10 @@ function syncGetOtpButtonState() {
   const remainingCooldownSec = inCooldown ? (until - now) / 1000 : 0;
   const exhausted = triesLeft !== null && triesLeft <= 0;
   const maxTriesCfg = transactionOtpSettings.maxTries;
+  syncOtpPrerequisiteFieldLock();
+
+  const btn = document.getElementById('get-otp-button');
+  if (!btn) return;
 
   if (otpRequestInFlight) {
     btn.classList.add('loading');
@@ -812,7 +823,7 @@ function initializeFormInputs() {
       saveCardEl.checked = false;
       const saveCardIcon = document.querySelector('.save-card-icon .app-icon');
       if (saveCardIcon) {
-        setAppIconFile(saveCardIcon, 'icn-square-plus.svg');
+        setAppIconFile(saveCardIcon, 'icn-square-check.svg');
       }
     }
 
@@ -857,19 +868,20 @@ function initializeFormInputs() {
     return expiryYearInput?.wrapper?.querySelector('.input-action-right') || null;
   };
 
-  const setExpiryDateLocked = (locked) => {
+  const setExpiryDateLockedState = ({ lockByCard, lockByOtp }) => {
+    const locked = Boolean(lockByCard || lockByOtp);
     if (!expiryMonthInput?.element || !expiryYearInput?.element) return;
-    isExpiryDateLockedFromCard = Boolean(locked);
+    isExpiryDateLockedFromCard = Boolean(lockByCard);
     for (const inp of [expiryMonthInput, expiryYearInput]) {
-      inp.element.disabled = Boolean(locked);
+      inp.element.disabled = locked;
       inp.element.setAttribute('aria-disabled', locked ? 'true' : 'false');
       // Keep options.disabled false so the edit action remains clickable while field is locked.
       inp.options.disabled = false;
       if (inp.wrapper) {
-        inp.wrapper.classList.toggle('disabled', Boolean(locked));
+        inp.wrapper.classList.toggle('disabled', locked);
       }
       if (inp.inputContainer) {
-        inp.inputContainer.classList.toggle('disabled', Boolean(locked));
+        inp.inputContainer.classList.toggle('disabled', locked);
       }
       if (inp.clearButton) {
         if (locked) {
@@ -879,7 +891,7 @@ function initializeFormInputs() {
         }
       }
     }
-    if (locked) {
+    if (lockByCard) {
       expiryMonthInput.setValue('');
       expiryYearInput.setValue('');
       expiryMonthInput.setPlaceholder('\u2022\u2022');
@@ -894,10 +906,14 @@ function initializeFormInputs() {
     }
     const editActionBtn = getExpiryEditActionButton();
     if (editActionBtn) {
-      editActionBtn.style.display = locked ? 'inline-flex' : 'none';
-      editActionBtn.disabled = false;
-      editActionBtn.setAttribute('aria-disabled', 'false');
-      editActionBtn.tabIndex = 0;
+      if (lockByCard) {
+        editActionBtn.style.display = 'inline-flex';
+        editActionBtn.disabled = Boolean(lockByOtp);
+        editActionBtn.setAttribute('aria-disabled', lockByOtp ? 'true' : 'false');
+        editActionBtn.tabIndex = lockByOtp ? -1 : 0;
+      } else {
+        editActionBtn.style.display = 'none';
+      }
     }
     if (locked) {
       expiryDateInput?.clearValidation?.();
@@ -907,8 +923,40 @@ function initializeFormInputs() {
   const applyExpiryDateModeForSelectedCard = () => {
     const lockByCard =
       Boolean(selectedSavedCardForApi?.hasValidExpiredDate) && !hasUserEnabledExpiryDateEdit;
-    setExpiryDateLocked(lockByCard);
+    const key = getOtpCardStateKey();
+    const until = key != null ? otpCooldownUntilByCardKey[key] : null;
+    const lockByOtp = until != null && Date.now() < until;
+    setExpiryDateLockedState({ lockByCard, lockByOtp });
   };
+
+  const setInputLockedByOtpCooldown = (input, locked) => {
+    if (!input?.element) return;
+    if (locked) {
+      input.disable();
+      input.clearValidation?.();
+      return;
+    }
+    input.enable();
+  };
+
+  const syncOtpLockedFieldsState = () => {
+    const key = getOtpCardStateKey();
+    const until = key != null ? otpCooldownUntilByCardKey[key] : null;
+    const isLocked = until != null && Date.now() < until;
+    if (lockCardNumberDuringOtpCooldown) {
+      if (isLocked) {
+        cardNumberInput?.disable?.();
+      } else {
+        cardNumberInput?.enable?.();
+        setCardInputTypingLocked(isLimitedCardSelectionOnlyMode());
+      }
+    }
+    setInputLockedByOtpCooldown(cvv2Input, isLocked);
+    setInputLockedByOtpCooldown(captchaInput, isLocked);
+    applyExpiryDateModeForSelectedCard();
+  };
+
+  syncOtpPrerequisiteFieldLock = syncOtpLockedFieldsState;
 
   const setCardInputTypingLocked = (locked) => {
     if (!cardNumberInput?.element) return;
@@ -1499,14 +1547,14 @@ function initializeFormInputs() {
     required: true,
     requiredMessageKey: 'common.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
-    maxLength: 6,
+    maxLength: captchaCodeLength,
     inputMode: 'numeric',
     onInput: (value) => {
-      const digitsOnly = extractNumbers(value).slice(0, 6);
+      const digitsOnly = extractNumbers(value).slice(0, captchaCodeLength);
       if (digitsOnly !== value) {
         captchaInput.setValue(digitsOnly);
       }
-      if (digitsOnly.length >= 6) {
+      if (digitsOnly.length >= captchaCodeLength) {
         focusNextVisibleInputField(captchaInput.element);
       }
     },
@@ -1605,13 +1653,13 @@ function initializeFormInputs() {
     validator: validateOTP,
     inputMode: 'numeric',
     maskWithPasswordFont: true,
-    maxLength: 6,
+    maxLength: otpLengthConfig.maxLength,
     onInput: (value) => {
-      const digitsOnly = extractNumbers(value).slice(0, 6);
+      const digitsOnly = extractNumbers(value).slice(0, otpLengthConfig.maxLength);
       if (digitsOnly !== value) {
         otpInput.setValue(digitsOnly);
       }
-      if (digitsOnly.length >= 6) {
+      if (digitsOnly.length >= otpLengthConfig.maxLength) {
         focusNextVisibleInputField(otpInput.element);
       }
     },
@@ -1621,7 +1669,7 @@ function initializeFormInputs() {
       onClick: () => {
         if (!otpPinPad) {
           otpPinPad = new VirtualPinPad(otpInput.element, {
-            maxLength: 6,
+            maxLength: otpLengthConfig.maxLength,
             onInput: (value) => {
               otpInput.setValue(value);
             },
@@ -1710,6 +1758,7 @@ function initializeFormInputs() {
   otpWrapper.appendChild(getOtpButton);
   syncGetOtpButtonState();
   otpContainer.appendChild(otpWrapper);
+  syncOtpLockedFieldsState();
 
   // Mobile Input (hidden initially)
   const mobileContainer = document.getElementById('mobile-input-container');
@@ -1860,6 +1909,10 @@ async function initializeTransactionInfo() {
       typeof rawOtp?.nextTryTime === 'string' ? rawOtp.nextTryTime : '00:02:00'
     ),
   };
+  lockCardNumberDuringOtpCooldown =
+    typeof rawOtp?.lockCardNumberDuringCooldown === 'boolean'
+      ? rawOtp.lockCardNumberDuringCooldown
+      : getDefaultLockCardNumberDuringOtpCooldown();
 
   // Convert amount to Tomans (divide by 10)
   const amountInTomans = Math.floor(transactionData.amount / 10);
@@ -2499,7 +2552,7 @@ function attachFormEvents() {
       if (!saveCardIcon) return;
       setAppIconFile(
         saveCardIcon,
-        saveCardCheckbox.checked ? 'icn-square-minus.svg' : 'icn-square-plus.svg'
+        saveCardCheckbox.checked ? 'icn-square-check-filled.svg' : 'icn-square-check.svg'
       );
     };
     updateSaveCardIcon();

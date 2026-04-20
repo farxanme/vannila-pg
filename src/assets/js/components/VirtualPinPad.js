@@ -122,13 +122,21 @@ export class VirtualPinPad {
     const backspaceBtn = document.createElement('button');
     backspaceBtn.type = 'button';
     backspaceBtn.className = 'pin-pad-btn pin-pad-backspace';
-    backspaceBtn.innerHTML = `<span class="pin-pad-action-icon" aria-hidden="true">${this.getBackspaceIconSvg()}</span>`;
+    backspaceBtn.innerHTML = `
+      <span class="pin-pad-action-icon" aria-hidden="true">
+        ${appIconHtml('icn-backspase.svg', 'pin-pad-action-icon-inner')}
+      </span>
+    `;
     backspaceBtn.onclick = () => this.handleBackspace();
 
     const clearBtn = document.createElement('button');
     clearBtn.type = 'button';
     clearBtn.className = 'pin-pad-btn pin-pad-clear';
-    clearBtn.innerHTML = `<span class="pin-pad-action-icon" aria-hidden="true">${this.getClearIconSvg()}</span>`;
+    clearBtn.innerHTML = `
+      <span class="pin-pad-action-icon" aria-hidden="true">
+        ${appIconHtml('ic-eraser.svg', 'pin-pad-action-icon-inner')}
+      </span>
+    `;
     clearBtn.setAttribute('aria-label', i18n.t('pinPad.clear'));
     clearBtn.onclick = () => this.handleClear();
 
@@ -139,23 +147,6 @@ export class VirtualPinPad {
 
     container.appendChild(grid);
     return container;
-  }
-
-  getBackspaceIconSvg() {
-    return `
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M11 7H19C20.1 7 21 7.9 21 9V15C21 16.1 20.1 17 19 17H11L4 12L11 7Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
-        <path d="M14 10L17 14M17 10L14 14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-      </svg>
-    `;
-  }
-
-  getClearIconSvg() {
-    return `
-      <svg viewBox="0 0 24 24" fill="none">
-        <path d="M6 6L18 18M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-      </svg>
-    `;
   }
 
   /**

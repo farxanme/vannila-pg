@@ -43,3 +43,37 @@ export function useCaptchaMock() {
 export function getShowLanguageSwitcher() {
   return import.meta.env.VITE_SHOW_LANGUAGE_SWITCHER !== 'false';
 }
+
+function parsePositiveInt(value, fallback) {
+  const n = Number.parseInt(value, 10);
+  return Number.isFinite(n) && n > 0 ? n : fallback;
+}
+
+/**
+ * OTP length constraints.
+ * - VITE_OTP_MIN_LENGTH (default: 6)
+ * - VITE_OTP_MAX_LENGTH (default: 12)
+ */
+export function getOtpLengthConfig() {
+  const minLength = parsePositiveInt(import.meta.env.VITE_OTP_MIN_LENGTH, 6);
+  const rawMaxLength = parsePositiveInt(import.meta.env.VITE_OTP_MAX_LENGTH, 12);
+  const maxLength = Math.max(minLength, rawMaxLength);
+  return { minLength, maxLength };
+}
+
+/**
+ * Captcha code length.
+ * - VITE_CAPTCHA_CODE_LENGTH (default: 6)
+ */
+export function getCaptchaCodeLength() {
+  return parsePositiveInt(import.meta.env.VITE_CAPTCHA_CODE_LENGTH, 6);
+}
+
+/**
+ * Default behavior for card input lock during OTP cooldown.
+ * - true (default): card input locked while cooldown active
+ * - false: keep card input editable during cooldown
+ */
+export function getDefaultLockCardNumberDuringOtpCooldown() {
+  return import.meta.env.VITE_LOCK_CARD_NUMBER_DURING_OTP_COOLDOWN !== 'false';
+}

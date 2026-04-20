@@ -49,7 +49,7 @@ export default {
   'form.otp': 'رمز پویا',
   'form.otp.placeholder': 'رمز پویا',
   'form.otp.required': 'رمز پویا الزامی است',
-  'form.otp.mustBe6Digits': 'رمز پویا باید ۶ رقم باشد',
+  'form.otp.invalidLengthRange': 'رمز پویا باید بین {{min}} تا {{max}} رقم باشد',
   'form.mobile': 'شماره موبایل',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'شماره موبایل الزامی است',

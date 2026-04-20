@@ -712,9 +712,10 @@
   display: inline-flex;
 }
 
-.pin-pad-action-icon svg {
+.pin-pad-action-icon .app-icon {
   width: 100%;
   height: 100%;
+  --app-icon-size: 18px;
 }
 
 @media (max-width: 768px) {

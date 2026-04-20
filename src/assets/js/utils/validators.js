@@ -1,6 +1,7 @@
 import { extractNumbers } from './numberConverter.js';
 import { i18n } from './i18n.js';
 import { getCurrentJalaliYearMonth, resolveJalaliYearFromCardYy } from './jalaliDate.js';
+import { getOtpLengthConfig } from '../config/env.js';
 
 /**
  * Validation Rules
@@ -203,19 +204,26 @@ export function validateRequired(value) {
 }
 
 /**
- * Validate OTP (6 digits)
+ * Validate OTP length range (configurable).
  * @param {string} otp - OTP code
  * @returns {Object} - { valid: boolean, message: string }
  */
 export function validateOTP(otp) {
+  const { minLength, maxLength } = getOtpLengthConfig();
   const numbers = extractNumbers(otp);
 
   if (!numbers || numbers.length === 0) {
     return { valid: false, message: i18n.t('form.otp.required') };
   }
 
-  if (numbers.length !== 6) {
-    return { valid: false, message: i18n.t('form.otp.mustBe6Digits') };
+  if (numbers.length < minLength || numbers.length > maxLength) {
+    return {
+      valid: false,
+      message: i18n.t('form.otp.invalidLengthRange', {
+        min: String(minLength),
+        max: String(maxLength),
+      }),
+    };
   }
 
   return { valid: true, message: '' };

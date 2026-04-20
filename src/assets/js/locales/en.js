@@ -49,7 +49,7 @@ export default {
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP is required',
-  'form.otp.mustBe6Digits': 'OTP must be 6 digits',
+  'form.otp.invalidLengthRange': 'OTP must be between {{min}} and {{max}} digits',
   'form.mobile': 'Mobile Number',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'Mobile number is required',

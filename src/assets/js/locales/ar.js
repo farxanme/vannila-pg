@@ -49,7 +49,7 @@ export default {
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP مطلوب',
-  'form.otp.mustBe6Digits': 'يجب أن يتكون OTP من 6 أرقام',
+  'form.otp.invalidLengthRange': 'يجب أن يتكون OTP من {{min}} إلى {{max}} أرقام',
   'form.mobile': 'رقم الجوال',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'رقم الجوال مطلوب',

@@ -411,7 +411,7 @@ html.app-ready #app .main-content {
 .save-card-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   cursor: pointer;
   user-select: none;
   font-family: var(--font-family-base);

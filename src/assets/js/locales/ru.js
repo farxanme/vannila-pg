@@ -49,7 +49,7 @@ export default {
   'form.otp': 'OTP',
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP обязателен',
-  'form.otp.mustBe6Digits': 'OTP должен содержать 6 цифр',
+  'form.otp.invalidLengthRange': 'OTP должен содержать от {{min}} до {{max}} цифр',
   'form.mobile': 'Номер мобильного',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'Номер мобильного обязателен',
