@@ -1,6 +1,7 @@
 /**
  * IPG API mock payloads (aligned with spg-webapp-samples).
  */
+import { getMockCardViewTimeout, getMockReceiptViewTimeout } from '../config/env.js';
 
 export const mockGetTransactionResponse = {
   data: {
@@ -19,8 +20,8 @@ export const mockGetTransactionResponse = {
         'توضیحات نمونه برای نمایش چندخطی. این بخش می‌تواند چند خط باشد تا دکمه بیشتر/کمتر نمایش داده شود.',
     },
     appSettings: {
-      cardViewTimeOut: '00:10:00',
-      receiptViewTimeOut: '00:00:10',
+      cardViewTimeOut: getMockCardViewTimeout(),
+      receiptViewTimeOut: getMockReceiptViewTimeout(),
       prCodesPanLimits: {
         prCode: 0,
         panProductCodes: [],

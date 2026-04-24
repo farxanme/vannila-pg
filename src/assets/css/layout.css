@@ -894,7 +894,6 @@
   text-align: center;
   padding-bottom: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
-  border-bottom: 1px dashed var(--color-stroke);
 }
 
 .receipt-status {
@@ -989,7 +988,9 @@
   flex-shrink: 0;
   display: flex;
   align-items: center;
+  gap: var(--spacing-xs);
   text-align: unset;
+  direction: ltr;
 }
 
 .card-header .timer-value {
@@ -998,6 +999,35 @@
   line-height: 1.25;
   font-family: var(--font-family-base);
   font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  display: inline-block;
+  width: 5ch;
+  min-width: 5ch;
+  text-align: center;
+  unicode-bidi: isolate;
+}
+
+.timer-progress {
+  --timer-progress: 1;
+  --timer-track-color: var(--color-gray-300);
+  --timer-fill-color: var(--color-primary);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  flex: 0 0 18px;
+  display: inline-block;
+  background: conic-gradient(
+    var(--timer-fill-color) calc(var(--timer-progress) * 1turn),
+    var(--timer-track-color) 0
+  );
+}
+
+#timer-header.warning .timer-progress {
+  --timer-fill-color: var(--color-warning);
+}
+
+#timer-header.danger .timer-progress {
+  --timer-fill-color: var(--color-danger);
 }
 
 .card-header.warning {

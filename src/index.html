@@ -176,6 +176,7 @@
               <div class="card-header" id="timer-header">
                 <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
                 <div id="timer-container" class="timer">
+                  <span class="timer-progress" aria-hidden="true"></span>
                   <div class="timer-value">15:00</div>
                 </div>
               </div>
@@ -203,74 +204,159 @@
             <div class="init-error-container receipt-container">
               <div class="card init-error-card" id="payment-receipt-card">
                 <div class="receipt-header">
-                  <div class="receipt-status">
-                    <span class="badge badge-success" id="payment-receipt-status-badge"></span>
-                  </div>
                   <h1 class="receipt-title" id="payment-receipt-title"></h1>
                   <p class="receipt-subtitle" id="payment-receipt-subtitle"></p>
-                  <div class="receipt-amount" id="payment-receipt-amount"></div>
-                  <div class="receipt-type" id="payment-receipt-type"></div>
-                </div>
-
-                <div class="transaction-divider"></div>
-
-                <div class="transaction-info">
-                  <h3 class="transaction-info-section-title" data-i18n="receipt.sectionMerchant">
-                    اطلاعات پذیرنده
-                  </h3>
-                  <div class="transaction-info-item">
-                    <span class="transaction-info-label" data-i18n="receipt.merchant">پذیرنده:</span>
-                    <span class="transaction-info-value" id="payment-receipt-merchant-name"></span>
+                  <div class="receipt-amount-bar">
+                    <div class="receipt-amount" id="payment-receipt-amount"></div>
+                    <div class="receipt-type" id="payment-receipt-headline"></div>
+                  </div>
+                  <button type="button" class="btn btn-success receipt-complete-button" id="payment-receipt-complete-button">
+                    <span data-i18n="receipt.completeAndReturn">تکمیل فرآیند و انتقال به سایت پذیرنده</span>
+                  </button>
+                  <div class="receipt-return-timer" id="payment-receipt-return-timer" hidden>
+                    <span class="timer-progress" aria-hidden="true"></span>
+                    <span data-i18n="receipt.autoReturnPrefix">بازگشت خودکار تا</span>
+                    <strong id="payment-receipt-return-time-value">00:00</strong>
                   </div>
                 </div>
 
                 <div class="transaction-divider"></div>
 
-                <div class="transaction-info">
-                  <h3 class="transaction-info-section-title" data-i18n="receipt.sectionTransaction">
-                    اطلاعات تراکنش
-                  </h3>
-                  <div class="transaction-info-item">
-                    <span class="transaction-info-label" data-i18n="receipt.traceNo">شماره پیگیری:</span>
-                    <span class="transaction-info-value" id="payment-receipt-trace"></span>
+                <section class="receipt-main-grid">
+                  <header class="receipt-main-grid-header">
+                    <h2 data-i18n="receipt.internetTitle">رسید تراکنش اینترنتی</h2>
+                  </header>
+
+                  <div class="receipt-main-grid-columns" id="payment-receipt-columns">
+                    <article class="receipt-info-column" data-column-kind="transaction">
+                      <h3 class="transaction-info-section-title" data-i18n="receipt.sectionTransaction">
+                        اطلاعات تراکنش
+                      </h3>
+                      <div class="receipt-info-rows">
+                        <div class="receipt-info-row" id="payment-receipt-row-transaction-type" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.transactionType">نوع تراکنش</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-transaction-type"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-status" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.status">وضعیت تراکنش</span>
+                          <span class="receipt-info-row-value">
+                            <span class="badge badge-success" id="payment-receipt-status-badge"></span>
+                          </span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-trace" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.traceCode">کد رهگیری</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-trace"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-digital-receipt" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.digitalReceipt">رسید دیجیتالی</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-digital-receipt"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-rrn" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.rrn">شماره مرجع:</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-rrn"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-card" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.plain.card">شماره کارت:</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-card-number"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-bank" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.issuerBank">بانک صادرکننده کارت</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-issuer-bank"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-date" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.transactionTime">زمان تراکنش</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-date"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-total-amount" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.transactionAmount">مبلغ تراکنش</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-total-amount"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-discount-amount" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.discountAmount">مبلغ تخفیف</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-discount-amount"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-affective-amount" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.deductedAmount">مبلغ کسر شده از کارت</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-affective-amount"></span>
+                        </div>
+                      </div>
+                    </article>
+
+                    <article
+                      class="receipt-info-column"
+                      id="payment-receipt-extra-column"
+                      data-column-kind="extra"
+                      hidden
+                    >
+                      <h3
+                        class="transaction-info-section-title"
+                        id="payment-receipt-extra-title"
+                        data-i18n="receipt.sectionInstallmentInfo"
+                      >
+                        اطلاعات تراکنش اقساطی
+                      </h3>
+                      <div class="receipt-info-rows" id="payment-receipt-extra-rows"></div>
+                    </article>
+
+                    <article class="receipt-info-column" data-column-kind="merchant">
+                      <h3 class="transaction-info-section-title" data-i18n="receipt.sectionMerchant">
+                        اطلاعات پذیرنده
+                      </h3>
+                      <div class="receipt-info-rows">
+                        <div class="receipt-info-row" id="payment-receipt-row-merchant-number" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.merchantNumber">شماره پذیرنده</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-merchant-number"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-terminal" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.terminalNumber">شماره ترمینال</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-terminal"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-gateway-code" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.gatewayCode">کد درگاه</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-gateway-code"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-facilitator" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.paymentFacilitator">پرداخت یار</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-facilitator"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-merchant-name" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.merchant">پذیرنده</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-merchant-name"></span>
+                        </div>
+                        <div class="receipt-info-row" id="payment-receipt-row-merchant-site" hidden>
+                          <span class="receipt-info-row-label" data-i18n="receipt.merchantSiteAddress">آدرس سایت پذیرنده</span>
+                          <span class="receipt-info-row-value" id="payment-receipt-merchant-site"></span>
+                        </div>
+                      </div>
+                    </article>
                   </div>
-                  <div class="transaction-info-item" id="payment-receipt-row-rrn" hidden>
-                    <span class="transaction-info-label" data-i18n="receipt.rrn">شماره مرجع:</span>
-                    <span class="transaction-info-value" id="payment-receipt-rrn"></span>
-                  </div>
-                  <div class="transaction-info-item" id="payment-receipt-row-ptrace" hidden>
-                    <span class="transaction-info-label" data-i18n="receipt.pTraceNo">شماره پیگیری ترمینال:</span>
-                    <span class="transaction-info-value" id="payment-receipt-ptrace"></span>
-                  </div>
-                  <div class="transaction-info-item" id="payment-receipt-row-terminal" hidden>
-                    <span class="transaction-info-label" data-i18n="receipt.terminal">ترمینال:</span>
-                    <span class="transaction-info-value" id="payment-receipt-terminal"></span>
-                  </div>
-                  <div class="transaction-info-item">
-                    <span class="transaction-info-label" data-i18n="receipt.plain.date">تاریخ:</span>
-                    <span class="transaction-info-value" id="payment-receipt-date"></span>
-                  </div>
-                  <div class="transaction-info-item">
-                    <span class="transaction-info-label" data-i18n="receipt.plain.card">شماره کارت:</span>
-                    <span class="transaction-info-value" id="payment-receipt-card-number"></span>
-                  </div>
-                </div>
+                </section>
 
                 <div class="transaction-divider"></div>
+
+                <div class="receipt-notice" role="note">
+                  <span data-i18n="receipt.noticePolicy">
+                    در صورتی که طی 30 دقیقه، فروشنده تایید تحویل کالا یا خدمت را به شرکت سِپ اطلاع رسانی نکند، مبلغ کسر شده طی 72 ساعت به حساب شما برگشت داده می‌شود.
+                  </span>
+                </div>
 
                 <div class="receipt-actions">
-                  <button type="button" class="btn btn-primary btn-bordered" id="payment-receipt-share-button">
-                    <span class="btn-icon" aria-hidden="true">📤</span>
-                    <span data-i18n="receipt.share">اشتراک‌گذاری</span>
+                  <button type="button" class="btn btn-primary btn-bordered receipt-share-button" id="payment-receipt-share-button">
+                    <span class="btn-icon" aria-hidden="true">
+                      <span class="app-icon" style="--app-icon-src: url('/assets/images/icons/icn-world.svg')"></span>
+                    </span>
+                    <span class="sr-only" data-i18n="receipt.share">اشتراک‌گذاری</span>
                   </button>
-                  <button type="button" class="btn btn-success" id="payment-receipt-save-button">
-                    <span class="btn-icon" aria-hidden="true">💾</span>
-                    <span data-i18n="receipt.save">ذخیره در گالری</span>
+                  <button type="button" class="btn btn-success receipt-download-button" id="payment-receipt-save-button">
+                    <span class="btn-icon" aria-hidden="true">
+                      <span class="app-icon" style="--app-icon-src: url('/assets/images/icons/icn-square-plus.svg')"></span>
+                    </span>
+                    <span data-i18n="receipt.download">دریافت رسید</span>
                   </button>
                 </div>
-
-                <div class="receipt-logo">
-                  <img src="/assets/images/logo-mini.svg" alt="" />
+                <div class="receipt-logos">
+                  <img src="/assets/images/logo-shaparak.svg" alt="Shaparak" />
+                  <img src="/assets/images/logo.svg" alt="SEP" />
                 </div>
               </div>
             </div>

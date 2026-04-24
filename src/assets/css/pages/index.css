@@ -518,7 +518,7 @@ html.app-ready #app .main-content {
 }
 
 .init-error-card {
-  padding: var(--spacing-xl);
+  padding: 14px;
 }
 
 .init-error-section .payment-init-error .empty-state {

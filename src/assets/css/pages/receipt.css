@@ -13,8 +13,11 @@
   margin-bottom: var(--spacing-lg);
 }
 
-.receipt-status {
-  margin-bottom: var(--spacing-md);
+.receipt-amount-bar {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--spacing-sm);
+  margin: var(--spacing-md) 0;
 }
 
 .receipt-title {
@@ -33,12 +36,55 @@
   font-size: var(--font-size-2xl);
   font-weight: 700;
   color: var(--color-primary);
-  margin: var(--spacing-md) 0;
+  margin: 0;
 }
 
 .receipt-type {
   color: var(--color-text-secondary);
+  font-size: var(--font-size-base);
+  margin-top: 0;
+}
+
+.receipt-complete-button {
+  margin-top: var(--spacing-md);
+  width: fit-content;
+  display: flex;
+  margin-inline: auto;
+}
+
+.receipt-return-timer {
+  margin-top: var(--spacing-sm);
+  color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-xs);
+  direction: ltr;
+  width: 100%;
+}
+
+.receipt-return-timer .timer-progress {
+  --timer-fill-color: var(--color-primary);
+}
+
+.receipt-return-timer.warning .timer-progress {
+  --timer-fill-color: var(--color-warning);
+}
+
+.receipt-return-timer.danger .timer-progress {
+  --timer-fill-color: var(--color-danger);
+}
+
+.receipt-return-timer strong {
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  display: inline-block;
+  width: 5ch;
+  min-width: 5ch;
+  text-align: center;
+  unicode-bidi: isolate;
 }
 
 .transaction-info-section-title {
@@ -47,23 +93,227 @@
   margin-bottom: var(--spacing-md);
 }
 
+.receipt-main-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.payment-receipt-section .transaction-divider {
+  position: relative;
+  height: 24px;
+  margin: var(--spacing-lg) calc(var(--spacing-md) * -1);
+  border: none;
+  background: transparent;
+}
+
+.payment-receipt-section .transaction-divider::after {
+  content: '';
+  position: absolute;
+  left: 20px;
+  right: 20px;
+  top: 50%;
+  border-top: 2px dashed var(--color-stroke);
+  transform: translateY(-50%);
+}
+
+.payment-receipt-section .transaction-divider::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at left center, var(--color-bg-light) 11px, transparent 12px),
+    radial-gradient(circle at right center, var(--color-bg-light) 11px, transparent 12px);
+  pointer-events: none;
+}
+
+.receipt-main-grid-header h2 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+}
+
+.receipt-main-grid-columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--spacing-md);
+}
+
+.receipt-main-grid-columns[data-columns='2'] {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.receipt-main-grid-columns[data-columns='1'] {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.receipt-info-column {
+  border: 1px solid var(--color-stroke);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-bg-white);
+}
+
+.receipt-info-column .transaction-info-section-title {
+  margin: 0;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--color-card-soft-bg);
+}
+
+.receipt-info-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.receipt-info-row:nth-child(odd) {
+  background: var(--color-bg-light);
+}
+
+.receipt-info-row:nth-child(even) {
+  background: var(--color-bg-white);
+}
+
+.receipt-info-row-label,
+.receipt-info-row-value {
+  font-size: var(--font-size-sm);
+}
+
+.receipt-info-row-label {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+
+.receipt-info-row-value {
+  color: var(--color-text-primary);
+  font-weight: 600;
+  text-align: left;
+  word-break: break-word;
+}
+
+[dir='rtl'] .receipt-info-row-label {
+  text-align: right;
+}
+
+[dir='rtl'] .receipt-info-row-value {
+  text-align: left;
+}
+
+[dir='ltr'] .receipt-info-row-label {
+  text-align: left;
+}
+
+[dir='ltr'] .receipt-info-row-value {
+  text-align: right;
+}
+
 .receipt-actions {
   display: flex;
   gap: var(--spacing-md);
   margin-top: var(--spacing-lg);
+  align-items: stretch;
+  width: 50%;
+  margin-inline: auto;
 }
 
-.receipt-actions .btn {
-  flex: 1;
+.receipt-share-button {
+  width: 48px;
+  min-width: 48px;
+  padding: 0;
+  flex: 0 0 48px;
+  border-radius: var(--radius-md);
 }
 
-.receipt-logo {
-  text-align: center;
-  margin-top: var(--spacing-lg);
-  padding-top: var(--spacing-lg);
-  border-top: 1px dashed var(--color-stroke);
+.receipt-download-button {
+  flex: 1 1 auto;
 }
 
-.receipt-logo img {
-  height: 40px;
+.receipt-actions .btn .btn-icon .app-icon {
+  --app-icon-size: 20px;
+}
+
+.receipt-bank-value {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+[dir='rtl'] .receipt-bank-value {
+  flex-direction: row-reverse;
+}
+
+.receipt-bank-logo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.receipt-notice {
+  margin-top: 0;
+  padding: var(--spacing-md);
+  border: 1px solid var(--color-stroke);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-light);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.7;
+}
+
+[dir='rtl'] .receipt-notice {
+  text-align: right;
+}
+
+[dir='ltr'] .receipt-notice {
+  text-align: left;
+}
+
+.receipt-logos {
+  margin-top: var(--spacing-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-lg);
+}
+
+.receipt-logos img {
+  height: 34px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 1024px) {
+  .receipt-main-grid-columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .receipt-actions {
+    width: 100%;
+  }
+
+  .receipt-main-grid-columns,
+  .receipt-main-grid-columns[data-columns='2'],
+  .receipt-main-grid-columns[data-columns='1'] {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

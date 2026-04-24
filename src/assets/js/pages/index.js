@@ -103,6 +103,9 @@ let currentTransactionPrCode = null;
 
 /** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
 let paymentReceiptMerchantContext = null;
+let paymentReceiptRedirectUrl = null;
+let paymentReceiptReturnSeconds = 0;
+let paymentReceiptReturnIntervalId = null;
 
 /** Last `paymentReceipt` from pay API when inline receipt is shown (for i18n refresh). */
 let lastPaymentReceiptData = null;
@@ -729,6 +732,7 @@ async function initializePage() {
 function initializeTimer(durationSeconds = 900) {
   const timerContainer = document.getElementById('timer-container');
   const timerHeader = document.getElementById('timer-header');
+  const timerProgress = timerContainer.querySelector('.timer-progress');
   const timerValue = timerContainer.querySelector('.timer-value');
   const total = Math.max(1, durationSeconds);
   const defaultHeaderTitle = i18n.t('header.title');
@@ -750,6 +754,7 @@ function initializeTimer(durationSeconds = 900) {
       const seconds = remaining % 60;
       const timeLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
       timerValue.textContent = timeLabel;
+      setTimerProgressIndicator(timerProgress, remaining / total);
       syncMobileHeaderTitleWithTimer(timeLabel);
 
       // Update timer header style based on progress
@@ -770,6 +775,7 @@ function initializeTimer(durationSeconds = 900) {
       if (timerHeader) timerHeader.classList.add('danger');
     },
     onEnd: () => {
+      setTimerProgressIndicator(timerProgress, 0);
       syncMobileHeaderTitleWithTimer('00:00');
       errorHandler.show({
         message: i18n.t('timer.expired'),
@@ -779,6 +785,7 @@ function initializeTimer(durationSeconds = 900) {
     },
   });
 
+  setTimerProgressIndicator(timerProgress, 1);
   timer.start();
 }
 
@@ -2031,7 +2038,19 @@ async function initializeTransactionInfo() {
 
   paymentReceiptMerchantContext = {
     merchant: transactionData.merchant,
+    merchantNumber:
+      txPayload?.merchant?.merchantNumber != null ? String(txPayload.merchant.merchantNumber) : '',
+    terminalNumber: terminalStr,
+    gatewayCode:
+      txPayload?.appSettings?.gatewayCode ??
+      txPayload?.gatewayCode ??
+      txPayload?.merchant?.gatewayCode ??
+      '',
+    paymentFacilitator:
+      txPayload?.merchant?.paymentFacilitatorName ?? txPayload?.paymentFacilitatorName ?? '',
+    merchantSite: transactionData.site,
   };
+  paymentReceiptReturnSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.receiptViewTimeOut);
 
   return { durationSeconds, merchantLogoUrl };
 }
@@ -2265,19 +2284,210 @@ function formatPaymentReceiptDate(isoStr) {
     return String(isoStr);
   }
   const locale = getNumberLocaleForLang(i18n.getLanguage());
-  return new Date(ms).toLocaleString(locale);
+  const dt = new Date(ms);
+  const datePart = dt.toLocaleDateString(locale);
+  const timePart = dt.toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
+  return `${datePart} - ${timePart}`;
 }
 
-function setPaymentReceiptOptionalRow(rowId, valueElId, value) {
+function setPaymentReceiptColumnsCount() {
+  const columnsWrap = document.getElementById('payment-receipt-columns');
+  if (!columnsWrap) return;
+  const visibleColumns = Array.from(columnsWrap.querySelectorAll('.receipt-info-column')).filter(
+    (col) => !col.hasAttribute('hidden')
+  ).length;
+  const columns = Math.max(1, Math.min(3, visibleColumns));
+  columnsWrap.setAttribute('data-columns', String(columns));
+}
+
+function isBillTransactionType() {
+  return [40, 41, 42, 43].includes(currentTransactionPrCode);
+}
+
+function isInstallmentTransactionType() {
+  return currentTransactionPrCode === 71;
+}
+
+function appendReceiptExtraRow(container, label, value) {
+  if (!container || value == null || String(value).trim() === '') return;
+  const row = document.createElement('div');
+  row.className = 'receipt-info-row';
+  const labelEl = document.createElement('span');
+  labelEl.className = 'receipt-info-row-label';
+  labelEl.textContent = label;
+  const valueEl = document.createElement('span');
+  valueEl.className = 'receipt-info-row-value';
+  valueEl.textContent = String(value);
+  row.appendChild(labelEl);
+  row.appendChild(valueEl);
+  container.appendChild(row);
+}
+
+function renderPaymentReceiptExtraColumn(paymentReceipt) {
+  const extraColumn = document.getElementById('payment-receipt-extra-column');
+  const extraTitle = document.getElementById('payment-receipt-extra-title');
+  const extraRows = document.getElementById('payment-receipt-extra-rows');
+  if (!extraColumn || !extraTitle || !extraRows) return;
+
+  extraRows.replaceChildren();
+
+  const showInstallment = isInstallmentTransactionType();
+  const showBill = isBillTransactionType();
+  if (!showInstallment && !showBill) {
+    extraColumn.setAttribute('hidden', '');
+    setPaymentReceiptColumnsCount();
+    return;
+  }
+
+  if (showInstallment) {
+    extraTitle.setAttribute('data-i18n', 'receipt.sectionInstallmentInfo');
+    extraTitle.textContent = i18n.t('receipt.sectionInstallmentInfo');
+    appendReceiptExtraRow(
+      extraRows,
+      i18n.t('receipt.installmentCount'),
+      paymentReceipt.installmentCount
+    );
+    appendReceiptExtraRow(
+      extraRows,
+      i18n.t('receipt.installmentAmount'),
+      paymentReceipt.installmentAmount
+    );
+    appendReceiptExtraRow(
+      extraRows,
+      i18n.t('receipt.installmentNumber'),
+      paymentReceipt.installmentNumber
+    );
+  }
+
+  if (showBill) {
+    extraTitle.setAttribute('data-i18n', 'receipt.sectionBillInfo');
+    extraTitle.textContent = i18n.t('receipt.sectionBillInfo');
+    appendReceiptExtraRow(extraRows, i18n.t('receipt.billInfoId'), paymentReceipt.billInfoId);
+    appendReceiptExtraRow(extraRows, i18n.t('receipt.billId'), paymentReceipt.billId);
+    appendReceiptExtraRow(extraRows, i18n.t('receipt.payId'), paymentReceipt.payId);
+  }
+
+  if (extraRows.children.length === 0) {
+    extraColumn.setAttribute('hidden', '');
+  } else {
+    extraColumn.removeAttribute('hidden');
+  }
+  setPaymentReceiptColumnsCount();
+}
+
+function setPaymentReceiptOptionalRow(rowId, valueElId, value, displayValue = value) {
   const row = document.getElementById(rowId);
   const el = document.getElementById(valueElId);
   if (!row || !el) return;
   if (value != null && String(value).trim() !== '') {
-    el.textContent = String(value);
+    el.textContent = String(displayValue);
     row.hidden = false;
   } else {
     row.hidden = true;
   }
+}
+
+function getCurrencyAmountLabel(amount) {
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  const locale = getNumberLocaleForLang(lang);
+  return `${Number(amount).toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+}
+
+function summarizeDigitalReceipt(value) {
+  const text = String(value ?? '').trim();
+  if (text.length <= 30) return text;
+  return `${text.slice(0, 14)}...${text.slice(-10)}`;
+}
+
+function getReceiptIssuerBankName(paymentReceipt) {
+  const bySelectedCard = selectedSavedCardForApi?.bankName;
+  if (bySelectedCard) return String(bySelectedCard);
+  const fromInput = detectBank(cardNumberInput?.getValue?.() || '')?.name;
+  if (fromInput) return String(fromInput);
+  const fromMasked = detectBank(paymentReceipt?.maskedPan || '')?.name;
+  if (fromMasked) return String(fromMasked);
+  return '';
+}
+
+function renderReceiptIssuerBankRow(paymentReceipt) {
+  const bankRow = document.getElementById('payment-receipt-row-bank');
+  const bankValueEl = document.getElementById('payment-receipt-issuer-bank');
+  if (!bankRow || !bankValueEl) return;
+
+  const bankName = getReceiptIssuerBankName(paymentReceipt);
+  if (!bankName) {
+    bankRow.hidden = true;
+    bankValueEl.textContent = '';
+    return;
+  }
+
+  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
+  const localizedName = getLocalizedBankName(bankName, lang) || bankName;
+  const logoPath = getBankLogo(bankName);
+  const hasLogo = Boolean(logoPath && !logoPath.includes('icn-square-info.svg'));
+  bankValueEl.innerHTML = hasLogo
+    ? `<span class="receipt-bank-value"><img class="receipt-bank-logo" src="${logoPath}" alt="${localizedName}" /><span>${localizedName}</span></span>`
+    : localizedName;
+  bankRow.hidden = false;
+}
+
+function clearPaymentReceiptReturnTimer() {
+  if (paymentReceiptReturnIntervalId != null) {
+    clearInterval(paymentReceiptReturnIntervalId);
+    paymentReceiptReturnIntervalId = null;
+  }
+}
+
+function setTimerProgressIndicator(progressEl, ratio) {
+  if (!progressEl) return;
+  const safeRatio = Math.max(0, Math.min(1, Number(ratio)));
+  progressEl.style.setProperty('--timer-progress', String(safeRatio));
+}
+
+function getMerchantReturnUrl() {
+  if (paymentReceiptRedirectUrl) return paymentReceiptRedirectUrl;
+  const site = String(paymentReceiptMerchantContext?.merchantSite || '').trim();
+  if (!site) return '';
+  if (/^https?:\/\//i.test(site)) return site;
+  return `https://${site}`;
+}
+
+function syncPaymentReceiptReturnTimer() {
+  clearPaymentReceiptReturnTimer();
+  const timerWrap = document.getElementById('payment-receipt-return-timer');
+  const timerValue = document.getElementById('payment-receipt-return-time-value');
+  const timerProgress = timerWrap?.querySelector('.timer-progress');
+  if (!timerWrap || !timerValue) return;
+
+  const totalSeconds = Math.max(0, Number(paymentReceiptReturnSeconds) || 0);
+  let remaining = totalSeconds;
+  if (remaining <= 0 || !getMerchantReturnUrl()) {
+    timerWrap.hidden = true;
+    return;
+  }
+
+  timerWrap.hidden = false;
+  timerWrap.classList.remove('warning', 'danger');
+  timerValue.textContent = formatSecondsAsMmSs(remaining);
+  setTimerProgressIndicator(timerProgress, totalSeconds > 0 ? remaining / totalSeconds : 0);
+  paymentReceiptReturnIntervalId = setInterval(() => {
+    remaining -= 1;
+    const ratio = totalSeconds > 0 ? remaining / totalSeconds : 0;
+    timerWrap.classList.toggle('danger', ratio <= 1 / 3);
+    timerWrap.classList.toggle('warning', ratio > 1 / 3 && ratio <= 2 / 3);
+    if (remaining <= 0) {
+      timerValue.textContent = '00:00';
+      setTimerProgressIndicator(timerProgress, 0);
+      clearPaymentReceiptReturnTimer();
+      const url = getMerchantReturnUrl();
+      if (url) {
+        window.location.href = url;
+      }
+      return;
+    }
+    timerValue.textContent = formatSecondsAsMmSs(remaining);
+    setTimerProgressIndicator(timerProgress, totalSeconds > 0 ? remaining / totalSeconds : 0);
+  }, 1000);
 }
 
 /**
@@ -2288,19 +2498,15 @@ function fillPaymentReceiptFromService(paymentReceipt) {
 
   lastPaymentReceiptData = { ...paymentReceipt };
 
-  const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const locale = getNumberLocaleForLang(lang);
   const success = paymentReceipt.isSuccess !== false;
+  const typeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
 
   const statusBadge = document.getElementById('payment-receipt-status-badge');
   const title = document.getElementById('payment-receipt-title');
   const subtitle = document.getElementById('payment-receipt-subtitle');
   const amountEl = document.getElementById('payment-receipt-amount');
-  const typeEl = document.getElementById('payment-receipt-type');
-  const merchantEl = document.getElementById('payment-receipt-merchant-name');
-  const traceEl = document.getElementById('payment-receipt-trace');
-  const dateEl = document.getElementById('payment-receipt-date');
-  const cardEl = document.getElementById('payment-receipt-card-number');
+  const headlineEl = document.getElementById('payment-receipt-headline');
+  const digitalReceiptEl = document.getElementById('payment-receipt-digital-receipt');
 
   if (statusBadge) {
     statusBadge.className = `badge badge-${success ? 'success' : 'danger'}`;
@@ -2320,24 +2526,25 @@ function fillPaymentReceiptFromService(paymentReceipt) {
     subtitle.textContent = desc;
   }
 
-  const rawAmount =
+  const totalAmount =
     typeof paymentReceipt.totalAmount === 'number'
       ? paymentReceipt.totalAmount
       : typeof paymentReceipt.affectiveAmount === 'number'
         ? paymentReceipt.affectiveAmount
         : null;
-  if (amountEl && rawAmount != null && !Number.isNaN(rawAmount)) {
-    amountEl.textContent = `${rawAmount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  const affectiveAmount =
+    typeof paymentReceipt.affectiveAmount === 'number' ? paymentReceipt.affectiveAmount : totalAmount;
+  const discountAmount =
+    typeof totalAmount === 'number' && typeof affectiveAmount === 'number'
+      ? Math.max(0, totalAmount - affectiveAmount)
+      : null;
+
+  if (amountEl && affectiveAmount != null && !Number.isNaN(affectiveAmount)) {
+    amountEl.textContent = getCurrencyAmountLabel(affectiveAmount);
   }
 
-  if (typeEl) {
-    const typeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
-    typeEl.textContent = typeInfo.label;
-  }
-
-  if (merchantEl) {
-    merchantEl.textContent =
-      paymentReceiptMerchantContext?.merchant ?? i18n.t('transaction.demo.merchantName');
+  if (headlineEl) {
+    headlineEl.textContent = typeInfo.label;
   }
 
   const traceVal =
@@ -2345,32 +2552,102 @@ function fillPaymentReceiptFromService(paymentReceipt) {
       ? String(paymentReceipt.traceNo)
       : paymentReceipt.ipgTransactionId != null
         ? String(paymentReceipt.ipgTransactionId)
-        : '—';
-  if (traceEl) traceEl.textContent = traceVal;
-
-  if (dateEl) {
-    dateEl.textContent = formatPaymentReceiptDate(paymentReceipt.receiptDate);
+        : '';
+  const digitalReceiptRaw =
+    paymentReceipt.receiptRefNum ?? paymentReceipt.receiptEnc ?? paymentReceipt.receiptNonce ?? '';
+  const cardDisplay = getPaymentReceiptCardDisplay(paymentReceipt);
+  if (digitalReceiptEl) {
+    const text = summarizeDigitalReceipt(digitalReceiptRaw);
+    digitalReceiptEl.textContent = text;
+    digitalReceiptEl.setAttribute('title', String(digitalReceiptRaw || ''));
   }
 
-  if (cardEl) {
-    cardEl.textContent = getPaymentReceiptCardDisplay(paymentReceipt);
-  }
-
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-transaction-type',
+    'payment-receipt-transaction-type',
+    typeInfo.label
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-status',
+    'payment-receipt-status-badge',
+    success ? i18n.t('receipt.success') : i18n.t('receipt.failed')
+  );
+  setPaymentReceiptOptionalRow('payment-receipt-row-trace', 'payment-receipt-trace', traceVal);
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-digital-receipt',
+    'payment-receipt-digital-receipt',
+    digitalReceiptRaw,
+    summarizeDigitalReceipt(digitalReceiptRaw)
+  );
   setPaymentReceiptOptionalRow(
     'payment-receipt-row-rrn',
     'payment-receipt-rrn',
     paymentReceipt.rrn != null ? String(paymentReceipt.rrn) : ''
   );
   setPaymentReceiptOptionalRow(
-    'payment-receipt-row-ptrace',
-    'payment-receipt-ptrace',
-    paymentReceipt.pTraceNo != null ? String(paymentReceipt.pTraceNo) : ''
+    'payment-receipt-row-card',
+    'payment-receipt-card-number',
+    cardDisplay === '—' ? '' : cardDisplay
+  );
+  renderReceiptIssuerBankRow(paymentReceipt);
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-date',
+    'payment-receipt-date',
+    formatPaymentReceiptDate(paymentReceipt.receiptDate)
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-total-amount',
+    'payment-receipt-total-amount',
+    totalAmount != null ? String(totalAmount) : '',
+    totalAmount != null ? getCurrencyAmountLabel(totalAmount) : ''
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-discount-amount',
+    'payment-receipt-discount-amount',
+    discountAmount != null ? String(discountAmount) : '',
+    discountAmount != null ? getCurrencyAmountLabel(discountAmount) : ''
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-affective-amount',
+    'payment-receipt-affective-amount',
+    affectiveAmount != null ? String(affectiveAmount) : '',
+    affectiveAmount != null ? getCurrencyAmountLabel(affectiveAmount) : ''
+  );
+
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-merchant-number',
+    'payment-receipt-merchant-number',
+    paymentReceiptMerchantContext?.merchantNumber
   );
   setPaymentReceiptOptionalRow(
     'payment-receipt-row-terminal',
     'payment-receipt-terminal',
-    paymentReceipt.terminalNumber != null ? String(paymentReceipt.terminalNumber) : ''
+    paymentReceipt.terminalNumber != null
+      ? String(paymentReceipt.terminalNumber)
+      : paymentReceiptMerchantContext?.terminalNumber
   );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-gateway-code',
+    'payment-receipt-gateway-code',
+    paymentReceiptMerchantContext?.gatewayCode
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-facilitator',
+    'payment-receipt-facilitator',
+    paymentReceiptMerchantContext?.paymentFacilitator
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-merchant-name',
+    'payment-receipt-merchant-name',
+    paymentReceiptMerchantContext?.merchant ?? i18n.t('transaction.demo.merchantName')
+  );
+  setPaymentReceiptOptionalRow(
+    'payment-receipt-row-merchant-site',
+    'payment-receipt-merchant-site',
+    paymentReceiptMerchantContext?.merchantSite
+  );
+  renderPaymentReceiptExtraColumn(paymentReceipt);
+  syncPaymentReceiptReturnTimer();
 
   i18n.applyDataI18n(document.getElementById('payment-receipt-card') || document);
 }
@@ -2405,6 +2682,10 @@ function showPaymentReceiptScreen(paymentReceipt) {
   const receiptSection = document.getElementById('payment-receipt-section');
   if (flow) flow.hidden = true;
   if (receiptSection) {
+    const completeButton = document.getElementById('payment-receipt-complete-button');
+    if (completeButton) {
+      completeButton.hidden = !getMerchantReturnUrl();
+    }
     fillPaymentReceiptFromService(paymentReceipt);
     receiptSection.hidden = false;
   }
@@ -2413,10 +2694,14 @@ function showPaymentReceiptScreen(paymentReceipt) {
 function attachPaymentReceiptActions() {
   const shareBtn = document.getElementById('payment-receipt-share-button');
   const saveBtn = document.getElementById('payment-receipt-save-button');
+  const completeBtn = document.getElementById('payment-receipt-complete-button');
   const card = document.getElementById('payment-receipt-card');
   if (!shareBtn || shareBtn.dataset.bound === '1') return;
   shareBtn.dataset.bound = '1';
   saveBtn.dataset.bound = '1';
+  if (completeBtn) {
+    completeBtn.dataset.bound = '1';
+  }
 
   shareBtn.addEventListener('click', async () => {
     const receiptText = generatePaymentReceiptPlainText();
@@ -2437,6 +2722,14 @@ function attachPaymentReceiptActions() {
       alert(i18n.t('receipt.saveError'));
     }
   });
+
+  if (completeBtn) {
+    completeBtn.addEventListener('click', () => {
+      const url = getMerchantReturnUrl();
+      if (!url) return;
+      window.location.href = url;
+    });
+  }
 }
 
 function attachFormEvents() {
@@ -2512,10 +2805,8 @@ function attachFormEvents() {
 
       const redirectRes = await ipgService.getReceiptRedirectParams();
       const redirectUrl = redirectRes?.data?.redirectUrl;
-      if (redirectUrl) {
-        window.location.href = redirectUrl;
-        return;
-      }
+      paymentReceiptRedirectUrl =
+        typeof redirectUrl === 'string' && redirectUrl.trim() !== '' ? redirectUrl.trim() : null;
 
       const paymentReceipt = payRes?.data?.paymentReceipt ?? null;
       if (paymentReceipt) {

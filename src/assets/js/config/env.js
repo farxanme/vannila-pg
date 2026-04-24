@@ -49,6 +49,20 @@ function parsePositiveInt(value, fallback) {
   return Number.isFinite(n) && n > 0 ? n : fallback;
 }
 
+function normalizeTimeSpan(value, fallback) {
+  if (typeof value === 'string' && /^\d{1,3}:\d{2}:\d{2}$/.test(value)) {
+    return value;
+  }
+  const sec = Number.parseInt(value, 10);
+  if (Number.isFinite(sec) && sec > 0) {
+    const hours = Math.floor(sec / 3600);
+    const minutes = Math.floor((sec % 3600) / 60);
+    const seconds = sec % 60;
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+  }
+  return fallback;
+}
+
 /**
  * OTP length constraints.
  * - VITE_OTP_MIN_LENGTH (default: 6)
@@ -76,4 +90,20 @@ export function getCaptchaCodeLength() {
  */
 export function getDefaultLockCardNumberDuringOtpCooldown() {
   return import.meta.env.VITE_LOCK_CARD_NUMBER_DURING_OTP_COOLDOWN !== 'false';
+}
+
+/**
+ * Mock transaction timer value (HH:MM:SS or seconds).
+ * Default: 00:10:00.
+ */
+export function getMockCardViewTimeout() {
+  return normalizeTimeSpan(import.meta.env.VITE_MOCK_CARD_VIEW_TIMEOUT, '00:05:00');
+}
+
+/**
+ * Mock receipt return timer value (HH:MM:SS or seconds).
+ * Default: 00:01:00.
+ */
+export function getMockReceiptViewTimeout() {
+  return normalizeTimeSpan(import.meta.env.VITE_MOCK_RECEIPT_VIEW_TIMEOUT, '00:03:00');
 }

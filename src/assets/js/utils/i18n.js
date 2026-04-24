@@ -1,12 +1,12 @@
 /**
  * Internationalization (i18n) Manager
- * Supports: Persian (default), English, Turkish, Arabic, Russian
+ * Supports: Persian (default), English, Turkish, Arabic, Russian, Chinese
  */
 class I18n {
   constructor() {
     const savedLang = localStorage.getItem('app_language');
     this.currentLang =
-      savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
+      savedLang && ['fa', 'en', 'tr', 'ar', 'ru', 'zh'].includes(savedLang) ? savedLang : 'fa';
     this.translations = {};
     this.readyPromise = this.loadTranslations();
   }
@@ -16,12 +16,13 @@ class I18n {
    */
   async loadTranslations() {
     try {
-      const [fa, en, tr, ar, ru] = await Promise.all([
+      const [fa, en, tr, ar, ru, zh] = await Promise.all([
         import('../locales/fa.js'),
         import('../locales/en.js'),
         import('../locales/tr.js'),
         import('../locales/ar.js'),
         import('../locales/ru.js'),
+        import('../locales/zh.js'),
       ]);
 
       this.translations = {
@@ -30,6 +31,7 @@ class I18n {
         tr: tr.default || {},
         ar: ar.default || {},
         ru: ru.default || {},
+        zh: zh.default || {},
       };
     } catch (err) {
       console.warn('Failed to load translations:', err);
@@ -39,16 +41,17 @@ class I18n {
         tr: {},
         ar: {},
         ru: {},
+        zh: {},
       };
     }
   }
 
   /**
    * Set language
-   * @param {string} lang - Language code (fa, en, tr, ar, ru)
+   * @param {string} lang - Language code (fa, en, tr, ar, ru, zh)
    */
   setLanguage(lang) {
-    if (['fa', 'en', 'tr', 'ar', 'ru'].includes(lang)) {
+    if (['fa', 'en', 'tr', 'ar', 'ru', 'zh'].includes(lang)) {
       this.currentLang = lang;
       // Save to localStorage
       localStorage.setItem('app_language', lang);
@@ -144,6 +147,7 @@ class I18n {
       { code: 'tr', name: 'Turkish', nativeName: 'Türkçe' },
       { code: 'ar', name: 'Arabic', nativeName: 'العربية' },
       { code: 'ru', name: 'Russian', nativeName: 'Русский' },
+      { code: 'zh', name: 'Chinese', nativeName: '中文' },
     ];
   }
 }

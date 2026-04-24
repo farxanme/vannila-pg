@@ -11,7 +11,7 @@ initTheme();
   await i18n.readyPromise;
   const savedLang = localStorage.getItem('app_language');
   const langToSet =
-    savedLang && ['fa', 'en', 'tr', 'ar', 'ru'].includes(savedLang) ? savedLang : 'fa';
+    savedLang && ['fa', 'en', 'tr', 'ar', 'ru', 'zh'].includes(savedLang) ? savedLang : 'fa';
   i18n.setLanguage(langToSet);
 })();
 
