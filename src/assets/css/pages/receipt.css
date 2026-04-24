@@ -125,10 +125,22 @@
   pointer-events: none;
 }
 
+.receipt-main-grid-header {
+  background: var(--color-card-soft-bg);
+  color: var(--color-primary-500);
+  border-radius: var(--radius-lg);
+  min-height: 50px;
+  padding: 0 16px;
+  box-sizing: border-box;
+  margin-bottom: var(--spacing-md);
+  display: flex;
+  align-items: center;
+}
+
 .receipt-main-grid-header h2 {
   margin: 0;
-  font-size: var(--font-size-lg);
-  font-weight: 700;
+  font-size: var(--font-size-base);
+  font-weight: 600;
 }
 
 .receipt-main-grid-columns {
