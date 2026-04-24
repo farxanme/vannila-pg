@@ -9,6 +9,7 @@ import {
   mockSendOtpResponse,
   mockPayTransactionResponse,
   mockReceiptRedirectParamsResponse,
+  mockCancelTransactionResponse,
   mockDelay,
 } from '../mocks/ipgMocks.js';
 
@@ -95,7 +96,7 @@ export async function getUserCards() {
  * @param {object} body - pan, cardId, cardRegisteredType, bill, etc.
  * @param {{ captchaToken: string, captchaResponse: string }} captchaHeaders
  */
-export async function sendTransactionOtp(body, captchaHeaders) {
+export async function sendTransactionOtp(body, captchaHeaders = {}) {
   if (useIpgMock()) {
     await mockDelay();
     return mockSendOtpResponse;
@@ -117,7 +118,7 @@ export async function sendTransactionOtp(body, captchaHeaders) {
  * @param {object} body - pan, cvv2, expiryDate, pin2, saveCardAfterPay, cellNumber, email, ...
  * @param {{ captchaToken: string, captchaResponse: string }} captchaHeaders
  */
-export async function payTransaction(body, captchaHeaders) {
+export async function payTransaction(body, captchaHeaders = {}) {
   if (useIpgMock()) {
     await mockDelay();
     return mockPayTransactionResponse;
@@ -144,4 +145,19 @@ export async function getReceiptRedirectParams() {
   }
   const q = requireSessionQuery();
   return ipgFetch(`/transaction/receipt/redirect-params?${toQueryString(q)}`, { method: 'GET' });
+}
+
+/**
+ * POST /transaction/cancel — cancel current payment session.
+ */
+export async function cancelTransaction() {
+  if (useIpgMock()) {
+    await mockDelay();
+    return mockCancelTransactionResponse;
+  }
+  const session = requireSessionBody();
+  return ipgFetch('/transaction/cancel', {
+    method: 'POST',
+    body: JSON.stringify(session),
+  });
 }

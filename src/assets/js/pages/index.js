@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Index Page Script
  */
 import { Header } from '../components/Header.js';
@@ -18,6 +18,7 @@ import {
 } from '../utils/validators.js';
 import {
   detectBank,
+  detectBankFromMaskedPan,
   formatCardNumber,
   getBankLogo,
   getLocalizedBankName,
@@ -100,6 +101,7 @@ const otpCooldownUntilByCardKey = Object.create(null);
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
+let currentTransactionPayload = null;
 
 /** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
 let paymentReceiptMerchantContext = null;
@@ -142,18 +144,32 @@ async function loadCaptchaImage(captchaImageEl) {
 
 /**
  * Card fields for OTP / pay (IPG expects pan or cardId).
- * @returns {{ cardId: string | null, pan: string | null, bill: null, cardRegisteredType: number } | null}
+ * @returns {{ cardId: string | null, pan: string | null, bill: object | null, cardRegisteredType: number } | null}
  */
 function buildCardPayloadForIpg() {
+  const firstBill =
+    Array.isArray(currentTransactionPayload?.bills) && currentTransactionPayload.bills.length > 0
+      ? currentTransactionPayload.bills[0]
+      : null;
+  const bill =
+    firstBill &&
+    typeof firstBill === 'object' &&
+    (firstBill.billId !== undefined || firstBill.payId !== undefined || firstBill.amount !== undefined)
+      ? {
+          billId: firstBill.billId ?? '',
+          payId: firstBill.payId ?? '',
+          amount: firstBill.amount ?? null,
+        }
+      : null;
   const pan = extractNumbers(cardNumberInput.getValue());
   if (pan.length === 16) {
-    return { cardId: null, pan, bill: null, cardRegisteredType: 0 };
+    return { cardId: null, pan, bill, cardRegisteredType: 0 };
   }
   if (selectedSavedCardForApi) {
     return {
       cardId: String(selectedSavedCardForApi.subscriberCardId),
       pan: null,
-      bill: null,
+      bill,
       cardRegisteredType: selectedSavedCardForApi.cardRegisteredType ?? 1,
     };
   }
@@ -347,9 +363,13 @@ function getCurrentCardBankName() {
 }
 
 function getCvv2Constraints() {
-  const bankName = getCurrentCardBankName();
-  const normalized = bankName.trim().toLowerCase();
-  const isSamanBank = normalized === 'saman' || bankName.includes('سامان');
+  const panDigits = extractNumbers(cardNumberInput?.getValue?.() || '');
+  const maskedPan = String(selectedSavedCardForApi?.securePan || '');
+  const bank =
+    (panDigits.length >= 6 ? detectBank(panDigits) : null) ||
+    detectBankFromMaskedPan(maskedPan) ||
+    null;
+  const isSamanBank = bank?.bin === '621986';
   if (isSamanBank) {
     return { minLength: 3, maxLength: 3, fixedLength: true };
   }
@@ -593,7 +613,7 @@ function removeCardFromList(cardListKey) {
   if (typeof refreshCardDropdownFooterButtons === 'function') {
     refreshCardDropdownFooterButtons();
   }
-  // Bottom sheet list is separate DOM — rebuild when open so removed rows disappear
+  // Bottom sheet list is separate DOM â€” rebuild when open so removed rows disappear
   if (cardListSheetRef && typeof openCardListSheetFn === 'function') {
     void openCardListSheetFn();
   }
@@ -1881,8 +1901,10 @@ async function initializeTransactionInfo() {
   try {
     const res = await ipgService.getTransaction();
     txPayload = res?.data ?? null;
+    currentTransactionPayload = txPayload;
   } catch (e) {
     console.error('getTransaction failed:', e);
+    currentTransactionPayload = null;
   }
 
   const terminalFromSession =
@@ -2049,7 +2071,10 @@ async function initializeTransactionInfo() {
       txPayload?.merchant?.gatewayCode ??
       '',
     paymentFacilitator:
-      txPayload?.merchant?.paymentFacilitatorName ?? txPayload?.paymentFacilitatorName ?? '',
+      txPayload?.merchant?.paymentFacilitatorName ??
+      txPayload?.merchant?.paymentFacilitatorInfo?.merchantName ??
+      txPayload?.paymentFacilitatorName ??
+      '',
     merchantSite: transactionData.site,
   };
   paymentReceiptReturnSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.receiptViewTimeOut);
@@ -2151,7 +2176,7 @@ function wireTransactionDescriptionUi(descriptionText) {
     .trim();
   const clipped =
     normalized.length > TRANSACTION_DESCRIPTION_MAX_CHARS
-      ? `${normalized.slice(0, TRANSACTION_DESCRIPTION_MAX_CHARS)}…`
+      ? `${normalized.slice(0, TRANSACTION_DESCRIPTION_MAX_CHARS)}â€¦`
       : normalized;
 
   if (!clipped) {
@@ -2256,7 +2281,12 @@ function openCancelPaymentConfirm() {
         text: i18n.t('cancelConfirm.confirmLeave'),
         type: 'danger',
         onClick: () => {
-          window.location.href = '/';
+          ipgService
+            .cancelTransaction()
+            .catch((err) => console.warn('Cancel transaction request failed:', err))
+            .finally(() => {
+              window.location.href = '/';
+            });
         },
       },
     ],
@@ -2276,11 +2306,11 @@ function getPaymentReceiptCardDisplay(paymentReceipt) {
   if (digits.length >= 4) {
     return `****${digits.slice(-4)}`;
   }
-  return '—';
+  return 'â€”';
 }
 
 function formatPaymentReceiptDate(isoStr) {
-  if (!isoStr) return '—';
+  if (!isoStr) return 'â€”';
   const ms = Date.parse(isoStr);
   if (Number.isNaN(ms)) {
     return String(isoStr);
@@ -2609,7 +2639,7 @@ function fillPaymentReceiptFromService(paymentReceipt) {
   setPaymentReceiptOptionalRow(
     'payment-receipt-row-card',
     'payment-receipt-card-number',
-    cardDisplay === '—' ? '' : cardDisplay
+    cardDisplay === 'â€”' ? '' : cardDisplay
   );
   renderReceiptIssuerBankRow(paymentReceipt);
   setPaymentReceiptOptionalRow(
@@ -3091,3 +3121,5 @@ function updatePageContent() {
 
   revalidateVisibleFormErrorsAfterLanguageChange();
 }
+
+

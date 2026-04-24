@@ -5,19 +5,51 @@ import { getMockCardViewTimeout, getMockReceiptViewTimeout } from '../config/env
 
 export const mockGetTransactionResponse = {
   data: {
-    transactionId: 63,
-    refNum: '9CCA4792E9F80F7E94513EC464412F4D97EF887A8B5300C95D2CD5E8ED5A8E56',
-    salt: '7f479858b67248068fb4aa2a0b258965',
-    userSessionKey: '13D8B41B8364727437F907D6F456ADDAD9249C40948537128C0F09AAA8551D88',
+    transactionState: 1,
+    expired: false,
     terminalNumber: 2765,
-    totalAmount: 120000,
+    totalAmount: 24000,
+    wage: 0,
+    prCode: 40,
+    transactionId: 75,
+    refNum: '8572993840D2D52F9F32280F4389468877298A9FAF4E0D7CB452E414307F94B7',
+    salt: '0cc0583ff53e468ca6c3657bb4a93479',
+    userSessionKey: '4DCDC07C8F79EABD7002824258717FA71E8A4AA0ECAFA6E6104598075AF7A691',
+    bills: [
+      {
+        id: 16,
+        ipgTransactionId: 75,
+        billId: '2306031018',
+        payId: '1210107',
+        amount: 12000,
+        paymentReceipt: null,
+        hasReceipt: false,
+      },
+      {
+        id: 17,
+        ipgTransactionId: 75,
+        billId: '8586431014',
+        payId: '1210102',
+        amount: 12000,
+        paymentReceipt: null,
+        hasReceipt: false,
+      },
+    ],
     merchant: {
       merchantNumber: 27650,
       merchantName: 'تست توسعه',
       merchantLogoUri: '/images/6060666dc75745e6b9c0fc8eae397283.gif',
       merchantWebSite: 'https://dev.net',
-      merchantDescription:
+      description:
         'توضیحات نمونه برای نمایش چندخطی. این بخش می‌تواند چند خط باشد تا دکمه بیشتر/کمتر نمایش داده شود.',
+      paymentFacilitatorInfo: {
+        merchantNumber: 27650,
+        merchantName: 'پرداخت یار توسعه',
+        merchantLogoUri: '/images/payment-facilitor-dev.jpg',
+        merchantWebSite: 'http://pglauncher.dev.net/',
+        description: '',
+        paymentFacilitatorInfo: null,
+      },
     },
     appSettings: {
       cardViewTimeOut: getMockCardViewTimeout(),
@@ -26,7 +58,10 @@ export const mockGetTransactionResponse = {
         prCode: 0,
         panProductCodes: [],
       },
-      billsSettings: null,
+      billsSettings: {
+        maxCount: 10,
+        staticPinMaxAmount: 1000000,
+      },
       otpSettings: {
         maxTries: 5,
         nextTryTime: '00:02:00',
@@ -106,13 +141,12 @@ export const mockPayTransactionResponse = {
       traceNo: '190802',
       sTraceNo: null,
       terminalNumber: 2765,
-      maskedPan: null,
+      maskedPan: '5022**********1234',
       hashedPan: null,
       resultCode: '00',
       resultDescription: 'پرداخت با موفقیت انجام شد',
       canRetry: false,
       isSuccess: true,
-      maskedPan: '5022**********1234',
     },
   },
   statusCode: 2000,
@@ -122,14 +156,20 @@ export const mockPayTransactionResponse = {
 
 export const mockReceiptRedirectParamsResponse = {
   data: {
-    /** Set to a URL to test merchant redirect; omit or null to show inline receipt on index. */
-    redirectUrl: null,
+    redirectUrl: 'https://unit-test/return',
     refNum: '9CCA4792E9F80F7E94513EC464412F4D97EF887A8B5300C95D2CD5E8ED5A8E56',
     receiptEnc:
       '613rzZczTIn/3y/IjJz0iqXwDSpjH6PwD3IFxRXhRYQ52iPDFMy4JCbeZ3i65mIy2AzdTsPxTqWl6A9W/ME9QSenkme5DKOXxQBaGqwBfpBzSmGkR2Wcq+TjmIbsWEZirlXjLt+N+dggEmF+F/j0yVoK//IMeuWrLaBHFeH1JzmJp1EF6PBwhHQxl6M0dwoEIweaKzCvxNcleEsGQujME942vo2WybO3IdKWAFwJPDih0QiwG0DeXsLtbGKOlxEAE+rtSY7/FIR+W/ct24v3QruID6/llZhvEbxJ6S5ngSlDmjlpOgGCcBKEDYSmmxnFsk1uR8LpOJPGu6Rh5f8M3hDshVqki1/ZEwXcdu2QyUw2zgZQP7irHbsw9zwKMKmbAUN4a5/Gyf7zMFyPpDAaJrmAr6P5YNqwHrLgfgBDUlHS2AEcygQvBzQ0LlzTcrVdo75iX+DjIlBv+88QjUy6Z4ZzPaIaTl5qnPzgDg==',
     receiptNonce: 'O9DIHkFx6SW3CiUz',
     receiptTag: 'Owm6dbhhDgql6uPIDnwQxQ==',
   },
+  statusCode: 2000,
+  statusTitle: 'Success',
+  validationErrors: [],
+};
+
+export const mockCancelTransactionResponse = {
+  data: {},
   statusCode: 2000,
   statusTitle: 'Success',
   validationErrors: [],
