@@ -438,6 +438,16 @@ html.app-ready #app .main-content {
   --app-icon-size: var(--size-icon-md);
 }
 
+.save-card-icon {
+  color: var(--color-gray-200);
+  --color-icon: var(--color-gray-200);
+}
+
+.save-card-checkbox:checked + .save-card-icon {
+  color: var(--color-primary);
+  --color-icon: var(--color-primary);
+}
+
 .show-receipt-icon {
   color: var(--color-primary);
   --color-icon: var(--color-primary);
