@@ -38,6 +38,37 @@ export async function shareContent(options) {
 }
 
 /**
+ * Capture element and download as PNG.
+ * @param {HTMLElement} element
+ * @param {string} filename
+ * @returns {Promise<boolean>}
+ */
+export async function downloadElementAsPng(element, filename = 'receipt.png') {
+  if (!element) return false;
+  try {
+    if (typeof html2canvas === 'undefined') {
+      return false;
+    }
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+    });
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    if (!blob) return false;
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+    return true;
+  } catch (err) {
+    console.error('PNG download failed:', err);
+    return false;
+  }
+}
+
+/**
  * Take screenshot of element and share/save
  * @param {HTMLElement} element - Element to capture
  * @param {string} caption - Caption text

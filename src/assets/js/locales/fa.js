@@ -122,6 +122,8 @@ export default {
   'receipt.shareText': 'رسید تراکنش',
   'receipt.download': 'دریافت رسید',
   'receipt.status': 'وضعیت تراکنش',
+  'receipt.statusSuccessDetail': 'پرداخت با موفقیت انجام شد',
+  'receipt.statusFailedDetail': 'پرداخت ناموفق بود',
   'receipt.plain.amount': 'مبلغ:',
   'receipt.plain.merchant': 'پذیرنده:',
   'receipt.plain.transactionId': 'شماره تراکنش:',

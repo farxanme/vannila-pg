@@ -550,12 +550,6 @@ html.app-ready #app .main-content {
   }
 }
 
-/* Inline payment receipt (PAN / trace) */
-#payment-receipt-card-number {
-  direction: ltr;
-  unicode-bidi: plaintext;
-}
-
 /* Jalali expiry: month + year side by side, shared error below */
 .expiry-date-group {
   min-width: 0;

@@ -45,7 +45,7 @@ import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
 import { soundManager } from '../utils/sound.js';
 import { Modal } from '../components/Modal.js';
-import { shareContent } from '../utils/share.js';
+import { shareContent, downloadElementAsPng } from '../utils/share.js';
 import { appIconHtml, createAppIcon, setAppIconFile } from '../utils/icons.js';
 
 // Initialize sound manager
@@ -106,6 +106,8 @@ let paymentReceiptMerchantContext = null;
 let paymentReceiptRedirectUrl = null;
 let paymentReceiptReturnSeconds = 0;
 let paymentReceiptReturnIntervalId = null;
+let paySubmitInFlight = false;
+const clickLockMap = new WeakMap();
 
 /** Last `paymentReceipt` from pay API when inline receipt is shown (for i18n refresh). */
 let lastPaymentReceiptData = null;
@@ -2444,6 +2446,24 @@ function setTimerProgressIndicator(progressEl, ratio) {
   progressEl.style.setProperty('--timer-progress', String(safeRatio));
 }
 
+function isButtonClickLocked(buttonEl) {
+  return Boolean(buttonEl && clickLockMap.get(buttonEl));
+}
+
+function lockButtonClick(buttonEl) {
+  if (!buttonEl) return;
+  clickLockMap.set(buttonEl, true);
+  buttonEl.disabled = true;
+  buttonEl.setAttribute('aria-disabled', 'true');
+}
+
+function unlockButtonClick(buttonEl) {
+  if (!buttonEl) return;
+  clickLockMap.set(buttonEl, false);
+  buttonEl.disabled = false;
+  buttonEl.removeAttribute('aria-disabled');
+}
+
 function getMerchantReturnUrl() {
   if (paymentReceiptRedirectUrl) return paymentReceiptRedirectUrl;
   const site = String(paymentReceiptMerchantContext?.merchantSite || '').trim();
@@ -2510,7 +2530,9 @@ function fillPaymentReceiptFromService(paymentReceipt) {
 
   if (statusBadge) {
     statusBadge.className = `badge badge-${success ? 'success' : 'danger'}`;
-    statusBadge.textContent = success ? i18n.t('receipt.success') : i18n.t('receipt.failed');
+    statusBadge.textContent = success
+      ? i18n.t('receipt.statusSuccessDetail')
+      : i18n.t('receipt.statusFailedDetail');
   }
   if (title) {
     title.textContent = success ? i18n.t('receipt.success') : i18n.t('receipt.failed');
@@ -2704,29 +2726,43 @@ function attachPaymentReceiptActions() {
   }
 
   shareBtn.addEventListener('click', async () => {
-    const receiptText = generatePaymentReceiptPlainText();
-    const ok = await shareContent({ text: receiptText });
-    if (!ok) {
-      const { copyToClipboard } = await import('../utils/clipboard.js');
-      await copyToClipboard(receiptText);
-      alert(i18n.t('receipt.copied'));
+    if (isButtonClickLocked(shareBtn)) return;
+    lockButtonClick(shareBtn);
+    try {
+      const receiptText = generatePaymentReceiptPlainText();
+      const ok = await shareContent({ text: receiptText });
+      if (!ok) {
+        const { copyToClipboard } = await import('../utils/clipboard.js');
+        await copyToClipboard(receiptText);
+        alert(i18n.t('receipt.copied'));
+      }
+    } finally {
+      unlockButtonClick(shareBtn);
     }
   });
 
   saveBtn.addEventListener('click', async () => {
-    const ok = await shareContent({
-      element: card,
-      text: i18n.t('receipt.shareText'),
-    });
-    if (!ok) {
-      alert(i18n.t('receipt.saveError'));
+    if (isButtonClickLocked(saveBtn)) return;
+    lockButtonClick(saveBtn);
+    try {
+      const ok = await downloadElementAsPng(card, 'receipt.png');
+      if (!ok) {
+        alert(i18n.t('receipt.saveError'));
+      }
+    } finally {
+      unlockButtonClick(saveBtn);
     }
   });
 
   if (completeBtn) {
     completeBtn.addEventListener('click', () => {
+      if (isButtonClickLocked(completeBtn)) return;
+      lockButtonClick(completeBtn);
       const url = getMerchantReturnUrl();
-      if (!url) return;
+      if (!url) {
+        unlockButtonClick(completeBtn);
+        return;
+      }
       window.location.href = url;
     });
   }
@@ -2741,6 +2777,8 @@ function attachFormEvents() {
 
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (paySubmitInFlight) return;
+    paySubmitInFlight = true;
 
     // Validate all fields
     const isValid = [
@@ -2763,6 +2801,7 @@ function attachFormEvents() {
       setTimeout(() => {
         setPayButtonState('active');
       }, 2000);
+      paySubmitInFlight = false;
       return;
     }
 
@@ -2773,6 +2812,7 @@ function attachFormEvents() {
         mode: 'toast',
         type: 'error',
       });
+      paySubmitInFlight = false;
       return;
     }
 
@@ -2833,6 +2873,7 @@ function attachFormEvents() {
       });
     } finally {
       setPayButtonState('active');
+      paySubmitInFlight = false;
     }
   });
 
@@ -2869,7 +2910,11 @@ function attachFormEvents() {
   }
 
   document.getElementById('cancel-button').addEventListener('click', () => {
+    const cancelButton = document.getElementById('cancel-button');
+    if (isButtonClickLocked(cancelButton)) return;
+    lockButtonClick(cancelButton);
     openCancelPaymentConfirm();
+    setTimeout(() => unlockButtonClick(cancelButton), 700);
   });
 
   attachPaymentReceiptActions();

@@ -122,6 +122,8 @@ export default {
   'receipt.shareText': 'İşlem fişi',
   'receipt.download': 'Fişi indir',
   'receipt.status': 'İşlem durumu',
+  'receipt.statusSuccessDetail': 'Ödeme başarıyla tamamlandı',
+  'receipt.statusFailedDetail': 'Ödeme başarısız oldu',
   'receipt.plain.amount': 'Tutar:',
   'receipt.plain.merchant': 'Satıcı:',
   'receipt.plain.transactionId': 'İşlem numarası:',

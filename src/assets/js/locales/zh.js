@@ -45,6 +45,8 @@ export default {
   'receipt.shareText': '交易回执',
   'receipt.download': '下载回执',
   'receipt.status': '交易状态',
+  'receipt.statusSuccessDetail': '支付已成功完成',
+  'receipt.statusFailedDetail': '支付失败',
   'receipt.plain.amount': '金额:',
   'receipt.plain.merchant': '商户:',
   'receipt.plain.transactionId': '交易号:',

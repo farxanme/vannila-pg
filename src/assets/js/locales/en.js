@@ -122,6 +122,8 @@ export default {
   'receipt.shareText': 'Transaction receipt',
   'receipt.download': 'Download receipt',
   'receipt.status': 'Transaction status',
+  'receipt.statusSuccessDetail': 'Payment completed successfully',
+  'receipt.statusFailedDetail': 'Payment failed',
   'receipt.plain.amount': 'Amount:',
   'receipt.plain.merchant': 'Merchant:',
   'receipt.plain.transactionId': 'Transaction ID:',

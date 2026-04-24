@@ -537,8 +537,6 @@
 
 /* Footer */
 .footer {
-  background: var(--color-footer-bg);
-  border-top: 1px solid var(--color-stroke);
   padding: var(--spacing-lg) 0;
   margin-top: auto;
 }
@@ -880,36 +878,6 @@
 .transaction-divider {
   border-top: 1px dashed var(--color-stroke);
   margin: var(--spacing-md) 0;
-}
-
-/* Receipt */
-.receipt-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
-.receipt-header {
-  text-align: center;
-  padding-bottom: var(--spacing-lg);
-  margin-bottom: var(--spacing-lg);
-}
-
-.receipt-status {
-  margin-bottom: var(--spacing-md);
-}
-
-.receipt-amount {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: var(--spacing-md) 0;
-}
-
-.receipt-type {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
 }
 
 /* Bank Logo */

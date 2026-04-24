@@ -122,6 +122,8 @@ export default {
   'receipt.shareText': 'Квитанция транзакции',
   'receipt.download': 'Скачать квитанцию',
   'receipt.status': 'Статус транзакции',
+  'receipt.statusSuccessDetail': 'Оплата успешно завершена',
+  'receipt.statusFailedDetail': 'Оплата не удалась',
   'receipt.plain.amount': 'Сумма:',
   'receipt.plain.merchant': 'Торговец:',
   'receipt.plain.transactionId': 'Номер операции:',

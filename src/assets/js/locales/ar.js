@@ -122,6 +122,8 @@ export default {
   'receipt.shareText': 'إيصال المعاملة',
   'receipt.download': 'تحميل الإيصال',
   'receipt.status': 'حالة المعاملة',
+  'receipt.statusSuccessDetail': 'تم الدفع بنجاح',
+  'receipt.statusFailedDetail': 'فشل الدفع',
   'receipt.plain.amount': 'المبلغ:',
   'receipt.plain.merchant': 'التاجر:',
   'receipt.plain.transactionId': 'رقم المعاملة:',
