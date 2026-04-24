@@ -1,3 +1,19 @@
+let html2canvasLoader = null;
+
+async function getHtml2Canvas() {
+  if (typeof window !== 'undefined' && window.html2canvas) {
+    return window.html2canvas;
+  }
+  if (!html2canvasLoader) {
+    html2canvasLoader = import('html2canvas').then((mod) => mod.default || mod);
+  }
+  return html2canvasLoader;
+}
+
+function canvasToBlob(canvas) {
+  return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+}
+
 /**
  * Share content (text or screenshot)
  * @param {Object} options - Share options
@@ -46,14 +62,12 @@ export async function shareContent(options) {
 export async function downloadElementAsPng(element, filename = 'receipt.png') {
   if (!element) return false;
   try {
-    if (typeof html2canvas === 'undefined') {
-      return false;
-    }
+    const html2canvas = await getHtml2Canvas();
     const canvas = await html2canvas(element, {
       backgroundColor: '#ffffff',
       scale: 2,
     });
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+    const blob = await canvasToBlob(canvas);
     if (!blob) return false;
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -76,42 +90,35 @@ export async function downloadElementAsPng(element, filename = 'receipt.png') {
  */
 async function shareScreenshot(element, caption) {
   try {
-    // Use html2canvas if available, otherwise fallback
-    if (typeof html2canvas !== 'undefined') {
-      const canvas = await html2canvas(element, {
-        backgroundColor: '#ffffff',
-        scale: 2,
+    const html2canvas = await getHtml2Canvas();
+    const canvas = await html2canvas(element, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+    });
+    const blob = await canvasToBlob(canvas);
+    if (!blob) return false;
+
+    const file = new File([blob], 'receipt.png', { type: 'image/png' });
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        text: caption || '',
       });
-
-      canvas.toBlob((blob) => {
-        const file = new File([blob], 'receipt.png', { type: 'image/png' });
-
-        if (navigator.share && navigator.canShare({ files: [file] })) {
-          navigator.share({
-            files: [file],
-            text: caption || '',
-          });
-        } else {
-          // Download as fallback
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = 'receipt.png';
-          a.click();
-          URL.revokeObjectURL(url);
-        }
-      });
-
       return true;
-    } else {
-      // Fallback: copy text if html2canvas not available
-      if (caption) {
-        const { copyToClipboard } = await import('./clipboard.js');
-        return await copyToClipboard(caption);
-      }
-      return false;
     }
+
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'receipt.png';
+    a.click();
+    URL.revokeObjectURL(url);
+    return true;
   } catch (err) {
+    if (caption) {
+      const { copyToClipboard } = await import('./clipboard.js');
+      return await copyToClipboard(caption);
+    }
     console.error('Screenshot failed:', err);
     return false;
   }
