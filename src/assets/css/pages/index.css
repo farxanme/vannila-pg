@@ -550,12 +550,6 @@ html.app-ready #app .main-content {
   }
 }
 
-@media (max-width: 1024px) {
-  .card-small #timer-header {
-    display: none;
-  }
-}
-
 /* Inline payment receipt (PAN / trace) */
 #payment-receipt-card-number {
   direction: ltr;

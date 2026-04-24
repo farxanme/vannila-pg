@@ -127,7 +127,7 @@ export class Header {
     this.element = header;
     this.syncToolbarPlacement = () => {
       if (!this.headerToolbar || !this.element) return;
-      const isMobile = window.matchMedia('(max-width: 1024px)').matches;
+      const isMobile = window.matchMedia('(max-width: 1268px)').matches;
       if (isMobile) {
         if (toolbarRow && this.headerToolbar.parentNode !== toolbarRow) {
           toolbarRow.appendChild(this.headerToolbar);
@@ -456,21 +456,34 @@ export class Header {
    */
   handleResize() {
     let lastScrollY = window.scrollY;
+    const mobileMq = window.matchMedia('(max-width: 1268px)');
+    const collapseThreshold = 24;
+    const showThreshold = 8;
 
-    window.addEventListener('scroll', () => {
-      const currentScrollY = window.scrollY;
+    const syncMobileHeaderScrollState = () => {
       const header = this.element;
+      if (!header) return;
+      if (!mobileMq.matches) {
+        header.classList.remove('scrolled');
+        lastScrollY = window.scrollY;
+        return;
+      }
+      const currentScrollY = window.scrollY;
+      const scrollingDown = currentScrollY > lastScrollY;
+      const scrollingUp = currentScrollY < lastScrollY;
 
-      if (window.innerWidth <= 1024) {
-        if (currentScrollY > lastScrollY && currentScrollY > 50) {
-          header.classList.add('scrolled');
-        } else {
-          header.classList.remove('scrolled');
-        }
+      if (scrollingDown && currentScrollY > collapseThreshold) {
+        header.classList.add('scrolled');
+      } else if (scrollingUp || currentScrollY <= showThreshold) {
+        header.classList.remove('scrolled');
       }
 
       lastScrollY = currentScrollY;
-    });
+    };
+
+    window.addEventListener('scroll', syncMobileHeaderScrollState, { passive: true });
+    window.addEventListener('resize', syncMobileHeaderScrollState);
+    syncMobileHeaderScrollState();
   }
 
   /**

@@ -736,7 +736,7 @@ function initializeTimer(durationSeconds = 900) {
   const syncMobileHeaderTitleWithTimer = (timeLabel) => {
     const headerTitleEl = header?.element?.querySelector('.header-title');
     if (!headerTitleEl) return;
-    if (window.matchMedia('(max-width: 1024px)').matches) {
+    if (window.matchMedia('(max-width: 768px)').matches) {
       headerTitleEl.textContent = timeLabel;
       return;
     }
