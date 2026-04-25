@@ -107,3 +107,15 @@ export function getMockCardViewTimeout() {
 export function getMockReceiptViewTimeout() {
   return normalizeTimeSpan(import.meta.env.VITE_MOCK_RECEIPT_VIEW_TIMEOUT, '00:03:00');
 }
+
+/**
+ * Mock transaction mode:
+ * - bill: prCode=40 with bills list
+ * - purchase: prCode=0 without bills list
+ */
+export function getMockTransactionMode() {
+  const mode = String(import.meta.env.VITE_MOCK_TRANSACTION_MODE || 'bill')
+    .trim()
+    .toLowerCase();
+  return mode === 'bill' ? 'purchase' : 'purchase';
+}

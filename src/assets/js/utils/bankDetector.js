@@ -1,19 +1,17 @@
 import { extractNumbers } from './numberConverter.js';
+import { getBankBins } from '../services/ipgService.js';
 
 /**
  * Bank BIN Detection Utility
  */
 
-const panBins = [
-  { bin: 'Unknown', bankName: 'Unknown', bankCode: '' },
-  { bin: '903769', bankName: 'Unknown', bankCode: '' },
+const fallbackPanBins = [
   { bin: '991975', bankName: 'Mellat', bankCode: '012' },
   { bin: '207177', bankName: 'Export Development', bankCode: '020' },
   { bin: '189956', bankName: 'Tosee Taavon', bankCode: '' },
   { bin: '170019', bankName: 'Melli Iran', bankCode: '' },
   { bin: '606256', bankName: 'Mellal', bankCode: '075' },
   { bin: '606373', bankName: 'Mehr Iran', bankCode: '060' },
-  { bin: '601287', bankName: 'Unknown', bankCode: '' },
   { bin: '603799', bankName: 'Melli', bankCode: '017' },
   { bin: '603769', bankName: 'Saderat', bankCode: '' },
   { bin: '603770', bankName: 'Keshavarzi', bankCode: '016' },
@@ -55,8 +53,10 @@ const panBins = [
   { bin: '502908', bankName: 'Tosee Taavon', bankCode: '022' },
   { bin: '502938', bankName: 'Dey', bankCode: '066' },
   { bin: '502229', bankName: 'Pasargad', bankCode: '057' },
-  { bin: '450905', bankName: 'Unknown', bankCode: '' },
 ];
+
+let panBins = [...fallbackPanBins];
+let bankBinsInitialized = false;
 
 // Neo-bank BINs that require extended (8+ digit) matching
 const neoBins = [
@@ -95,6 +95,7 @@ const bankLocalizedNames = {
   mellal: { en: 'Mellal', fa: 'ملل', ar: 'ملل' },
   sarmaye: { en: 'Sarmayeh', fa: 'سرمایه', ar: 'سرماية' },
   tourism: { en: 'Tourism', fa: 'گردشگری', ar: 'السياحة' },
+  'central-bank': { en: 'IRI CentralBank', fa: 'بانک مرکزی', ar: 'البنك المركزي' },
 };
 
 const bankNameToKeyMatchers = [
@@ -128,7 +129,166 @@ const bankNameToKeyMatchers = [
   { key: 'mellal', checks: ['mellal', 'ملل'] },
   { key: 'sarmaye', checks: ['sarmayeh', 'سرمایه'] },
   { key: 'tourism', checks: ['tourism', 'گردشگری'] },
+  { key: 'central-bank', checks: ['iri centralbank', 'iri central', 'central bank', 'centralbank', 'بانک مرکزی'] },
 ];
+
+const logoKeyByLocalizationKey = {
+  saman: 'saman',
+  pasargad: 'pasargad',
+  ayandeh: 'ayandeh',
+  'gharzolhasaneh-resalat': 'gharzolhasaneh-resalat',
+  melli: 'melli',
+  mellat: 'mellat',
+  saderat: 'saderat',
+  keshavarzi: 'keshavarzi',
+  tejarat: 'tejarat',
+  maskan: 'maskan',
+  'sanat-madan': 'sanat-madan',
+  shahr: 'shahr',
+  'eghtesad-novin': 'eghtesad-novin',
+  sina: 'sina',
+  refah: 'refah',
+  sepah: 'sepah',
+  'iran-zamin': 'iran-zamin',
+  ansar: 'ansar',
+  ghavamin: 'ghavamin',
+  parsian: 'parsian',
+  blu: 'blu',
+  post: 'post-bank',
+  'middle-east': 'khavarmiane',
+  dey: 'day',
+  'tosee-taavon': 'tosee-taavon',
+  karafarin: 'karafarin',
+  'mehr-eghtesad': 'mehr-eghtesad',
+  mellal: 'mellal',
+  sarmaye: 'sarmaye',
+  tourism: 'gardeshgari',
+  'central-bank': 'central-bank',
+};
+
+const availableLogoKeys = new Set([
+  'gharzolhasaneh-resalat',
+  'ansar',
+  'ghavamin',
+  'khavarmiane',
+  'central-bank',
+  'gharzolhasaneh-mehr',
+  'gardeshgari',
+  'melli',
+  'iran-venezuela',
+  'parsian',
+  'ayandeh',
+  'hekmat',
+  'post-bank',
+  'tosee-saderat',
+  'future',
+  'taavon-eslami',
+  'kosar',
+  'karafarin',
+  'day',
+  'keshavarzi',
+  'mellat',
+  'saman',
+  'maskan',
+  'noor',
+  'sarmaye',
+  'mellal',
+  'pasargad',
+  'shaparak',
+  'saderat',
+  'blu',
+  'tejarat',
+  'sina',
+  'shahr',
+  'wepod',
+  'tat',
+  'iran-zamin',
+  'abank',
+  'sanat-madan',
+  'sepah',
+  'refah',
+  'tosee-taavon',
+  'mehr-eghtesad',
+  'tosee',
+  'bankino',
+  'eghtesad-novin',
+  'farda',
+  'iran-europe',
+]);
+
+function isValidBinItem(item) {
+  if (!item || typeof item !== 'object') return false;
+  const bin = String(item.bin ?? '').trim();
+  const bankName = String(item.bankName ?? '').trim();
+  return /^\d{5,12}$/.test(bin) && bankName.length > 0;
+}
+
+function normalizeBankBins(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .filter(isValidBinItem)
+    .map((item) => ({
+      bin: String(item.bin).trim(),
+      bankName: String(item.bankName).trim(),
+      bankCode: String(item.bankCode ?? '').trim(),
+    }));
+}
+
+function mergeBinLists(primary, secondary) {
+  const map = new Map();
+  [...primary, ...secondary].forEach((item) => {
+    const normalized = isValidBinItem(item)
+      ? {
+          bin: String(item.bin).trim(),
+          bankName: String(item.bankName).trim(),
+          bankCode: String(item.bankCode ?? '').trim(),
+        }
+      : null;
+    if (!normalized) return;
+    const key = normalized.bin;
+    if (!map.has(key)) {
+      map.set(key, normalized);
+    }
+  });
+  return Array.from(map.values());
+}
+
+function getKnownBins() {
+  return panBins.filter((b) => b.bin && b.bankName && b.bankName !== 'Unknown');
+}
+
+function findBestBinByPan(numbers) {
+  const candidates = getKnownBins().filter((b) => numbers.startsWith(b.bin));
+  if (candidates.length === 0) return null;
+  return candidates.sort((a, b) => b.bin.length - a.bin.length)[0];
+}
+
+/**
+ * Initialize BIN list from API and keep fallback on failure.
+ * API: GET /v2/ipg/base-data/bank-bins.js
+ * @returns {Promise<object[]>}
+ */
+export async function initializeBankBins() {
+  if (bankBinsInitialized) {
+    return panBins;
+  }
+
+  try {
+    const apiBins = await getBankBins();
+    const normalized = normalizeBankBins(apiBins);
+    if (normalized.length > 0) {
+      panBins = mergeBinLists(normalized, fallbackPanBins);
+    } else {
+      panBins = [...fallbackPanBins];
+    }
+  } catch {
+    panBins = [...fallbackPanBins];
+  } finally {
+    bankBinsInitialized = true;
+  }
+
+  return panBins;
+}
 
 function resolveBankLocalizationKey(bankName) {
   const raw = String(bankName || '').trim();
@@ -142,6 +302,42 @@ function resolveBankLocalizationKey(bankName) {
   return null;
 }
 
+function findBankRecordByBin(bankBin) {
+  const normalizedBin = String(bankBin || '').replace(/\D/g, '');
+  if (!normalizedBin) return null;
+
+  const mergedBins = [...panBins, ...fallbackPanBins, ...neoBins];
+  const candidates = mergedBins.filter(
+    (item) =>
+      item &&
+      item.bin &&
+      /^\d+$/.test(String(item.bin)) &&
+      normalizedBin.startsWith(String(item.bin))
+  );
+  if (candidates.length === 0) return null;
+  return candidates.sort((a, b) => String(b.bin).length - String(a.bin).length)[0];
+}
+
+function resolveBankProfile(bankName, bankBin) {
+  const byBin = findBankRecordByBin(bankBin);
+  const effectiveName = byBin?.bankName || bankName || '';
+  const key = resolveBankLocalizationKey(effectiveName);
+  if (!key) {
+    return {
+      name: effectiveName,
+      key: null,
+      localized: null,
+      logoKey: null,
+    };
+  }
+  return {
+    name: effectiveName,
+    key,
+    localized: bankLocalizedNames[key] || null,
+    logoKey: logoKeyByLocalizationKey[key] || null,
+  };
+}
+
 /**
  * Get localized bank name for card list.
  * - fa => Persian
@@ -151,13 +347,19 @@ function resolveBankLocalizationKey(bankName) {
  * @param {string} lang
  * @returns {string}
  */
-export function getLocalizedBankName(bankName, lang = 'fa') {
-  const key = resolveBankLocalizationKey(bankName);
-  if (!key || !bankLocalizedNames[key]) {
-    return bankName || '';
+export function getLocalizedBankName(bankName, lang = 'fa', bankBin = '') {
+  const profile = resolveBankProfile(bankName, bankBin);
+  if (!profile.localized) {
+    return profile.name || bankName || '';
   }
   const targetLang = lang === 'fa' || lang === 'ar' ? lang : 'en';
-  return bankLocalizedNames[key][targetLang] || bankLocalizedNames[key].en || bankName || '';
+  return (
+    profile.localized[targetLang] ||
+    profile.localized.en ||
+    profile.name ||
+    bankName ||
+    ''
+  );
 }
 
 /**
@@ -172,7 +374,7 @@ export function detectBank(cardNumber) {
   const numbers = extractNumbers(cardNumber);
   const plain = cardNumber.replace(/\s/g, '');
 
-  if (numbers.length < 6) return null;
+  if (numbers.length < 5) return null;
 
   // 1) Check extended BINs (neo banks) first
   const neoBank = neoBins.find((neo) => {
@@ -192,15 +394,14 @@ export function detectBank(cardNumber) {
     };
   }
 
-  // 2) Fallback to standard 6–digit BINs
-  const bin = numbers.substring(0, 6);
-  const bank = panBins.find((b) => b.bin === bin);
+  // 2) Fallback to normal BIN list (supports variable lengths)
+  const bank = findBestBinByPan(numbers);
 
-  if (bank && bank.bankName !== 'Unknown') {
+  if (bank) {
     return {
       name: bank.bankName,
       code: bank.bankCode,
-      bin: bin,
+      bin: bank.bin,
     };
   }
 
@@ -252,12 +453,21 @@ export function detectBankFromMaskedPan(maskedPan) {
     }
   }
 
-  const candidates = panBins.filter(
+  const knownBins = getKnownBins();
+
+  const exactLeadMatches = knownBins.filter((b) => lead.startsWith(b.bin));
+  if (exactLeadMatches.length > 0) {
+    const bestExact = exactLeadMatches.sort((a, b) => b.bin.length - a.bin.length)[0];
+    return {
+      name: bestExact.bankName,
+      code: bestExact.bankCode,
+      bin: bestExact.bin,
+    };
+  }
+
+  const candidates = knownBins.filter(
     (b) =>
       b.bin &&
-      b.bin !== 'Unknown' &&
-      b.bankName &&
-      b.bankName !== 'Unknown' &&
       b.bin.startsWith(lead)
   );
 
@@ -279,12 +489,17 @@ export function detectBankFromMaskedPan(maskedPan) {
  * @param {string} bankName - Bank name
  * @returns {string} - Logo path
  */
-export function getBankLogo(bankName) {
-  if (!bankName) {
+export function getBankLogo(bankName, bankBin = '') {
+  const profile = resolveBankProfile(bankName, bankBin);
+  if (!profile.name) {
     return '/assets/images/icons/icn-square-info.svg';
   }
 
-  const originalName = bankName.trim();
+  if (profile.logoKey && availableLogoKeys.has(profile.logoKey)) {
+    return `/assets/images/banks/${profile.logoKey}.svg`;
+  }
+
+  const originalName = profile.name.trim();
   // Normalize (Latin) bank name for file path
   const normalized = originalName.toLowerCase().replace(/\s+/g, '-');
 
@@ -306,97 +521,19 @@ export function getBankLogo(bankName) {
     sep: 'shaparak',
   };
 
-  // Handle common Persian bank names coming from API
-  const persianMap = [
-    { keyword: 'سامان', key: 'saman' },
-    { keyword: 'پاسارگاد', key: 'pasargad' },
-    { keyword: 'آینده', key: 'ayandeh' },
-    { keyword: 'قرض الحسنه رسالت', key: 'gharzolhasaneh-resalat' },
-    { keyword: 'رسالت', key: 'gharzolhasaneh-resalat' },
-    { keyword: 'ملی', key: 'melli' },
-    { keyword: 'ملت', key: 'mellat' },
-    { keyword: 'صادرات', key: 'saderat' },
-    { keyword: 'کشاورزی', key: 'keshavarzi' },
-    { keyword: 'تجارت', key: 'tejarat' },
-    { keyword: 'مسکن', key: 'maskan' },
-    { keyword: 'صنعت و معدن', key: 'sanat-madan' },
-    { keyword: 'شهر', key: 'shahr' },
-    { keyword: 'اقتصاد نوین', key: 'eghtesad-novin' },
-    { keyword: 'سینا', key: 'sina' },
-    { keyword: 'رفاه', key: 'refah' },
-    { keyword: 'سپه', key: 'sepah' },
-    { keyword: 'آینده', key: 'ayandeh' },
-    { keyword: 'ایران زمین', key: 'iran-zamin' },
-    { keyword: 'انصار', key: 'ansar' },
-    { keyword: 'قوامین', key: 'ghavamin' },
-  ];
-
-  // All available bank SVG icon filenames (without extension)
-  const availableIcons = [
-    'gharzolhasaneh-resalat',
-    'ansar',
-    'ghavamin',
-    'khavarmiane',
-    'central-bank',
-    'gharzolhasaneh-mehr',
-    'gardeshgari',
-    'melli',
-    'iran-venezuela',
-    'parsian',
-    'ayandeh',
-    'hekmat',
-    'post-bank',
-    'tosee-saderat',
-    'future',
-    'taavon-eslami',
-    'kosar',
-    'karafarin',
-    'day',
-    'keshavarzi',
-    'mellat',
-    'saman',
-    'maskan',
-    'noor',
-    'sarmaye',
-    'mellal',
-    'pasargad',
-    'shaparak',
-    'saderat',
-    'blu',
-    'tejarat',
-    'sina',
-    'shahr',
-    'wepod',
-    'tat',
-    'iran-zamin',
-    'abank',
-    'sanat-madan',
-    'sepah',
-    'refah',
-    'tosee-taavon',
-    'mehr-eghtesad',
-    'tosee',
-    'bankino',
-    'eghtesad-novin',
-    'farda',
-    'iran-europe',
-  ];
-
-  // Try Persian mapping first
-  let mappedKey = null;
-  for (const item of persianMap) {
-    if (originalName.includes(item.keyword)) {
-      mappedKey = item.key;
-      break;
-    }
-  }
+  // Try localized key mapping first (covers Persian/English aliases)
+  const localizedKey = resolveBankLocalizationKey(originalName);
+  let mappedKey =
+    localizedKey && logoKeyByLocalizationKey[localizedKey]
+      ? logoKeyByLocalizationKey[localizedKey]
+      : null;
 
   // Fallback to Latin/normalized mapping
   if (!mappedKey) {
     mappedKey = map[normalized] || normalized;
   }
 
-  if (!availableIcons.includes(mappedKey)) {
+  if (!availableLogoKeys.has(mappedKey)) {
     return '/assets/images/icons/icn-square-info.svg';
   }
 

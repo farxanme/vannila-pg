@@ -57,7 +57,7 @@ export function getMockCaptchaAudioBlob() {
     v.setInt16(44 + i * 2, int16, true);
   }
 
-  return new Blob([buffer], { type: 'audio/wav' });
+  return new window.Blob([buffer], { type: 'audio/wav' });
 }
 
 /**

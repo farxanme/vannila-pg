@@ -6,6 +6,7 @@ import { getSessionQueryParams, getSessionJsonBody } from './paymentInitData.js'
 import {
   mockGetTransactionResponse,
   mockGetUserCardsResponse,
+  mockGetBankBinsResponse,
   mockSendOtpResponse,
   mockPayTransactionResponse,
   mockReceiptRedirectParamsResponse,
@@ -45,6 +46,47 @@ async function ipgFetch(path, init = {}) {
     throw new Error(msg);
   }
   return json;
+}
+
+async function ipgFetchText(path, init = {}) {
+  const base = getIpgBaseUrl();
+  if (!base) {
+    throw new Error('IPG base URL is not configured');
+  }
+  const url = `${base}/v2/ipg${path}`;
+  const headers = {
+    ...init.headers,
+  };
+  const res = await fetch(url, {
+    credentials: 'include',
+    ...init,
+    headers,
+  });
+  if (!res.ok) {
+    throw new Error(`HTTP ${res.status}`);
+  }
+  return res.text();
+}
+
+function parseBankBinsScript(payload) {
+  if (!payload) return [];
+  const raw = String(payload);
+  const arrayMatch = raw.match(/panBins\s*=\s*(\[[\s\S]*?\])/);
+  if (!arrayMatch || !arrayMatch[1]) return [];
+  const arrayLiteral = arrayMatch[1];
+  try {
+    // First attempt: strict JSON-like payloads
+    return JSON.parse(arrayLiteral.replace(/'/g, '"'));
+  } catch {
+    try {
+      // Fallback: JS object literal payloads (unquoted keys, trailing commas, etc.)
+      const parser = new Function(`return (${arrayLiteral});`);
+      const result = parser();
+      return Array.isArray(result) ? result : [];
+    } catch {
+      return [];
+    }
+  }
 }
 
 function requireSessionQuery() {
@@ -89,6 +131,18 @@ export async function getUserCards() {
   }
   const q = requireSessionQuery();
   return ipgFetch(`/user/cards?${toQueryString(q)}`, { method: 'GET' });
+}
+
+/**
+ * GET /base-data/bank-bins.js — BIN list for bank detection
+ */
+export async function getBankBins() {
+  if (useIpgMock()) {
+    await mockDelay();
+    return mockGetBankBinsResponse;
+  }
+  const scriptText = await ipgFetchText('/base-data/bank-bins.js', { method: 'GET' });
+  return parseBankBinsScript(scriptText);
 }
 
 /**

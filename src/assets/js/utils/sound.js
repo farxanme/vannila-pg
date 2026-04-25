@@ -14,7 +14,7 @@ class SoundManager {
   init() {
     try {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    } catch (err) {
+    } catch {
       console.warn('Audio context not supported');
     }
   }
@@ -99,7 +99,7 @@ class SoundManager {
         });
       };
 
-      if (audio.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+      if (audio.readyState >= window.HTMLMediaElement.HAVE_CURRENT_DATA) {
         tryPlay();
       } else {
         audio.addEventListener('canplay', tryPlay, { once: true });
@@ -116,7 +116,7 @@ class SoundManager {
    */
   async playAudioBlob(audioBlob, volume = 1) {
     if (!this.enabled) return;
-    if (!audioBlob || !(audioBlob instanceof Blob) || audioBlob.size === 0) {
+    if (!audioBlob || !(audioBlob instanceof window.Blob) || audioBlob.size === 0) {
       throw new Error('Audio blob is empty or invalid');
     }
     const audioUrl = URL.createObjectURL(audioBlob);

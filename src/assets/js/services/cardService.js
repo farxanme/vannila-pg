@@ -62,6 +62,7 @@ class CardService {
         securePan: masked,
         subscriberCardId: Number.isNaN(cardIdNum) ? apiCard.cardId : cardIdNum,
         bankName: bank?.name || '',
+        bankBin: bank?.bin || '',
         isGiftCard: Boolean(apiCard.isGiftCard),
         hasValidExpiredDate: apiCard.expireDate != null,
         selected: Boolean(apiCard.selected),
@@ -76,11 +77,13 @@ class CardService {
     if (apiCard.SecurePan != null && String(apiCard.SecurePan).trim() !== '') {
       const secure = String(apiCard.SecurePan);
       const cardNumber = secure.replace(/[^0-9]/g, '');
+      const bank = detectBankFromMaskedPan(secure) || detectBank(cardNumber);
       return {
         number: cardNumber,
         securePan: secure,
         subscriberCardId: apiCard.SubscriberCardId,
-        bankName: apiCard.BankName,
+        bankName: apiCard.BankName || bank?.name || '',
+        bankBin: bank?.bin || '',
         isGiftCard: apiCard.IsGiftCard,
         hasValidExpiredDate: apiCard.HasValidExpiredDate,
         selected: apiCard.Selected,

@@ -90,8 +90,13 @@ export default {
   'transaction.amount': '金额',
   'transaction.terminal': '商户号 / 终端号',
   'transaction.site': '商户网站',
+  'transaction.paymentFacilitatorName': '支付服务商名称',
   'transaction.transactionType': '交易类型',
+  'transaction.billListTitle': '账单列表',
+  'transaction.billItem': '账单',
+  'transaction.billCount': '{count} 个账单',
   'transaction.rial': '里亚尔',
+  'transaction.amountInWordsPrefix': '约合',
   'transaction.toman': '土曼',
 
   // Timer

@@ -22,6 +22,7 @@ import {
   formatCardNumber,
   getBankLogo,
   getLocalizedBankName,
+  initializeBankBins,
 } from '../utils/bankDetector.js';
 import {
   convertToEnglishNumbers,
@@ -102,6 +103,7 @@ let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
 let currentTransactionPayload = null;
+let isBillListOnlyMode = false;
 
 /** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
 let paymentReceiptMerchantContext = null;
@@ -354,14 +356,6 @@ function focusNextVisibleInputField(currentField) {
   }
 }
 
-function getCurrentCardBankName() {
-  if (selectedSavedCardForApi?.bankName) {
-    return String(selectedSavedCardForApi.bankName);
-  }
-  const bank = detectBank(cardNumberInput?.getValue?.() || '');
-  return bank?.name || '';
-}
-
 function getCvv2Constraints() {
   const panDigits = extractNumbers(cardNumberInput?.getValue?.() || '');
   const maskedPan = String(selectedSavedCardForApi?.securePan || '');
@@ -549,8 +543,8 @@ function buildCardDropdownItems(typedDigits) {
       : selectableCards;
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
   return filtered.map((card) => {
-    const logoPath = getBankLogo(card.bankName);
-    const localizedBankName = getLocalizedBankName(card.bankName, lang);
+    const logoPath = getBankLogo(card.bankName, card.bankBin);
+    const localizedBankName = getLocalizedBankName(card.bankName, lang, card.bankBin);
     const maskedPan = getMaskedDisplayPan(card.securePan);
     const rowKey = getCardListKey(card);
     const removeButtonHtml = isCardListManageMode
@@ -711,6 +705,9 @@ async function initializePage() {
       copyright: i18n.t('footer.copyright'),
     });
 
+    // Load bank BINs from API (fallback to local list on failure)
+    await initializeBankBins();
+
     // Load saved cards from API
     await loadCards();
 
@@ -719,14 +716,22 @@ async function initializePage() {
     // Initialize timer (duration from transaction appSettings when available)
     initializeTimer(txUi?.durationSeconds ?? 900);
 
-    // Initialize form inputs
-    initializeFormInputs();
+    // Initialize form inputs only for non-bill-list flows
+    if (!txUi?.showBillList) {
+      initializeFormInputs();
+    } else {
+      isBillListOnlyMode = true;
+    }
 
     // Initialize partner logos (merchant logo from transaction when available)
     initializePartnerLogos(txUi?.merchantLogoUrl ?? null);
 
-    // Attach form events
-    attachFormEvents();
+    // Attach form events only when payment form is available
+    if (!txUi?.showBillList) {
+      attachFormEvents();
+    } else {
+      attachBillListEvents();
+    }
 
     // Update page content with current language
     updatePageContent();
@@ -1022,7 +1027,7 @@ function initializeFormInputs() {
     selectedSavedCardForApi = card;
     hasUserEnabledExpiryDateEdit = false;
     cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
-    updateBankLogo({ name: card.bankName });
+    updateBankLogo({ name: card.bankName, bin: card.bankBin });
     handleGiftCardNotificationFromPan(card.securePan);
     applyExpiryDateModeForSelectedCard();
     syncCvv2Constraints();
@@ -1720,7 +1725,7 @@ function initializeFormInputs() {
             onInput: (value) => {
               otpInput.setValue(value);
             },
-            onComplete: (value) => {
+            onComplete: (_value) => {
               otpPinPad.close();
             },
           });
@@ -1869,7 +1874,7 @@ function updateBankLogo(bank) {
     return;
   }
 
-  const logoPath = getBankLogo(bank.name);
+  const logoPath = getBankLogo(bank.name, bank.bin);
   // If getBankLogo falls back to generic info icon or returns nothing, hide in input
   if (!logoPath || logoPath.includes('/assets/images/icons/icn-square-info.svg')) {
     logoWrapper.innerHTML = '';
@@ -1942,10 +1947,18 @@ async function initializeTransactionInfo() {
 
   const durationSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.cardViewTimeOut);
   const merchantLogoUrl = resolveMerchantLogoUrl(txPayload?.merchant?.merchantLogoUri);
-  const prCodeCandidate = txPayload?.appSettings?.prCodesPanLimits?.prCode;
+  const prCodeCandidate =
+    typeof txPayload?.prCode === 'number'
+      ? txPayload.prCode
+      : txPayload?.appSettings?.prCodesPanLimits?.prCode;
   currentTransactionPrCode =
     typeof prCodeCandidate === 'number' && !Number.isNaN(prCodeCandidate) ? prCodeCandidate : null;
   const transactionTypeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
+  const paymentFacilitatorName =
+    txPayload?.merchant?.paymentFacilitatorInfo?.merchantName ??
+    txPayload?.merchant?.paymentFacilitatorName ??
+    txPayload?.paymentFacilitatorName ??
+    '';
 
   const rawOtp = txPayload?.appSettings?.otpSettings;
   const maxTriesFromApi =
@@ -1988,7 +2001,7 @@ async function initializeTransactionInfo() {
           <div class="transaction-info-label" data-transaction-field="amount">${i18n.t('transaction.amount')}</div>
           <div class="transaction-info-value">
             <div class="transaction-amount-rial" data-amount="${transactionData.amount}">${transactionData.amount.toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
-            <div class="transaction-amount-toman">${amountInWords} ${i18n.t('transaction.toman')}</div>
+            <div class="transaction-amount-toman">${i18n.t('transaction.amountInWordsPrefix')} ${amountInWords} ${i18n.t('transaction.toman')}</div>
           </div>
         </div>
       </div>
@@ -2019,6 +2032,15 @@ async function initializeTransactionInfo() {
         <div class="transaction-info-content">
           <div class="transaction-info-label" data-transaction-field="site">${i18n.t('transaction.site')}</div>
           <div class="transaction-info-value">${transactionData.site}</div>
+        </div>
+      </div>
+      <div class="transaction-info-item" id="transaction-facilitator-row" ${paymentFacilitatorName ? '' : 'hidden'}>
+        <div class="transaction-info-icon">
+          ${appIconHtml('icn-credit-card.svg')}
+        </div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label" data-transaction-field="paymentFacilitatorName">${i18n.t('transaction.paymentFacilitatorName')}</div>
+          <div class="transaction-info-value" id="transaction-facilitator-value">${paymentFacilitatorName}</div>
         </div>
       </div>
       <div class="transaction-info-item transaction-description-item" id="transaction-description-block" hidden>
@@ -2079,7 +2101,94 @@ async function initializeTransactionInfo() {
   };
   paymentReceiptReturnSeconds = parseTimeSpanToSeconds(txPayload?.appSettings?.receiptViewTimeOut);
 
-  return { durationSeconds, merchantLogoUrl };
+  const bills = Array.isArray(txPayload?.bills) ? txPayload.bills : [];
+  const showBillList = currentTransactionPrCode === 40 && bills.length > 0;
+  if (showBillList) {
+    renderBillListSection(bills);
+  } else {
+    restorePaymentFormSection();
+  }
+
+  return { durationSeconds, merchantLogoUrl, showBillList };
+}
+
+function restorePaymentFormSection() {
+  const paymentFormRegion = document.getElementById('payment-form-region');
+  const billSection = document.getElementById('bill-list-section');
+  const largeCardTitle = document.querySelector('.card.card-large .card-title');
+  if (paymentFormRegion) {
+    paymentFormRegion.hidden = false;
+  }
+  if (billSection) {
+    billSection.remove();
+  }
+  if (largeCardTitle) {
+    largeCardTitle.textContent = i18n.t('form.title');
+  }
+}
+
+function renderBillListSection(bills) {
+  const paymentFormRegion = document.getElementById('payment-form-region');
+  const largeCardTitle = document.querySelector('.card.card-large .card-title');
+  if (!paymentFormRegion) return;
+
+  paymentFormRegion.hidden = true;
+  if (largeCardTitle) {
+    largeCardTitle.textContent = i18n.t('transaction.billListTitle');
+  }
+  let billSection = document.getElementById('bill-list-section');
+  if (!billSection) {
+    billSection = document.createElement('section');
+    billSection.id = 'bill-list-section';
+    billSection.className = 'transaction-info';
+    paymentFormRegion.parentElement?.appendChild(billSection);
+  }
+
+  const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
+  const billRowsHtml = bills
+    .map(
+      (bill) => `
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">${appIconHtml('icn-cash-banknote.svg')}</div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.billItem')}</div>
+          <div class="transaction-info-value">
+            ${i18n.t('receipt.billId')}: ${bill.billId || '-'} | ${i18n.t('receipt.payId')}: ${bill.payId || '-'} | ${i18n.t('transaction.amount')}: ${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}
+          </div>
+        </div>
+      </div>
+    `
+    )
+    .join('');
+
+  billSection.innerHTML = `
+    <div class="transaction-summary-card">
+      <div class="transaction-info-item">
+        <div class="transaction-info-icon">${appIconHtml('icn-cash-banknote.svg')}</div>
+        <div class="transaction-info-content">
+          <div class="transaction-info-label">${i18n.t('transaction.billListTitle')}</div>
+          <div class="transaction-info-value">${i18n.t('transaction.billCount', { count: bills.length })}</div>
+        </div>
+      </div>
+    </div>
+    <div class="more-content show" id="bill-list-content">${billRowsHtml}</div>
+    <div class="form-actions">
+      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
+        ${i18n.t('form.cancel')}
+      </button>
+    </div>
+  `;
+}
+
+function attachBillListEvents() {
+  const cancelBtn = document.getElementById('bill-list-cancel-button');
+  if (!cancelBtn) return;
+  cancelBtn.addEventListener('click', () => {
+    if (isButtonClickLocked(cancelBtn)) return;
+    lockButtonClick(cancelBtn);
+    openCancelPaymentConfirm();
+    setTimeout(() => unlockButtonClick(cancelBtn), 700);
+  });
 }
 
 function getTransactionAmountFromDom() {
@@ -2094,6 +2203,7 @@ function getTransactionAmountFromDom() {
 const transactionFieldToI18nKey = {
   terminal: 'transaction.terminal',
   site: 'transaction.site',
+  paymentFacilitatorName: 'transaction.paymentFacilitatorName',
   transactionType: 'transaction.transactionType',
   description: 'transaction.description',
   merchant: 'transaction.merchant',
@@ -2124,7 +2234,7 @@ function refreshTransactionAmountValues() {
 
   const amountInTomans = Math.floor(amount / 10);
   const amountInWords = numberToWordsByLang(amountInTomans, lang);
-  tomanEl.textContent = `${amountInWords} ${i18n.t('transaction.toman')}`;
+  tomanEl.textContent = `${i18n.t('transaction.amountInWordsPrefix')} ${amountInWords} ${i18n.t('transaction.toman')}`;
 }
 
 function setPayButtonState(state) {
@@ -2208,8 +2318,8 @@ function wireTransactionDescriptionUi(descriptionText) {
     }
   };
 
-  requestAnimationFrame(() => {
-    requestAnimationFrame(applyOverflow);
+  window.requestAnimationFrame(() => {
+    window.requestAnimationFrame(applyOverflow);
   });
 
   toggle.onclick = () => {
@@ -2431,14 +2541,22 @@ function summarizeDigitalReceipt(value) {
   return `${text.slice(0, 14)}...${text.slice(-10)}`;
 }
 
-function getReceiptIssuerBankName(paymentReceipt) {
-  const bySelectedCard = selectedSavedCardForApi?.bankName;
-  if (bySelectedCard) return String(bySelectedCard);
-  const fromInput = detectBank(cardNumberInput?.getValue?.() || '')?.name;
-  if (fromInput) return String(fromInput);
-  const fromMasked = detectBank(paymentReceipt?.maskedPan || '')?.name;
-  if (fromMasked) return String(fromMasked);
-  return '';
+function getReceiptIssuerBank(paymentReceipt) {
+  if (selectedSavedCardForApi?.bankName) {
+    return {
+      name: String(selectedSavedCardForApi.bankName),
+      bin: String(selectedSavedCardForApi.bankBin || ''),
+    };
+  }
+  const fromInput = detectBank(cardNumberInput?.getValue?.() || '');
+  if (fromInput?.name) {
+    return { name: String(fromInput.name), bin: String(fromInput.bin || '') };
+  }
+  const fromMasked = detectBank(paymentReceipt?.maskedPan || '');
+  if (fromMasked?.name) {
+    return { name: String(fromMasked.name), bin: String(fromMasked.bin || '') };
+  }
+  return null;
 }
 
 function renderReceiptIssuerBankRow(paymentReceipt) {
@@ -2446,16 +2564,16 @@ function renderReceiptIssuerBankRow(paymentReceipt) {
   const bankValueEl = document.getElementById('payment-receipt-issuer-bank');
   if (!bankRow || !bankValueEl) return;
 
-  const bankName = getReceiptIssuerBankName(paymentReceipt);
-  if (!bankName) {
+  const bank = getReceiptIssuerBank(paymentReceipt);
+  if (!bank?.name) {
     bankRow.hidden = true;
     bankValueEl.textContent = '';
     return;
   }
 
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const localizedName = getLocalizedBankName(bankName, lang) || bankName;
-  const logoPath = getBankLogo(bankName);
+  const localizedName = getLocalizedBankName(bank.name, lang, bank.bin) || bank.name;
+  const logoPath = getBankLogo(bank.name, bank.bin);
   const hasLogo = Boolean(logoPath && !logoPath.includes('icn-square-info.svg'));
   bankValueEl.innerHTML = hasLogo
     ? `<span class="receipt-bank-value"><img class="receipt-bank-logo" src="${logoPath}" alt="${localizedName}" /><span>${localizedName}</span></span>`
@@ -2803,8 +2921,6 @@ function attachFormEvents() {
   const saveCardCheckbox = document.getElementById('save-card-checkbox');
   const showReceiptToggle = document.getElementById('show-receipt-toggle');
   const receiptFields = document.getElementById('receipt-fields');
-  const payButton = document.getElementById('pay-button');
-
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (paySubmitInFlight) return;
@@ -2987,9 +3103,16 @@ function updatePageContent() {
     footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
     footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
-  syncGetOtpButtonState();
+  if (!isBillListOnlyMode) {
+    syncGetOtpButtonState();
+  }
 
   i18n.applyDataI18n(document);
+  if (isBillListOnlyMode) {
+    const bills = Array.isArray(currentTransactionPayload?.bills) ? currentTransactionPayload.bills : [];
+    renderBillListSection(bills);
+    attachBillListEvents();
+  }
   const headerHelpButton = document.getElementById('card-header-help-button');
   if (headerHelpButton) {
     headerHelpButton.setAttribute('aria-label', i18n.t('common.help'));
@@ -3117,7 +3240,9 @@ function updatePageContent() {
   if (receiptSaveBtn) receiptSaveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
 
   // Ensure pay button label uses current language and amount
-  setPayButtonState('active');
+  if (!isBillListOnlyMode) {
+    setPayButtonState('active');
+  }
 
   revalidateVisibleFormErrorsAfterLanguageChange();
 }

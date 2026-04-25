@@ -1,77 +1,91 @@
 /**
  * IPG API mock payloads (aligned with spg-webapp-samples).
  */
-import { getMockCardViewTimeout, getMockReceiptViewTimeout } from '../config/env.js';
+import {
+  getMockCardViewTimeout,
+  getMockReceiptViewTimeout,
+  getMockTransactionMode,
+} from '../config/env.js';
 
-export const mockGetTransactionResponse = {
-  data: {
-    transactionState: 1,
-    expired: false,
-    terminalNumber: 2765,
-    totalAmount: 24000,
-    wage: 0,
-    prCode: 40,
-    transactionId: 75,
-    refNum: '8572993840D2D52F9F32280F4389468877298A9FAF4E0D7CB452E414307F94B7',
-    salt: '0cc0583ff53e468ca6c3657bb4a93479',
-    userSessionKey: '4DCDC07C8F79EABD7002824258717FA71E8A4AA0ECAFA6E6104598075AF7A691',
-    bills: [
-      {
-        id: 16,
-        ipgTransactionId: 75,
-        billId: '2306031018',
-        payId: '1210107',
-        amount: 12000,
-        paymentReceipt: null,
-        hasReceipt: false,
-      },
-      {
-        id: 17,
-        ipgTransactionId: 75,
-        billId: '8586431014',
-        payId: '1210102',
-        amount: 12000,
-        paymentReceipt: null,
-        hasReceipt: false,
-      },
-    ],
-    merchant: {
-      merchantNumber: 27650,
-      merchantName: 'تست توسعه',
-      merchantLogoUri: '/images/6060666dc75745e6b9c0fc8eae397283.gif',
-      merchantWebSite: 'https://dev.net',
-      description:
-        'توضیحات نمونه برای نمایش چندخطی. این بخش می‌تواند چند خط باشد تا دکمه بیشتر/کمتر نمایش داده شود.',
-      paymentFacilitatorInfo: {
+function buildMockBills() {
+  return [
+    {
+      id: 16,
+      ipgTransactionId: 75,
+      billId: '2306031018',
+      payId: '1210107',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 17,
+      ipgTransactionId: 75,
+      billId: '8586431014',
+      payId: '1210102',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+  ];
+}
+
+function buildMockGetTransactionResponse() {
+  const mode = getMockTransactionMode();
+  const isBillMode = mode === 'bill';
+
+  return {
+    data: {
+      transactionState: 1,
+      expired: false,
+      terminalNumber: 2765,
+      totalAmount: 24000,
+      wage: 0,
+      prCode: isBillMode ? 40 : 0,
+      transactionId: 75,
+      refNum: '8572993840D2D52F9F32280F4389468877298A9FAF4E0D7CB452E414307F94B7',
+      salt: '0cc0583ff53e468ca6c3657bb4a93479',
+      userSessionKey: '4DCDC07C8F79EABD7002824258717FA71E8A4AA0ECAFA6E6104598075AF7A691',
+      bills: isBillMode ? buildMockBills() : [],
+      merchant: {
         merchantNumber: 27650,
-        merchantName: 'پرداخت یار توسعه',
-        merchantLogoUri: '/images/payment-facilitor-dev.jpg',
-        merchantWebSite: 'http://pglauncher.dev.net/',
-        description: '',
-        paymentFacilitatorInfo: null,
+        merchantName: 'تست توسعه',
+        merchantLogoUri: '/images/6060666dc75745e6b9c0fc8eae397283.gif',
+        merchantWebSite: 'https://dev.net',
+        description:
+          'توضیحات تستی ترمینال تستی در محیط تستی در حالت توضیحات فعال با تعداد کاراکتر های زیاد جهت نمایش در صفحه کارت درگاه پرداخت اینترنتی آنلاین پی جی سپ (پرداخت الکترونیک سامان کیش)',
+        paymentFacilitatorInfo: isBillMode
+          ? {
+              merchantNumber: 27650,
+              merchantName: 'پرداخت یار توسعه',
+              merchantLogoUri: '/images/payment-facilitor-dev.jpg',
+              merchantWebSite: 'http://pglauncher.dev.net/',
+              description: '',
+              paymentFacilitatorInfo: null,
+            }
+          : null,
+      },
+      appSettings: {
+        cardViewTimeOut: getMockCardViewTimeout(),
+        receiptViewTimeOut: getMockReceiptViewTimeout(),
+        prCodesPanLimits: null,
+        billsSettings: {
+          maxCount: 10,
+          staticPinMaxAmount: 1000000,
+        },
+        otpSettings: {
+          maxTries: 5,
+          nextTryTime: '00:02:00',
+        },
       },
     },
-    appSettings: {
-      cardViewTimeOut: getMockCardViewTimeout(),
-      receiptViewTimeOut: getMockReceiptViewTimeout(),
-      prCodesPanLimits: {
-        prCode: 0,
-        panProductCodes: [],
-      },
-      billsSettings: {
-        maxCount: 10,
-        staticPinMaxAmount: 1000000,
-      },
-      otpSettings: {
-        maxTries: 5,
-        nextTryTime: '00:02:00',
-      },
-    },
-  },
-  statusCode: 2000,
-  statusTitle: 'Success',
-  validationErrors: [],
-};
+    statusCode: 2000,
+    statusTitle: 'Success',
+    validationErrors: [],
+  };
+}
+
+export const mockGetTransactionResponse = buildMockGetTransactionResponse();
 
 export const mockGetUserCardsResponse = {
   data: {
@@ -118,6 +132,19 @@ export const mockGetUserCardsResponse = {
   statusTitle: 'Success',
   validationErrors: [],
 };
+
+export const mockGetBankBinsResponse = [
+  {
+    bin: '10060',
+    bankName: 'IRI CentralBank',
+    bankCode: '10',
+  },
+  {
+    bin: '170019',
+    bankName: 'Melli Iran',
+    bankCode: '17',
+  },
+];
 
 export const mockSendOtpResponse = {
   data: null,
