@@ -5,21 +5,15 @@
    */
 
   /* Primary */
-  --color-primary-default: #4980e0;
   --color-primary-light: #7da7eb;
-  --color-primary-dark: #2f63bf;
 
   /* Numbered scale (compat with existing selectors + focus rings) */
   --color-primary-50: #edf2fb;
-  --color-primary-100: #d0def6;
   --color-primary-200: #afc7f0;
   --color-primary-300: #7da7eb;
-  --color-primary-400: #6292e6;
   --color-primary-500: #4980e0;
   --color-primary-600: #3b72d5;
-  --color-primary-700: #2f63bf;
   --color-primary-800: #274f99;
-  --color-primary-900: #1f3d75;
 
   --color-primary: var(--color-primary-500);
   --color-primary-hover: var(--color-primary-600);
@@ -45,8 +39,6 @@
   --color-gray-500: var(--color-gray-6);
   --color-gray-600: var(--color-gray-7);
   --color-gray-700: var(--color-gray-7);
-  --color-gray-800: var(--color-gray-8);
-  --color-gray-900: var(--color-gray-9);
 
   /* Base text (portal gray-10 / Tailwind text-gray-10) */
   --color-text-primary: rgb(1 21 38 / var(--text-opacity, 1));
@@ -58,25 +50,16 @@
   --color-bg-white: #ffffff;
   --color-stroke: #e5e7eb;
   --color-card-soft-bg: #edf4fc;
-  --color-footer-bg: #e4eaec;
   --color-footer-copyright: #718e9c;
   --color-footer-contact: #253035;
 
   /* Error */
-  --color-error-default: #ff3651;
   --color-error-light: #ff808e;
-  --color-error-dark: #cd002e;
 
   --color-error-50: #fef2f2;
-  --color-error-100: #fecaca;
   --color-error-200: #fecaca;
   --color-error-300: #ff3651;
-  --color-error-400: #ff3651;
   --color-error-500: #ff3651;
-  --color-error-600: #dc2626;
-  --color-error-700: #cd002e;
-  --color-error-800: #991b1b;
-  --color-error-900: #7f1d1d;
 
   --color-error: var(--color-error-500);
 
@@ -84,57 +67,27 @@
   --color-danger: var(--color-error);
 
   /* Success */
-  --color-success-default: #00c291;
   --color-success-light: #6be9b9;
-  --color-success-dark: #038f6c;
 
   --color-success-50: #f0fdf4;
-  --color-success-100: #bbf7d0;
-  --color-success-200: #bbf7d0;
-  --color-success-300: #6be9b9;
-  --color-success-400: #00c291;
   --color-success-500: #00c291;
-  --color-success-600: #16a34a;
-  --color-success-700: #038f6c;
-  --color-success-800: #166534;
-  --color-success-900: #14532d;
 
   --color-success: var(--color-success-500);
 
   /* Warning */
-  --color-warning-default: #ff9a4b;
-  --color-warning-light: #ffbd8a;
-  --color-warning-dark: #da6000;
 
   --color-warning-50: #fefce8;
-  --color-warning-100: #fef08a;
-  --color-warning-200: #fef08a;
-  --color-warning-300: #ffbd8a;
-  --color-warning-400: #ff9a4b;
   --color-warning-500: #ff9a4b;
-  --color-warning-600: #ca8a04;
   --color-warning-700: #da6000;
-  --color-warning-800: #a16207;
-  --color-warning-900: #713f12;
 
   --color-warning: var(--color-warning-500);
 
   /* Info */
   --color-info-default: #01b4dd;
-  --color-info-light: #7be6ff;
-  --color-info-dark: #008eae;
-
-  --color-info-50: #eff6ff;
-  --color-info-200: #bfdbfe;
-  --color-info-600: #2563eb;
 
   --color-info: var(--color-info-default);
 
   /* Accent (portal) */
-  --color-secondary: #16dbcc;
-  --color-third: #fcaa0b;
-  --color-pink: #ff6b9d;
-  --color-purple: #6840c6;
 
   /* Surfaces */
   --color-controller: var(--color-gray-2);
@@ -153,7 +106,6 @@
   --font-family-vazirmatn-fd: 'VazirmatnFD', 'Vazirmatn', system-ui, -apple-system, sans-serif;
   --font-family-base: var(--font-family-vazirmatn-fd);
 
-  --font-size-xxs: 10px;
   --font-size-xs: 12px;
   --font-size-sm: 14px;
   --font-size-base: 16px;
@@ -166,14 +118,12 @@
   /* Layout */
   --container-max-width: 980px;
   --header-height: 88px;
-  --header-height-mobile: 72px;
 
   /* Border Radius / Sizes */
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
   --radius-xl: 12px;
-  --radius-card-top-right: 60px;
 
   /* Component sizes */
   --height-control-md: 48px;
@@ -192,7 +142,6 @@
   --shadow-colored: 0 20px 27px 0 var(--shadow-color);
 
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-default: var(--shadow);
 
@@ -201,15 +150,12 @@
 
   /* Transitions */
   --transition-base: 0.2s ease;
-  --transition-fast: 0.15s ease;
 
   /* Z-index */
   --z-dropdown: 1000;
-  --z-sticky: 1020;
   --z-fixed: 1030;
   --z-modal-backdrop: 1040;
   --z-modal: 1050;
-  --z-popover: 1060;
   --z-tooltip: 1070;
 }
 
