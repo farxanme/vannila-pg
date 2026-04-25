@@ -15,6 +15,7 @@ export default {
 
   // Redirect
   'redirect.loading': 'Yönlendiriliyor...',
+  'redirect.loadingTitle': 'Satici sitesine yonlendiriliyor',
 
   // Header
   'header.title': 'Ödeme Ağ Geçidi',
@@ -207,6 +208,9 @@ export default {
   // Timer
   'timer.title': 'Kalan Süre',
   'timer.expired': 'Süre doldu',
+  'timer.transactionExpiredTitle': 'Islem suresi doldu',
+  'timer.transactionExpiredDescription': 'Bir dakika icinde satici sitesine yonlendirileceksiniz.',
+  'timer.returnToMerchant': 'Satici sitesine git',
 
   // Errors
   'error.network': 'Ağ hatası',

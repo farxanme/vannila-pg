@@ -15,6 +15,7 @@ export default {
 
   // Redirect
   'redirect.loading': 'Redirecting...',
+  'redirect.loadingTitle': 'Redirecting to merchant website',
 
   // Header
   'header.title': 'Payment Gateway',
@@ -207,6 +208,9 @@ export default {
   // Timer
   'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
+  'timer.transactionExpiredTitle': 'Transaction time has expired',
+  'timer.transactionExpiredDescription': 'You will be redirected to merchant website in one minute.',
+  'timer.returnToMerchant': 'Return to merchant website',
 
   // Errors
   'error.network': 'Network error',

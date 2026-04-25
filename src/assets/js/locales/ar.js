@@ -15,6 +15,7 @@ export default {
 
   // Redirect
   'redirect.loading': 'جاري التحويل...',
+  'redirect.loadingTitle': 'جاري التحويل إلى موقع التاجر',
 
   // Header
   'header.title': 'بوابة الدفع',
@@ -207,6 +208,9 @@ export default {
   // Timer
   'timer.title': 'الوقت المتبقي',
   'timer.expired': 'انتهى الوقت',
+  'timer.transactionExpiredTitle': 'انتهى وقت تنفيذ المعاملة',
+  'timer.transactionExpiredDescription': 'سيتم تحويلك إلى موقع التاجر خلال دقيقة واحدة.',
+  'timer.returnToMerchant': 'التحويل إلى موقع التاجر',
 
   // Errors
   'error.network': 'خطأ في الشبكة',

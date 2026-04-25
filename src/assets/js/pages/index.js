@@ -110,6 +110,9 @@ let paymentReceiptMerchantContext = null;
 let paymentReceiptRedirectUrl = null;
 let paymentReceiptReturnSeconds = 0;
 let paymentReceiptReturnIntervalId = null;
+let transactionExpiredReturnIntervalId = null;
+let transactionExpiredRemainingSeconds = 60;
+let receiptRedirectLoadingTimeoutId = null;
 let paySubmitInFlight = false;
 const clickLockMap = new WeakMap();
 
@@ -809,6 +812,7 @@ function initializeTimer(durationSeconds = 900) {
         mode: 'toast',
         type: 'warning',
       });
+      showTransactionExpiredScreen();
     },
   });
 
@@ -2639,6 +2643,20 @@ function clearPaymentReceiptReturnTimer() {
   }
 }
 
+function clearTransactionExpiredReturnTimer() {
+  if (transactionExpiredReturnIntervalId != null) {
+    clearInterval(transactionExpiredReturnIntervalId);
+    transactionExpiredReturnIntervalId = null;
+  }
+}
+
+function clearReceiptRedirectLoadingTimeout() {
+  if (receiptRedirectLoadingTimeoutId != null) {
+    window.clearTimeout(receiptRedirectLoadingTimeoutId);
+    receiptRedirectLoadingTimeoutId = null;
+  }
+}
+
 function setTimerProgressIndicator(progressEl, ratio) {
   if (!progressEl) return;
   const safeRatio = Math.max(0, Math.min(1, Number(ratio)));
@@ -2671,6 +2689,85 @@ function getMerchantReturnUrl() {
   return `https://${site}`;
 }
 
+function navigateToMerchantSite() {
+  const url = getMerchantReturnUrl();
+  if (url) {
+    window.location.href = url;
+  }
+}
+
+function showReceiptRedirectLoadingScreen() {
+  clearPaymentReceiptReturnTimer();
+  clearTransactionExpiredReturnTimer();
+  clearReceiptRedirectLoadingTimeout();
+  if (timer && typeof timer.stop === 'function') {
+    timer.stop();
+  }
+
+  const flow = document.getElementById('payment-flow-section');
+  const receiptSection = document.getElementById('payment-receipt-section');
+  const initErrorSection = document.getElementById('payment-init-error-section');
+  const txExpiredSection = document.getElementById('payment-transaction-expired-section');
+  const redirectSection = document.getElementById('payment-redirect-loading-section');
+
+  if (flow) flow.hidden = true;
+  if (receiptSection) receiptSection.hidden = true;
+  if (initErrorSection) initErrorSection.hidden = true;
+  if (txExpiredSection) txExpiredSection.hidden = true;
+  if (redirectSection) redirectSection.hidden = false;
+
+  const url = getMerchantReturnUrl();
+  if (!url) return;
+  receiptRedirectLoadingTimeoutId = setTimeout(() => {
+    navigateToMerchantSite();
+  }, 1000);
+}
+
+function showTransactionExpiredScreen() {
+  clearPaymentReceiptReturnTimer();
+  clearTransactionExpiredReturnTimer();
+  clearReceiptRedirectLoadingTimeout();
+  if (timer && typeof timer.stop === 'function') {
+    timer.stop();
+  }
+
+  const flow = document.getElementById('payment-flow-section');
+  const receiptSection = document.getElementById('payment-receipt-section');
+  const initErrorSection = document.getElementById('payment-init-error-section');
+  const redirectSection = document.getElementById('payment-redirect-loading-section');
+  const txExpiredSection = document.getElementById('payment-transaction-expired-section');
+  const returnBtn = document.getElementById('transaction-expired-return-button');
+  const returnValueEl = document.getElementById('transaction-expired-return-time-value');
+
+  if (flow) flow.hidden = true;
+  if (receiptSection) receiptSection.hidden = true;
+  if (initErrorSection) initErrorSection.hidden = true;
+  if (redirectSection) redirectSection.hidden = true;
+  if (txExpiredSection) txExpiredSection.hidden = false;
+
+  transactionExpiredRemainingSeconds = 60;
+  if (returnValueEl) {
+    returnValueEl.textContent = formatSecondsAsMmSs(transactionExpiredRemainingSeconds);
+  }
+
+  if (returnBtn) {
+    returnBtn.onclick = () => navigateToMerchantSite();
+  }
+
+  transactionExpiredReturnIntervalId = setInterval(() => {
+    transactionExpiredRemainingSeconds -= 1;
+    if (returnValueEl) {
+      returnValueEl.textContent = formatSecondsAsMmSs(
+        Math.max(0, transactionExpiredRemainingSeconds)
+      );
+    }
+    if (transactionExpiredRemainingSeconds <= 0) {
+      clearTransactionExpiredReturnTimer();
+      navigateToMerchantSite();
+    }
+  }, 1000);
+}
+
 function syncPaymentReceiptReturnTimer() {
   clearPaymentReceiptReturnTimer();
   const timerWrap = document.getElementById('payment-receipt-return-timer');
@@ -2698,10 +2795,7 @@ function syncPaymentReceiptReturnTimer() {
       timerValue.textContent = '00:00';
       setTimerProgressIndicator(timerProgress, 0);
       clearPaymentReceiptReturnTimer();
-      const url = getMerchantReturnUrl();
-      if (url) {
-        window.location.href = url;
-      }
+      showReceiptRedirectLoadingScreen();
       return;
     }
     timerValue.textContent = formatSecondsAsMmSs(remaining);
@@ -2895,6 +2989,8 @@ function generatePaymentReceiptPlainText() {
  * Show full-width receipt section (same layout as init-error / receipt.html) and hide checkout grid.
  */
 function showPaymentReceiptScreen(paymentReceipt) {
+  clearTransactionExpiredReturnTimer();
+  clearReceiptRedirectLoadingTimeout();
   if (timer && typeof timer.stop === 'function') {
     timer.stop();
   }
@@ -3287,8 +3383,12 @@ function updatePageContent() {
 
   const receiptShareBtn = document.getElementById('payment-receipt-share-button');
   const receiptSaveBtn = document.getElementById('payment-receipt-save-button');
+  const txExpiredTime = document.getElementById('transaction-expired-return-time-value');
   if (receiptShareBtn) receiptShareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
   if (receiptSaveBtn) receiptSaveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
+  if (txExpiredTime && !document.getElementById('payment-transaction-expired-section')?.hidden) {
+    txExpiredTime.textContent = formatSecondsAsMmSs(Math.max(0, transactionExpiredRemainingSeconds));
+  }
 
   // Ensure pay button label uses current language and amount
   if (!isBillListOnlyMode) {

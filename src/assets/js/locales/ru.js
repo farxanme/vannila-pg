@@ -15,6 +15,7 @@ export default {
 
   // Redirect
   'redirect.loading': 'Перенаправление...',
+  'redirect.loadingTitle': 'Перенаправление на сайт продавца',
 
   // Header
   'header.title': 'Платежный шлюз',
@@ -207,6 +208,9 @@ export default {
   // Timer
   'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
+  'timer.transactionExpiredTitle': 'Время выполнения транзакции истекло',
+  'timer.transactionExpiredDescription': 'Через одну минуту вы будете перенаправлены на сайт продавца.',
+  'timer.returnToMerchant': 'Перейти на сайт продавца',
 
   // Errors
   'error.network': 'Ошибка сети',

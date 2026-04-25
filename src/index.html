@@ -381,6 +381,58 @@
               </div>
             </div>
           </section>
+
+          <!-- Auto redirect loading after receipt timer end -->
+          <section
+            id="payment-redirect-loading-section"
+            class="init-error-section"
+            hidden
+            aria-labelledby="redirect-loading-title"
+          >
+            <div class="init-error-container">
+              <div class="card init-error-card redirect-loading-card">
+                <div class="redirect-loading-content">
+                  <div class="redirect-loading-spinner spinner" aria-hidden="true"></div>
+                  <h2 id="redirect-loading-title" data-i18n="redirect.loadingTitle">
+                    در حال انتقال به سایت پذیرنده
+                  </h2>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transaction timeout screen -->
+          <section
+            id="payment-transaction-expired-section"
+            class="init-error-section"
+            hidden
+            aria-labelledby="transaction-expired-title"
+          >
+            <div class="init-error-container">
+              <div class="card init-error-card transaction-expired-card">
+                <div class="transaction-expired-content">
+                  <h2 id="transaction-expired-title" data-i18n="timer.transactionExpiredTitle">
+                    زمان انجام تراکنش به پایان رسید
+                  </h2>
+                  <p data-i18n="timer.transactionExpiredDescription">
+                    شما تا یک دقیقه دیگر به سایت پذیرنده منتقل می‌شوید.
+                  </p>
+                  <p class="transaction-expired-countdown-text">
+                    <span data-i18n="receipt.autoReturnPrefix">بازگشت خودکار تا</span>
+                    <strong id="transaction-expired-return-time-value">01:00</strong>
+                  </p>
+                  <button
+                    type="button"
+                    class="btn btn-success"
+                    id="transaction-expired-return-button"
+                    data-i18n="timer.returnToMerchant"
+                  >
+                    انتقال به سایت پذیرنده
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
         </div>
       </main>
 

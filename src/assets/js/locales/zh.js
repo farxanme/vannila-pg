@@ -102,4 +102,8 @@ export default {
   // Timer
   'timer.title': '剩余时间',
   'timer.expired': '时间已结束',
+  'timer.transactionExpiredTitle': '交易时间已结束',
+  'timer.transactionExpiredDescription': '您将在一分钟后跳转到商户网站。',
+  'timer.returnToMerchant': '跳转到商户网站',
+  'redirect.loadingTitle': '正在跳转到商户网站',
 };

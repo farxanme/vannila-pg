@@ -15,6 +15,7 @@ export default {
 
   // Redirect
   'redirect.loading': 'در حال انتقال...',
+  'redirect.loadingTitle': 'در حال انتقال به سایت پذیرنده',
 
   // Header
   'header.title': 'درگاه پرداخت اینترنتی سِپ',
@@ -207,6 +208,9 @@ export default {
   // Timer
   'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
+  'timer.transactionExpiredTitle': 'زمان انجام تراکنش به پایان رسید',
+  'timer.transactionExpiredDescription': 'شما تا یک دقیقه دیگر به سایت پذیرنده منتقل می‌شوید.',
+  'timer.returnToMerchant': 'انتقال به سایت پذیرنده',
 
   // Errors
   'error.network': 'خطا در ارتباط با سرور',
