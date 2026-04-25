@@ -50,9 +50,10 @@
         <div class="container">
           <!-- Checkout flow (two-column grid) -->
           <section id="payment-flow-section" class="payment-flow-section">
+          <div class="card payment-main-card">
           <div class="grid grid-2-col">
-            <!-- Large Card (2/3) -->
-            <div class="card card-large">
+            <!-- Large Section (2/3) -->
+            <div class="card-large">
               <div class="card-header">
                 <h2 class="card-title" data-i18n="form.title">اطلاعات کارت خود را وارد کنید</h2>
                 <button
@@ -74,6 +75,11 @@
                 <!-- Card Number -->
                 <div class="form-group">
                   <div id="card-number-input-container"></div>
+                  <div
+                    id="gift-card-inline-notice"
+                    class="gift-card-inline-notice"
+                    hidden
+                  ></div>
                 </div>
 
                 <!-- CVV2 and Expiry Date -->
@@ -171,8 +177,8 @@
               </div>
             </div>
 
-            <!-- Small Card (1/3) -->
-            <div class="card card-small">
+            <!-- Small Section (1/3) -->
+            <div class="card-small">
               <div class="card-header" id="timer-header">
                 <h2 class="card-title" data-i18n="timer.title">زمان باقی‌مانده</h2>
                 <div id="timer-container" class="timer">
@@ -191,6 +197,7 @@
                 <!-- Transaction info will be inserted here -->
               </div>
             </div>
+          </div>
           </div>
           </section>
 

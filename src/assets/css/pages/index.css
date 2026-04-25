@@ -67,17 +67,17 @@ html.app-ready #app .main-content {
 }
 
 /* Small card layout: stack content, show transaction info below logos */
-.card.card-large,
-.card.card-small {
+.card-large,
+.card-small {
   padding: 14px;
 }
 
-.card.card-small {
+.card-small {
   display: flex;
   flex-direction: column;
 }
 
-.card.card-small .transaction-info {
+.card-small .transaction-info {
   margin-top: var(--spacing-lg);
 }
 
@@ -120,6 +120,16 @@ html.app-ready #app .main-content {
     padding-left: 48px;
     padding-right: 48px;
   }
+}
+
+.gift-card-inline-notice {
+  margin-top: var(--spacing-xs);
+}
+
+.gift-card-inline-notice.error-dom-content.error-dom-info {
+  color: var(--color-warning-700);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
 }
 
 /* OTP Input Container Styles */

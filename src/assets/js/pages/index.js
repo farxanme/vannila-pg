@@ -1028,7 +1028,7 @@ function initializeFormInputs() {
     hasUserEnabledExpiryDateEdit = false;
     cardNumberInput.setValue(getMaskedDisplayPan(card.securePan));
     updateBankLogo({ name: card.bankName, bin: card.bankBin });
-    handleGiftCardNotificationFromPan(card.securePan);
+    handleGiftCardNotification(card.securePan, Boolean(card.isGiftCard));
     applyExpiryDateModeForSelectedCard();
     syncCvv2Constraints();
     syncGetOtpButtonState();
@@ -1086,7 +1086,7 @@ function initializeFormInputs() {
       }
 
       // Detect gift card and notify
-      handleGiftCardNotificationFromPan(value);
+      handleGiftCardNotification(value);
 
       if (cardDropdown) {
         cardDropdown.updateItems(buildCardDropdownItems());
@@ -1139,6 +1139,7 @@ function initializeFormInputs() {
                 syncCvv2Constraints();
                 syncGetOtpButtonState();
                 resetFieldsOnCardChange();
+                handleGiftCardNotification('');
                 if (cardListSheetRef) {
                   cardListSheetRef.destroy();
                   cardListSheetRef = null;
@@ -1314,6 +1315,56 @@ function initializeFormInputs() {
       });
     }
     isCurrentGiftCard = isGift;
+    const inlineNotice = document.getElementById('gift-card-inline-notice');
+    if (inlineNotice) {
+      if (isGift) {
+        inlineNotice.hidden = false;
+        errorHandler.show({
+          message: i18n.t('form.giftCardNotice'),
+          mode: 'dom',
+          targetElement: inlineNotice,
+          type: 'info',
+        });
+      } else {
+        inlineNotice.hidden = true;
+        inlineNotice.textContent = '';
+        inlineNotice.removeAttribute('role');
+        inlineNotice.className = 'gift-card-inline-notice';
+      }
+    }
+  }
+
+  function handleGiftCardNotification(pan, forceGiftCard = null) {
+    if (typeof forceGiftCard === 'boolean') {
+      const isGift = forceGiftCard;
+      if (isGift && !isCurrentGiftCard) {
+        errorHandler.show({
+          message: i18n.t('form.giftCardNotice'),
+          mode: 'toast',
+          type: 'info',
+        });
+      }
+      isCurrentGiftCard = isGift;
+      const inlineNotice = document.getElementById('gift-card-inline-notice');
+      if (inlineNotice) {
+        if (isGift) {
+          inlineNotice.hidden = false;
+          errorHandler.show({
+            message: i18n.t('form.giftCardNotice'),
+            mode: 'dom',
+            targetElement: inlineNotice,
+            type: 'info',
+          });
+        } else {
+          inlineNotice.hidden = true;
+          inlineNotice.textContent = '';
+          inlineNotice.removeAttribute('role');
+          inlineNotice.className = 'gift-card-inline-notice';
+        }
+      }
+      return;
+    }
+    handleGiftCardNotificationFromPan(pan);
   }
 
   // CVV2 Input
