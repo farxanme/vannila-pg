@@ -12,7 +12,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, 'src/index.html'),
         receipt: resolve(__dirname, 'src/receipt.html'),
-        redirect: resolve(__dirname, 'src/redirect.html')
+        redirect: resolve(__dirname, 'src/redirect.html'),
       },
       output: {
         entryFileNames: 'assets/js/[name].js',
@@ -38,15 +38,15 @@ export default defineConfig({
             return 'assets/fonts/[name][extname]';
           }
           return 'assets/[name][extname]';
-        }
-      }
+        },
+      },
     },
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true
-      }
-    }
+        drop_console: true,
+      },
+    },
   },
   server: {
     port: 3000,

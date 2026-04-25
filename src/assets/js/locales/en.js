@@ -51,6 +51,10 @@ export default {
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP is required',
   'form.otp.invalidLengthRange': 'OTP must be between {{min}} and {{max}} digits',
+  'form.internetPin': 'Internet PIN',
+  'form.internetPin.placeholder': 'Internet PIN',
+  'form.internetPin.required': 'Internet PIN is required',
+  'form.internetPin.invalidLengthRange': 'Internet PIN must be between {{min}} and {{max}} digits',
   'form.mobile': 'Mobile Number',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'Mobile number is required',
@@ -61,6 +65,10 @@ export default {
   'form.email.invalid': 'Invalid email',
   'form.saveCard': 'Save card in SEP gateway',
   'form.pay': 'Pay',
+  'form.payDynamicPin': 'Pay with dynamic PIN',
+  'form.payStaticPin': 'Pay with static PIN',
+  'form.continue': 'Continue',
+  'form.back': 'Back',
   'form.pay.securePrefix': 'Secure payment',
   'form.pay.secureWithAmount': 'Secure payment ({{amount}} {{currency}})',
   'form.pay.disabled': 'Please complete all information',
@@ -209,7 +217,8 @@ export default {
   'timer.title': 'Remaining Time',
   'timer.expired': 'Time expired',
   'timer.transactionExpiredTitle': 'Transaction time has expired',
-  'timer.transactionExpiredDescription': 'You will be redirected to merchant website in one minute.',
+  'timer.transactionExpiredDescription':
+    'You will be redirected to merchant website in one minute.',
   'timer.returnToMerchant': 'Return to merchant website',
 
   // Errors

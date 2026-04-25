@@ -29,6 +29,10 @@ export default {
   'form.pay': '支付',
   'form.cancel': '取消',
   'form.getOtp': '获取动态密码',
+  'form.internetPin': '网银密码',
+  'form.internetPin.placeholder': '网银密码',
+  'form.internetPin.required': '网银密码为必填项',
+  'form.internetPin.invalidLengthRange': '网银密码长度需在 {{min}} 到 {{max}} 位之间',
   'form.pay.processing': '正在连接银行...',
 
   // Receipt

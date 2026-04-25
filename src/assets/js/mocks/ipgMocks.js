@@ -54,16 +54,14 @@ function buildMockGetTransactionResponse() {
         merchantWebSite: 'https://dev.net',
         description:
           'توضیحات تستی ترمینال تستی در محیط تستی در حالت توضیحات فعال با تعداد کاراکتر های زیاد جهت نمایش در صفحه کارت درگاه پرداخت اینترنتی آنلاین پی جی سپ (پرداخت الکترونیک سامان کیش)',
-        paymentFacilitatorInfo: isBillMode
-          ? {
-              merchantNumber: 27650,
-              merchantName: 'پرداخت یار توسعه',
-              merchantLogoUri: '/images/payment-facilitor-dev.jpg',
-              merchantWebSite: 'http://pglauncher.dev.net/',
-              description: '',
-              paymentFacilitatorInfo: null,
-            }
-          : null,
+        paymentFacilitatorInfo: {
+          merchantNumber: 27650,
+          merchantName: 'پرداخت یار توسعه',
+          merchantLogoUri: '/images/payment-facilitor-dev.jpg',
+          merchantWebSite: 'http://pglauncher.dev.net/',
+          description: '',
+          paymentFacilitatorInfo: null,
+        },
       },
       appSettings: {
         cardViewTimeOut: getMockCardViewTimeout(),

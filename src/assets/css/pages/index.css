@@ -67,11 +67,6 @@ html.app-ready #app .main-content {
 }
 
 /* Small card layout: stack content, show transaction info below logos */
-.card-large,
-.card-small {
-  padding: 14px;
-}
-
 .card-small {
   display: flex;
   flex-direction: column;
@@ -232,7 +227,9 @@ html.app-ready #app .main-content {
   min-height: 48px;
   position: relative;
   z-index: 1;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 /* RTL: Input container on right side */
@@ -287,7 +284,9 @@ html.app-ready #app .main-content {
   flex-shrink: 0;
   display: block;
   box-sizing: border-box;
-  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+  transition:
+    border-color var(--transition-base),
+    box-shadow var(--transition-base);
 }
 
 /* RTL: Captcha image on left side */
@@ -305,9 +304,7 @@ html.app-ready #app .main-content {
   border-color: var(--color-gray-200);
 }
 
-.captcha-container
-  .captcha-input-cluster:not(:has(.input-container.error)):hover
-  .captcha-image {
+.captcha-container .captcha-input-cluster:not(:has(.input-container.error)):hover .captcha-image {
   border-top-color: var(--color-gray-200);
   border-bottom-color: var(--color-gray-200);
   border-right-color: var(--color-gray-200);
@@ -574,6 +571,27 @@ html.app-ready #app .main-content {
 .transaction-expired-countdown-text {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+}
+
+.bill-list-actions {
+  margin-top: var(--spacing-md);
+}
+
+.bill-list-actions-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+  width: 100%;
+}
+
+.payment-form .form-actions.bill-form-actions-with-back {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--spacing-sm);
+}
+
+.payment-form .form-actions.bill-form-actions-with-back > .btn.btn-success {
+  grid-column: 1 / -1;
 }
 
 /* Mobile: captcha audio = icon only; checkout card headers minimized */

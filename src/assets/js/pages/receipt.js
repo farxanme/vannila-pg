@@ -100,16 +100,12 @@ function updateReceiptContent(data) {
   amount.textContent = `${data.amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
   transactionId.textContent = data.id;
   transactionDate.textContent =
-    typeof data.dateMs === 'number'
-      ? new Date(data.dateMs).toLocaleString(locale)
-      : data.date;
+    typeof data.dateMs === 'number' ? new Date(data.dateMs).toLocaleString(locale) : data.date;
   cardNumber.textContent = data.cardNumber;
   merchantName.textContent = data.useDemoCopy
     ? i18n.t('transaction.demo.merchantName')
     : data.merchant;
-  type.textContent = data.useDemoCopy
-    ? i18n.t('receipt.demo.transactionType')
-    : data.type;
+  type.textContent = data.useDemoCopy ? i18n.t('receipt.demo.transactionType') : data.type;
 }
 
 function attachEvents() {

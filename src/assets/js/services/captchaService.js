@@ -27,9 +27,7 @@ export async function fetchCaptcha() {
     throw new Error('Invalid captcha response');
   }
   const raw = data.captchaImageBase64;
-  const imageDataUrl = raw.startsWith('data:')
-    ? raw
-    : `data:image/png;base64,${raw}`;
+  const imageDataUrl = raw.startsWith('data:') ? raw : `data:image/png;base64,${raw}`;
   return {
     imageDataUrl,
     captchaKey: data.captchaKey,

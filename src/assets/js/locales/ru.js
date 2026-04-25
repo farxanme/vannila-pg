@@ -51,6 +51,11 @@ export default {
   'form.otp.placeholder': '123456',
   'form.otp.required': 'OTP обязателен',
   'form.otp.invalidLengthRange': 'OTP должен содержать от {{min}} до {{max}} цифр',
+  'form.internetPin': 'Интернет-пароль',
+  'form.internetPin.placeholder': 'Интернет-пароль',
+  'form.internetPin.required': 'Интернет-пароль обязателен',
+  'form.internetPin.invalidLengthRange':
+    'Интернет-пароль должен содержать от {{min}} до {{max}} цифр',
   'form.mobile': 'Номер мобильного',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'Номер мобильного обязателен',
@@ -61,6 +66,10 @@ export default {
   'form.email.invalid': 'Неверная электронная почта',
   'form.saveCard': 'Сохранить карту в шлюзе SEP',
   'form.pay': 'Оплатить',
+  'form.payDynamicPin': 'Оплатить с динамическим PIN',
+  'form.payStaticPin': 'Оплатить со статическим PIN',
+  'form.continue': 'Продолжить',
+  'form.back': 'Назад',
   'form.pay.securePrefix': 'Безопасная оплата',
   'form.pay.secureWithAmount': 'Безопасная оплата ({{amount}} {{currency}})',
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
@@ -209,7 +218,8 @@ export default {
   'timer.title': 'Оставшееся время',
   'timer.expired': 'Время истекло',
   'timer.transactionExpiredTitle': 'Время выполнения транзакции истекло',
-  'timer.transactionExpiredDescription': 'Через одну минуту вы будете перенаправлены на сайт продавца.',
+  'timer.transactionExpiredDescription':
+    'Через одну минуту вы будете перенаправлены на сайт продавца.',
   'timer.returnToMerchant': 'Перейти на сайт продавца',
 
   // Errors

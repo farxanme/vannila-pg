@@ -93,10 +93,12 @@ class SoundManager {
           resolve();
           return;
         }
-        playPromise.then(() => resolve()).catch((err) => {
-          revokeUrlIfNeeded();
-          reject(err);
-        });
+        playPromise
+          .then(() => resolve())
+          .catch((err) => {
+            revokeUrlIfNeeded();
+            reject(err);
+          });
       };
 
       if (audio.readyState >= window.HTMLMediaElement.HAVE_CURRENT_DATA) {

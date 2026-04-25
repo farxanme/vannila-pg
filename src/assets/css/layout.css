@@ -6,7 +6,7 @@
   top: 0;
   left: 0;
   right: 0;
-  height:110px;
+  height: 110px;
   background: linear-gradient(
     to bottom,
     var(--color-primary) 0,
@@ -20,7 +20,7 @@
 }
 
 .header.scrolled {
-  height:110px;
+  height: 110px;
 }
 
 .header-container {
@@ -225,7 +225,9 @@
   cursor: pointer;
   color: var(--color-text-muted);
   --color-icon: var(--color-text-muted);
-  transition: border-color var(--transition-base), background var(--transition-base);
+  transition:
+    border-color var(--transition-base),
+    background var(--transition-base);
 }
 
 .settings-dropdown-btn:hover {
@@ -377,7 +379,9 @@
   border: 2px solid var(--color-gray-400);
   margin-inline-start: auto;
   background: transparent;
-  transition: border-color var(--transition-base), border-width var(--transition-base);
+  transition:
+    border-color var(--transition-base),
+    border-width var(--transition-base);
 }
 
 .settings-theme-option[aria-checked='true'] .settings-theme-check,
@@ -414,7 +418,9 @@
   border: 2px solid var(--color-gray-400);
   margin-inline-start: auto;
   background: transparent;
-  transition: border-color var(--transition-base), border-width var(--transition-base);
+  transition:
+    border-color var(--transition-base),
+    border-width var(--transition-base);
 }
 
 @media (max-width: 1268px) {
@@ -429,7 +435,9 @@
       transparent 104px,
       transparent 148px
     );
-    transition: height var(--transition-base), background var(--transition-base);
+    transition:
+      height var(--transition-base),
+      background var(--transition-base);
   }
 
   .header.scrolled {
@@ -962,7 +970,9 @@
   line-height: 1.25;
   font-family: var(--font-family-base);
   font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-feature-settings:
+    'tnum' 1,
+    'lnum' 1;
   display: inline-block;
   width: 5ch;
   min-width: 5ch;

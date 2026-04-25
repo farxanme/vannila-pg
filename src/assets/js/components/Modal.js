@@ -331,7 +331,10 @@ export class Modal {
       else this.modalImageRef.setAttribute('aria-label', t);
     }
     if (this.modalCloseButton && this.options.closeButtonAriaLabelKey) {
-      this.modalCloseButton.setAttribute('aria-label', i18n.t(this.options.closeButtonAriaLabelKey));
+      this.modalCloseButton.setAttribute(
+        'aria-label',
+        i18n.t(this.options.closeButtonAriaLabelKey)
+      );
     }
   }
 

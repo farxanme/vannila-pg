@@ -149,11 +149,8 @@ export class Header {
   async createSettingsDropdown(container) {
     const { i18n } = await import('../utils/i18n.js');
     const { getThemePreference, setThemePreference } = await import('../utils/themeManager.js');
-    const {
-      getSettingsGroupDescriptors,
-      buildSettingsGroupBody,
-      mountSettingsGroupsLayout,
-    } = await import('./settingsPanel.js');
+    const { getSettingsGroupDescriptors, buildSettingsGroupBody, mountSettingsGroupsLayout } =
+      await import('./settingsPanel.js');
     const { appIconHtml } = await import('../utils/icons.js');
 
     const wrap = document.createElement('div');
@@ -198,7 +195,8 @@ export class Header {
       },
     });
 
-    const menuThemeBody = bodies.find((b) => b.themeButtons && b.themeButtons.length > 0) || bodies[0];
+    const menuThemeBody =
+      bodies.find((b) => b.themeButtons && b.themeButtons.length > 0) || bodies[0];
     this.settingsMenuThemeSync = menuThemeBody.syncThemeSelection;
     window.addEventListener('themePreferenceChange', syncThemeFromWindow);
 

@@ -44,7 +44,8 @@ const prCodeToIcon = {
  */
 export function getTransactionTypeInfo(prCode, t) {
   const code = typeof prCode === 'number' && !Number.isNaN(prCode) ? prCode : null;
-  const key = code != null && prCodeToTypeKey[code] ? prCodeToTypeKey[code] : 'transaction.type.unknown';
+  const key =
+    code != null && prCodeToTypeKey[code] ? prCodeToTypeKey[code] : 'transaction.type.unknown';
   const icon =
     code != null && prCodeToIcon[code]
       ? prCodeToIcon[code]

@@ -90,7 +90,7 @@ const bankLocalizedNames = {
   'middle-east': { en: 'Middle East', fa: 'خاورمیانه', ar: 'الشرق الأوسط' },
   dey: { en: 'Dey', fa: 'دی', ar: 'دي' },
   'tosee-taavon': { en: 'Tosee Taavon', fa: 'توسعه تعاون', ar: 'تنمية التعاون' },
-  'karafarin': { en: 'Kar Afarin', fa: 'کارآفرین', ar: 'كار آفرين' },
+  karafarin: { en: 'Kar Afarin', fa: 'کارآفرین', ar: 'كار آفرين' },
   'mehr-eghtesad': { en: 'Mehr', fa: 'مهر', ar: 'مهر' },
   mellal: { en: 'Mellal', fa: 'ملل', ar: 'ملل' },
   sarmaye: { en: 'Sarmayeh', fa: 'سرمایه', ar: 'سرماية' },
@@ -129,7 +129,10 @@ const bankNameToKeyMatchers = [
   { key: 'mellal', checks: ['mellal', 'ملل'] },
   { key: 'sarmaye', checks: ['sarmayeh', 'سرمایه'] },
   { key: 'tourism', checks: ['tourism', 'گردشگری'] },
-  { key: 'central-bank', checks: ['iri centralbank', 'iri central', 'central bank', 'centralbank', 'بانک مرکزی'] },
+  {
+    key: 'central-bank',
+    checks: ['iri centralbank', 'iri central', 'central bank', 'centralbank', 'بانک مرکزی'],
+  },
 ];
 
 const logoKeyByLocalizationKey = {
@@ -225,13 +228,11 @@ function isValidBinItem(item) {
 
 function normalizeBankBins(list) {
   if (!Array.isArray(list)) return [];
-  return list
-    .filter(isValidBinItem)
-    .map((item) => ({
-      bin: String(item.bin).trim(),
-      bankName: String(item.bankName).trim(),
-      bankCode: String(item.bankCode ?? '').trim(),
-    }));
+  return list.filter(isValidBinItem).map((item) => ({
+    bin: String(item.bin).trim(),
+    bankName: String(item.bankName).trim(),
+    bankCode: String(item.bankCode ?? '').trim(),
+  }));
 }
 
 function mergeBinLists(primary, secondary) {
@@ -353,13 +354,7 @@ export function getLocalizedBankName(bankName, lang = 'fa', bankBin = '') {
     return profile.name || bankName || '';
   }
   const targetLang = lang === 'fa' || lang === 'ar' ? lang : 'en';
-  return (
-    profile.localized[targetLang] ||
-    profile.localized.en ||
-    profile.name ||
-    bankName ||
-    ''
-  );
+  return profile.localized[targetLang] || profile.localized.en || profile.name || bankName || '';
 }
 
 /**
@@ -441,9 +436,7 @@ export function detectBankFromMaskedPan(maskedPan) {
 
   // Neo (8+ digit BIN, e.g. Blu): only when enough digits are visible — avoids Blu vs Saman on short prefixes like 62198
   if (lead.length >= 8) {
-    const neo = neoBins.find(
-      (n) => n.bin && n.bankName && n.bin.startsWith(lead)
-    );
+    const neo = neoBins.find((n) => n.bin && n.bankName && n.bin.startsWith(lead));
     if (neo) {
       return {
         name: neo.bankName,
@@ -465,11 +458,7 @@ export function detectBankFromMaskedPan(maskedPan) {
     };
   }
 
-  const candidates = knownBins.filter(
-    (b) =>
-      b.bin &&
-      b.bin.startsWith(lead)
-  );
+  const candidates = knownBins.filter((b) => b.bin && b.bin.startsWith(lead));
 
   if (candidates.length === 0) {
     return null;

@@ -104,6 +104,9 @@ let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
 let currentTransactionPayload = null;
 let isBillListOnlyMode = false;
+let isBillTransactionView = false;
+let billListAllowsStaticPinMode = false;
+let billFlowMode = 'list';
 
 /** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
 let paymentReceiptMerchantContext = null;
@@ -159,7 +162,9 @@ function buildCardPayloadForIpg() {
   const bill =
     firstBill &&
     typeof firstBill === 'object' &&
-    (firstBill.billId !== undefined || firstBill.payId !== undefined || firstBill.amount !== undefined)
+    (firstBill.billId !== undefined ||
+      firstBill.payId !== undefined ||
+      firstBill.amount !== undefined)
       ? {
           billId: firstBill.billId ?? '',
           payId: firstBill.payId ?? '',
@@ -315,10 +320,7 @@ function syncGetOtpButtonState() {
     btn.disabled = true;
     const timeLabel = formatSecondsAsMmSs(remainingCooldownSec);
     btn.textContent = timeLabel;
-    btn.setAttribute(
-      'aria-label',
-      i18n.t('form.getOtpCountdownAria', { time: timeLabel })
-    );
+    btn.setAttribute('aria-label', i18n.t('form.getOtpCountdownAria', { time: timeLabel }));
     return;
   }
 
@@ -719,22 +721,16 @@ async function initializePage() {
     // Initialize timer (duration from transaction appSettings when available)
     initializeTimer(txUi?.durationSeconds ?? 900);
 
-    // Initialize form inputs only for non-bill-list flows
-    if (!txUi?.showBillList) {
-      initializeFormInputs();
-    } else {
-      isBillListOnlyMode = true;
-    }
+    // Always initialize form inputs; bill flow switches between list and form views.
+    initializeFormInputs();
+    isBillListOnlyMode = Boolean(txUi?.showBillList);
 
     // Initialize partner logos (merchant logo from transaction when available)
     initializePartnerLogos(txUi?.merchantLogoUrl ?? null);
 
-    // Attach form events only when payment form is available
-    if (!txUi?.showBillList) {
-      attachFormEvents();
-    } else {
-      attachBillListEvents();
-    }
+    // Attach both form and bill-list actions.
+    attachFormEvents();
+    attachBillListEvents();
 
     // Update page content with current language
     updatePageContent();
@@ -1835,10 +1831,7 @@ function initializeFormInputs() {
       });
 
       ensureOtpTriesForKey(key);
-      otpTriesRemainingByCardKey[key] = Math.max(
-        0,
-        otpTriesRemainingByCardKey[key] - 1
-      );
+      otpTriesRemainingByCardKey[key] = Math.max(0, otpTriesRemainingByCardKey[key] - 1);
       otpCooldownUntilByCardKey[key] =
         Date.now() + Math.max(1, transactionOtpSettings.nextTrySeconds) * 1000;
 
@@ -2159,8 +2152,13 @@ async function initializeTransactionInfo() {
   const bills = Array.isArray(txPayload?.bills) ? txPayload.bills : [];
   const showBillList = currentTransactionPrCode === 40 && bills.length > 0;
   if (showBillList) {
+    billFlowMode = 'list';
+    isBillListOnlyMode = true;
     renderBillListSection(bills);
   } else {
+    isBillTransactionView = false;
+    billFlowMode = 'list';
+    isBillListOnlyMode = false;
     restorePaymentFormSection();
   }
 
@@ -2170,12 +2168,12 @@ async function initializeTransactionInfo() {
 function restorePaymentFormSection() {
   const paymentFormRegion = document.getElementById('payment-form-region');
   const billSection = document.getElementById('bill-list-section');
-  const largeCardTitle = document.querySelector('.card.card-large .card-title');
+  const largeCardTitle = document.querySelector('.card-large .card-title');
   if (paymentFormRegion) {
     paymentFormRegion.hidden = false;
   }
   if (billSection) {
-    billSection.remove();
+    billSection.hidden = true;
   }
   if (largeCardTitle) {
     largeCardTitle.textContent = i18n.t('form.title');
@@ -2184,10 +2182,15 @@ function restorePaymentFormSection() {
 
 function renderBillListSection(bills) {
   const paymentFormRegion = document.getElementById('payment-form-region');
-  const largeCardTitle = document.querySelector('.card.card-large .card-title');
+  const largeCardTitle = document.querySelector('.card-large .card-title');
   if (!paymentFormRegion) return;
 
-  paymentFormRegion.hidden = true;
+  const totalAmount = bills.reduce((sum, bill) => sum + (Number(bill?.amount) || 0), 0);
+  const staticPinThreshold = 1000000;
+  isBillTransactionView = true;
+  billListAllowsStaticPinMode = totalAmount < staticPinThreshold;
+
+  paymentFormRegion.hidden = billFlowMode === 'list';
   if (largeCardTitle) {
     largeCardTitle.textContent = i18n.t('transaction.billListTitle');
   }
@@ -2198,6 +2201,7 @@ function renderBillListSection(bills) {
     billSection.className = 'transaction-info';
     paymentFormRegion.parentElement?.appendChild(billSection);
   }
+  billSection.hidden = billFlowMode !== 'list';
 
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
   const billRowsHtml = bills
@@ -2215,6 +2219,28 @@ function renderBillListSection(bills) {
     `
     )
     .join('');
+  const paymentButtonsHtml = billListAllowsStaticPinMode
+    ? `
+      <div class="bill-list-actions-row">
+        <button type="button" class="btn btn-success" id="bill-list-pay-dynamic-button" data-i18n="form.payDynamicPin">
+          ${i18n.t('form.payDynamicPin')}
+        </button>
+        <button type="button" class="btn btn-success btn-bordered" id="bill-list-pay-static-button" data-i18n="form.payStaticPin">
+          ${i18n.t('form.payStaticPin')}
+        </button>
+      </div>
+      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
+        ${i18n.t('form.cancel')}
+      </button>
+    `
+    : `
+      <button type="button" class="btn btn-success" id="bill-list-pay-button" data-i18n="form.pay">
+        ${i18n.t('form.pay')}
+      </button>
+      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
+        ${i18n.t('form.cancel')}
+      </button>
+    `;
 
   billSection.innerHTML = `
     <div class="transaction-summary-card">
@@ -2227,23 +2253,187 @@ function renderBillListSection(bills) {
       </div>
     </div>
     <div class="more-content show" id="bill-list-content">${billRowsHtml}</div>
-    <div class="form-actions">
-      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
-        ${i18n.t('form.cancel')}
-      </button>
+    <div class="form-actions bill-list-actions">
+      ${paymentButtonsHtml}
     </div>
   `;
 }
 
 function attachBillListEvents() {
   const cancelBtn = document.getElementById('bill-list-cancel-button');
-  if (!cancelBtn) return;
-  cancelBtn.addEventListener('click', () => {
-    if (isButtonClickLocked(cancelBtn)) return;
-    lockButtonClick(cancelBtn);
-    openCancelPaymentConfirm();
-    setTimeout(() => unlockButtonClick(cancelBtn), 700);
-  });
+  const payBtn = document.getElementById('bill-list-pay-button');
+  const payDynamicBtn = document.getElementById('bill-list-pay-dynamic-button');
+  const payStaticBtn = document.getElementById('bill-list-pay-static-button');
+
+  if (cancelBtn) {
+    cancelBtn.onclick = () => {
+      if (isButtonClickLocked(cancelBtn)) return;
+      lockButtonClick(cancelBtn);
+      openCancelPaymentConfirm();
+      setTimeout(() => unlockButtonClick(cancelBtn), 700);
+    };
+  }
+
+  if (payBtn) {
+    payBtn.onclick = () => {
+      showBillPaymentForm('static');
+    };
+  }
+
+  if (payDynamicBtn) {
+    payDynamicBtn.onclick = () => {
+      showBillPaymentForm('dynamic');
+    };
+  }
+
+  if (payStaticBtn) {
+    payStaticBtn.onclick = () => {
+      showBillPaymentForm('static');
+    };
+  }
+}
+
+function setBillDynamicEntryModeUi(enabled) {
+  const cvv2Container = document.getElementById('cvv2-input-container');
+  const otpGroup = otpInput?.wrapper?.closest('.form-group');
+  const expiryGroup = document.getElementById('expiry-date-container')?.closest('.form-group');
+  if (cvv2Container) {
+    cvv2Container.hidden = enabled;
+    cvv2Container.style.display = enabled ? 'none' : '';
+  }
+  if (otpGroup) otpGroup.hidden = enabled;
+  // In dynamic PIN flow, expiry date must remain visible.
+  if (expiryGroup) expiryGroup.hidden = false;
+}
+
+function setOtpFieldMode(mode) {
+  if (!otpInput) return;
+  const getOtpButton = document.getElementById('get-otp-button');
+  const isStaticPinMode = mode === 'static-pin';
+
+  if (isStaticPinMode) {
+    if (getOtpButton) {
+      getOtpButton.hidden = true;
+      getOtpButton.style.display = 'none';
+    }
+    if (otpLabelElement) {
+      otpLabelElement.textContent = i18n.t('form.internetPin');
+    }
+    otpInput.setPlaceholder(i18n.t('form.internetPin.placeholder'));
+    otpInput.options.requiredMessageKey = 'form.internetPin.required';
+    otpInput.options.validator = (value) => {
+      const digits = extractNumbers(value);
+      if (!digits) {
+        return { valid: false, message: i18n.t('form.internetPin.required') };
+      }
+      if (digits.length < 4 || digits.length > 12) {
+        return {
+          valid: false,
+          message: i18n.t('form.internetPin.invalidLengthRange', { min: '4', max: '12' }),
+        };
+      }
+      return { valid: true };
+    };
+    otpInput.clearValidation?.();
+    return;
+  }
+
+  if (getOtpButton) {
+    getOtpButton.hidden = false;
+    getOtpButton.style.display = '';
+  }
+  if (otpLabelElement) {
+    otpLabelElement.textContent = i18n.t('form.otp');
+  }
+  otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+  otpInput.options.requiredMessageKey = 'form.otp.required';
+  otpInput.options.validator = validateOTP;
+  otpInput.clearValidation?.();
+  syncGetOtpButtonState();
+}
+
+function syncBillFormActionButtons() {
+  const formActions = document.querySelector('#payment-form .form-actions');
+  const cancelButton = document.getElementById('cancel-button');
+  const payButton = document.getElementById('pay-button');
+  if (!formActions || !cancelButton || !payButton) return;
+
+  let backButton = document.getElementById('bill-form-back-button');
+  const showBack = isBillTransactionView && billFlowMode !== 'list';
+
+  if (showBack) {
+    if (!backButton) {
+      backButton = document.createElement('button');
+      backButton.type = 'button';
+      backButton.id = 'bill-form-back-button';
+      backButton.className = 'btn btn-primary btn-bordered';
+      backButton.textContent = i18n.t('form.back');
+      formActions.appendChild(backButton);
+      backButton.addEventListener('click', () => {
+        showBillListView();
+      });
+    } else {
+      backButton.hidden = false;
+      backButton.textContent = i18n.t('form.back');
+    }
+    formActions.classList.add('bill-form-actions-with-back');
+  } else {
+    if (backButton) {
+      backButton.hidden = true;
+    }
+    formActions.classList.remove('bill-form-actions-with-back');
+  }
+}
+
+function showBillListView() {
+  billFlowMode = 'list';
+  isBillListOnlyMode = true;
+  const paymentFormRegion = document.getElementById('payment-form-region');
+  const billSection = document.getElementById('bill-list-section');
+  const largeCardTitle = document.querySelector('.card-large .card-title');
+  if (paymentFormRegion) paymentFormRegion.hidden = true;
+  if (billSection) {
+    billSection.hidden = false;
+    billSection.style.display = '';
+  }
+  if (largeCardTitle) {
+    largeCardTitle.textContent = i18n.t('transaction.billListTitle');
+  }
+  setBillDynamicEntryModeUi(false);
+  setOtpFieldMode('default');
+  syncBillFormActionButtons();
+}
+
+function showBillPaymentForm(mode) {
+  billFlowMode = mode === 'dynamic' ? 'dynamic' : 'static';
+  isBillListOnlyMode = false;
+
+  const paymentFormRegion = document.getElementById('payment-form-region');
+  const billSection = document.getElementById('bill-list-section');
+  const largeCardTitle = document.querySelector('.card-large .card-title');
+  if (paymentFormRegion) paymentFormRegion.hidden = false;
+  if (billSection) {
+    billSection.hidden = true;
+    billSection.style.display = 'none';
+  }
+  if (largeCardTitle) {
+    largeCardTitle.textContent = i18n.t('form.title');
+  }
+
+  const payButton = document.getElementById('pay-button');
+  const cancelButton = document.getElementById('cancel-button');
+  if (mode === 'dynamic') {
+    setBillDynamicEntryModeUi(true);
+    setOtpFieldMode('default');
+    if (payButton) payButton.textContent = i18n.t('form.continue');
+    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
+  } else {
+    setBillDynamicEntryModeUi(false);
+    setOtpFieldMode('static-pin');
+    if (payButton) setPayButtonState('active');
+    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
+  }
+  syncBillFormActionButtons();
 }
 
 function getTransactionAmountFromDom() {
@@ -2848,7 +3038,9 @@ function fillPaymentReceiptFromService(paymentReceipt) {
         ? paymentReceipt.affectiveAmount
         : null;
   const affectiveAmount =
-    typeof paymentReceipt.affectiveAmount === 'number' ? paymentReceipt.affectiveAmount : totalAmount;
+    typeof paymentReceipt.affectiveAmount === 'number'
+      ? paymentReceipt.affectiveAmount
+      : totalAmount;
   const discountAmount =
     typeof totalAmount === 'number' && typeof affectiveAmount === 'number'
       ? Math.max(0, totalAmount - affectiveAmount)
@@ -2975,10 +3167,11 @@ function generatePaymentReceiptPlainText() {
   const date = document.getElementById('payment-receipt-date')?.textContent ?? '';
   const rrnRow = document.getElementById('payment-receipt-row-rrn');
   const rrn = !rrnRow?.hidden
-    ? document.getElementById('payment-receipt-rrn')?.textContent ?? ''
+    ? (document.getElementById('payment-receipt-rrn')?.textContent ?? '')
     : '';
 
-  let text = `${title}\n${i18n.t('receipt.plain.amount')} ${amount}\n${i18n.t('receipt.plain.merchant')} ${merchant}\n${i18n.t('receipt.traceNo')}: ${trace}\n${i18n.t('receipt.plain.date')} ${date}`.trim();
+  let text =
+    `${title}\n${i18n.t('receipt.plain.amount')} ${amount}\n${i18n.t('receipt.plain.merchant')} ${merchant}\n${i18n.t('receipt.traceNo')}: ${trace}\n${i18n.t('receipt.plain.date')} ${date}`.trim();
   if (rrn) {
     text += `\n${i18n.t('receipt.rrn')}: ${rrn}`;
   }
@@ -3073,17 +3266,27 @@ function attachFormEvents() {
     if (paySubmitInFlight) return;
     paySubmitInFlight = true;
 
-    // Validate all fields
-    const isValid = [
-      cardNumberInput.validate(),
-      cvv2Input.validate(),
-      expiryDateInput.validate(),
-      captchaInput.validate(),
-      otpInput.validate(),
-    ].every((v) => v);
+    const isBillDynamicEntry = isBillTransactionView && billFlowMode === 'dynamic';
+    // Validate all fields (dynamic bill entry does not require CVV2/OTP).
+    const isValid = (
+      isBillDynamicEntry
+        ? [cardNumberInput.validate(), expiryDateInput.validate(), captchaInput.validate()]
+        : [
+            cardNumberInput.validate(),
+            cvv2Input.validate(),
+            expiryDateInput.validate(),
+            captchaInput.validate(),
+            otpInput.validate(),
+          ]
+    ).every((v) => v);
 
     if (!isValid) {
-      setPayButtonState('disabled');
+      if (isBillDynamicEntry) {
+        const payButton = document.getElementById('pay-button');
+        if (payButton) payButton.textContent = i18n.t('form.continue');
+      } else {
+        setPayButtonState('disabled');
+      }
       errorHandler.show({
         message: i18n.t('form.validation.error'),
         mode: 'toast',
@@ -3092,7 +3295,12 @@ function attachFormEvents() {
 
       // Restore active state after a short delay
       setTimeout(() => {
-        setPayButtonState('active');
+        if (isBillDynamicEntry) {
+          const payButton = document.getElementById('pay-button');
+          if (payButton) payButton.textContent = i18n.t('form.continue');
+        } else {
+          setPayButtonState('active');
+        }
       }, 2000);
       paySubmitInFlight = false;
       return;
@@ -3109,7 +3317,9 @@ function attachFormEvents() {
       return;
     }
 
-    setPayButtonState('processing');
+    if (!isBillDynamicEntry) {
+      setPayButtonState('processing');
+    }
     soundManager.beep();
 
     try {
@@ -3119,8 +3329,8 @@ function attachFormEvents() {
 
       const payBody = {
         ...cardPart,
-        cvv2: extractNumbers(cvv2Input.getValue()),
-        pin2: extractNumbers(otpInput.getValue()),
+        cvv2: isBillDynamicEntry ? '' : extractNumbers(cvv2Input.getValue()),
+        pin2: isBillDynamicEntry ? '' : extractNumbers(otpInput.getValue()),
         cellNumber:
           receiptOpen && mobileInput ? extractNumbers(mobileInput.getValue()) || null : null,
         email: receiptOpen && emailInput ? emailInput.getValue().trim() || null : null,
@@ -3129,6 +3339,13 @@ function attachFormEvents() {
       };
       if (shouldSendExpiryDateInPayRequest()) {
         payBody.expiryDate = getExpiryDateForApi();
+      }
+
+      if (isBillDynamicEntry) {
+        // For dynamic bill flow, first step is a lightweight entry screen.
+        showBillPaymentForm('static');
+        setPayButtonState('active');
+        return;
       }
 
       const payRes = await ipgService.payTransaction(payBody, {
@@ -3165,7 +3382,9 @@ function attachFormEvents() {
         type: 'error',
       });
     } finally {
-      setPayButtonState('active');
+      if (!(isBillTransactionView && billFlowMode === 'dynamic')) {
+        setPayButtonState('active');
+      }
       paySubmitInFlight = false;
     }
   });
@@ -3256,10 +3475,13 @@ function updatePageContent() {
 
   i18n.applyDataI18n(document);
   if (isBillListOnlyMode) {
-    const bills = Array.isArray(currentTransactionPayload?.bills) ? currentTransactionPayload.bills : [];
+    const bills = Array.isArray(currentTransactionPayload?.bills)
+      ? currentTransactionPayload.bills
+      : [];
     renderBillListSection(bills);
     attachBillListEvents();
   }
+  syncBillFormActionButtons();
   const headerHelpButton = document.getElementById('card-header-help-button');
   if (headerHelpButton) {
     headerHelpButton.setAttribute('aria-label', i18n.t('common.help'));
@@ -3321,12 +3543,15 @@ function updatePageContent() {
   const captchaAudioBtn = document.querySelector('.captcha-audio-btn');
   if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
-    otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+    const isStaticPinMode = isBillTransactionView && billFlowMode === 'static';
+    otpInput.setPlaceholder(
+      i18n.t(isStaticPinMode ? 'form.internetPin.placeholder' : 'form.otp.placeholder')
+    );
     otpInput.setRightActionAriaLabel(i18n.t('form.virtualPinPad'));
     otpInput.setClearButtonAriaLabel(i18n.t('common.clear'));
     // Update separate OTP label
     if (otpLabelElement) {
-      otpLabelElement.textContent = i18n.t('form.otp');
+      otpLabelElement.textContent = i18n.t(isStaticPinMode ? 'form.internetPin' : 'form.otp');
     }
   }
   if (mobileInput) {
@@ -3387,15 +3612,21 @@ function updatePageContent() {
   if (receiptShareBtn) receiptShareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
   if (receiptSaveBtn) receiptSaveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
   if (txExpiredTime && !document.getElementById('payment-transaction-expired-section')?.hidden) {
-    txExpiredTime.textContent = formatSecondsAsMmSs(Math.max(0, transactionExpiredRemainingSeconds));
+    txExpiredTime.textContent = formatSecondsAsMmSs(
+      Math.max(0, transactionExpiredRemainingSeconds)
+    );
   }
 
   // Ensure pay button label uses current language and amount
-  if (!isBillListOnlyMode) {
+  if (!isBillListOnlyMode && !(isBillTransactionView && billFlowMode === 'dynamic')) {
     setPayButtonState('active');
+  }
+  if (isBillTransactionView && billFlowMode === 'dynamic') {
+    const payButton = document.getElementById('pay-button');
+    const cancelButton = document.getElementById('cancel-button');
+    if (payButton) payButton.textContent = i18n.t('form.continue');
+    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
   }
 
   revalidateVisibleFormErrorsAfterLanguageChange();
 }
-
-

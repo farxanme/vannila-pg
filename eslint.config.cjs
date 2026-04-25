@@ -28,13 +28,12 @@ module.exports = [
         File: 'readonly',
         URL: 'readonly',
         confirm: 'readonly',
-        Audio: 'readonly'
-      }
+        Audio: 'readonly',
+      },
     },
     rules: {
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
-      'no-console': 'off'
-    }
-  }
+      'no-console': 'off',
+    },
+  },
 ];
-

@@ -52,9 +52,7 @@ export function setThemePreference(mode) {
   if (!validModes.includes(mode)) return;
   localStorage.setItem(storageKey, mode);
   applyThemeToDocument();
-  window.dispatchEvent(
-    new CustomEvent('themePreferenceChange', { detail: { mode } })
-  );
+  window.dispatchEvent(new CustomEvent('themePreferenceChange', { detail: { mode } }));
   scheduleSystemTick();
 }
 

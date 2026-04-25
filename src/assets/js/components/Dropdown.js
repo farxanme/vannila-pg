@@ -333,7 +333,10 @@ export class Dropdown {
           return;
         }
         if (this.options.autoOpen !== false) {
-          if (this.options.desktopOnlyAutoOpen && !window.matchMedia('(min-width: 769px)').matches) {
+          if (
+            this.options.desktopOnlyAutoOpen &&
+            !window.matchMedia('(min-width: 769px)').matches
+          ) {
             return;
           }
           if (this.options.openOnFocusWhenInputEmpty) {

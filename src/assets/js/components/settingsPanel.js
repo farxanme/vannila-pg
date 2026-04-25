@@ -126,7 +126,9 @@ export function mountSettingsGroupsLayout(container, ctx) {
     const heading = document.createElement('div');
     heading.className = 'settings-dropdown-section-heading';
     if (only.id === 'theme') {
-      heading.appendChild(createAppIcon('icn-brush.svg', 'settings-section-heading-icon app-icon-muted'));
+      heading.appendChild(
+        createAppIcon('icn-brush.svg', 'settings-section-heading-icon app-icon-muted')
+      );
     }
     const sectionTitle = document.createElement('div');
     sectionTitle.className = 'settings-dropdown-section-title';
@@ -166,7 +168,9 @@ export function mountSettingsGroupsLayout(container, ctx) {
     titleSpan.textContent = i18n.t(desc.titleKey);
 
     if (desc.id === 'theme') {
-      header.appendChild(createAppIcon('icn-brush.svg', 'settings-group-header-icon app-icon-muted'));
+      header.appendChild(
+        createAppIcon('icn-brush.svg', 'settings-group-header-icon app-icon-muted')
+      );
     }
 
     const chevron = document.createElement('span');
