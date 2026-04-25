@@ -33,6 +33,7 @@ import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
 import { getTransactionTypeInfo } from '../utils/transactionType.js';
+import { detectBillTypeKey } from '../utils/billDetector.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
 import { getPaymentInitData, validatePaymentInitData } from '../services/paymentInitData.js';
@@ -2028,6 +2029,16 @@ async function initializeTransactionInfo() {
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToWordsByLang(amountInTomans, i18n.getLanguage());
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
+  const billIconFileByTypeKey = {
+    'bill.type.water': 'icn-display.svg',
+    'bill.type.electricity': 'icn-brush.svg',
+    'bill.type.gas': 'icn-refresh.svg',
+    'bill.type.phone': 'icn-volume.svg',
+    'bill.type.mobile': 'icn-credit-card.svg',
+    'bill.type.municipality': 'icn-shop.svg',
+    'bill.type.tax': 'icn-square-info.svg',
+    'bill.type.traffic': 'icn-logout.svg',
+  };
   const txTypeIconMask = `<span class="app-icon" style="--app-icon-src:url('${transactionTypeInfo.icon}')" aria-hidden="true"></span>`;
 
   container.innerHTML = `
@@ -2204,17 +2215,37 @@ function renderBillListSection(bills) {
   billSection.hidden = billFlowMode !== 'list';
 
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
-  const billRowsHtml = bills
+  const billIconFileByTypeKey = {
+    'bill.type.water': 'icn-display.svg',
+    'bill.type.electricity': 'icn-brush.svg',
+    'bill.type.gas': 'icn-refresh.svg',
+    'bill.type.phone': 'icn-volume.svg',
+    'bill.type.mobile': 'icn-credit-card.svg',
+    'bill.type.municipality': 'icn-shop.svg',
+    'bill.type.tax': 'icn-square-info.svg',
+    'bill.type.traffic': 'icn-logout.svg',
+  };
+  const enrichedBills = bills.map((bill) => ({
+    ...bill,
+    billTypeKey: detectBillTypeKey(bill?.billId),
+  }));
+
+  const billRowsHtml = enrichedBills
     .map(
       (bill) => `
       <div class="transaction-info-item">
-        <div class="transaction-info-icon">${appIconHtml('icn-cash-banknote.svg')}</div>
-        <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.billItem')}</div>
-          <div class="transaction-info-value">
-            ${i18n.t('receipt.billId')}: ${bill.billId || '-'} | ${i18n.t('receipt.payId')}: ${bill.payId || '-'} | ${i18n.t('transaction.amount')}: ${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}
+        <div class="bill-list-item-main">
+          <div class="bill-list-item-logo-circle" aria-hidden="true">
+            ${appIconHtml(
+              bill.billTypeKey ? billIconFileByTypeKey[bill.billTypeKey] || 'icn-cash-banknote.svg' : 'icn-cash-banknote.svg'
+            )}
+          </div>
+          <div class="bill-list-item-meta">
+            <div class="bill-list-item-title">${bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown')}</div>
+            <div class="bill-list-item-id">${extractNumbers(bill.billId) || '-'}</div>
           </div>
         </div>
+        <div class="bill-list-item-amount">${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
       </div>
     `
     )
@@ -2243,15 +2274,6 @@ function renderBillListSection(bills) {
     `;
 
   billSection.innerHTML = `
-    <div class="transaction-summary-card">
-      <div class="transaction-info-item">
-        <div class="transaction-info-icon">${appIconHtml('icn-cash-banknote.svg')}</div>
-        <div class="transaction-info-content">
-          <div class="transaction-info-label">${i18n.t('transaction.billListTitle')}</div>
-          <div class="transaction-info-value">${i18n.t('transaction.billCount', { count: bills.length })}</div>
-        </div>
-      </div>
-    </div>
     <div class="more-content show" id="bill-list-content">${billRowsHtml}</div>
     <div class="form-actions bill-list-actions">
       ${paymentButtonsHtml}

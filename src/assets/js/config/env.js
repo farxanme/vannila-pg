@@ -117,5 +117,5 @@ export function getMockTransactionMode() {
   const mode = String(import.meta.env.VITE_MOCK_TRANSACTION_MODE || 'bill')
     .trim()
     .toLowerCase();
-  return mode === 'bill' ? 'purchase' : 'purchase';
+  return mode === 'bill' ? 'bill' : 'purchase';
 }

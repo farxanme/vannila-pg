@@ -115,6 +115,11 @@ html.app-ready #app .main-content {
     padding-left: 48px;
     padding-right: 48px;
   }
+
+  .card-large #bill-list-section {
+    padding-left: 48px;
+    padding-right: 48px;
+  }
 }
 
 .gift-card-inline-notice {
@@ -571,6 +576,63 @@ html.app-ready #app .main-content {
 .transaction-expired-countdown-text {
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
+}
+
+#bill-list-content .transaction-info-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.bill-list-item-main {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  min-width: 0;
+}
+
+.bill-list-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.bill-list-item-title {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: 600;
+}
+
+.bill-list-item-id {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-secondary);
+}
+
+.bill-list-item-logo-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--color-bg-light);
+  border: 1px solid var(--color-stroke);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.bill-list-item-logo-circle .app-icon {
+  color: var(--color-text-muted);
+  --color-icon: var(--color-text-muted);
+  --app-icon-size: 18px;
+}
+
+.bill-list-item-amount {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-primary);
+  font-weight: 600;
+  white-space: nowrap;
 }
 
 .bill-list-actions {

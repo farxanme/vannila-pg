@@ -12,8 +12,8 @@ function buildMockBills() {
     {
       id: 16,
       ipgTransactionId: 75,
-      billId: '2306031018',
-      payId: '1210107',
+      billId: '2306000000115',
+      payId: '1210017',
       amount: 12000,
       paymentReceipt: null,
       hasReceipt: false,
@@ -21,8 +21,62 @@ function buildMockBills() {
     {
       id: 17,
       ipgTransactionId: 75,
-      billId: '8586431014',
-      payId: '1210102',
+      billId: '2306000000220',
+      payId: '1210025',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 18,
+      ipgTransactionId: 75,
+      billId: '2306000000336',
+      payId: '1210033',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 19,
+      ipgTransactionId: 75,
+      billId: '2306000000441',
+      payId: '1210041',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 20,
+      ipgTransactionId: 75,
+      billId: '2306000000557',
+      payId: '1210050',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 21,
+      ipgTransactionId: 75,
+      billId: '2306000000662',
+      payId: '1210068',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 22,
+      ipgTransactionId: 75,
+      billId: '2306000000883',
+      payId: '1210084',
+      amount: 12000,
+      paymentReceipt: null,
+      hasReceipt: false,
+    },
+    {
+      id: 23,
+      ipgTransactionId: 75,
+      billId: '2306000000999',
+      payId: '1210092',
       amount: 12000,
       paymentReceipt: null,
       hasReceipt: false,
@@ -33,20 +87,24 @@ function buildMockBills() {
 function buildMockGetTransactionResponse() {
   const mode = getMockTransactionMode();
   const isBillMode = mode === 'bill';
+  const bills = isBillMode ? buildMockBills() : [];
+  const totalAmount = isBillMode
+    ? bills.reduce((sum, bill) => sum + (Number(bill?.amount) || 0), 0)
+    : 24000;
 
   return {
     data: {
       transactionState: 1,
       expired: false,
       terminalNumber: 2765,
-      totalAmount: 24000,
+      totalAmount,
       wage: 0,
       prCode: isBillMode ? 40 : 0,
       transactionId: 75,
       refNum: '8572993840D2D52F9F32280F4389468877298A9FAF4E0D7CB452E414307F94B7',
       salt: '0cc0583ff53e468ca6c3657bb4a93479',
       userSessionKey: '4DCDC07C8F79EABD7002824258717FA71E8A4AA0ECAFA6E6104598075AF7A691',
-      bills: isBillMode ? buildMockBills() : [],
+      bills,
       merchant: {
         merchantNumber: 27650,
         merchantName: 'تست توسعه',
