@@ -126,9 +126,9 @@ export function mountSettingsGroupsLayout(container, ctx) {
     const heading = document.createElement('div');
     heading.className = 'settings-dropdown-section-heading';
     if (only.id === 'theme') {
-      heading.appendChild(
+      /*heading.appendChild(
         createAppIcon('icn-brush.svg', 'settings-section-heading-icon app-icon-muted')
-      );
+      );*/
     }
     const sectionTitle = document.createElement('div');
     sectionTitle.className = 'settings-dropdown-section-title';

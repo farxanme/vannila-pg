@@ -243,6 +243,25 @@ function getTimerStateStorageKey() {
   return timerStateStorageKeyCache;
 }
 
+function clearStoredDataExceptPreferences() {
+  try {
+    const preservedLocalStorageKeys = new Set(['app_language', 'app_theme']);
+    Object.keys(window.localStorage).forEach((key) => {
+      if (!preservedLocalStorageKeys.has(key)) {
+        window.localStorage.removeItem(key);
+      }
+    });
+  } catch {
+    // Ignore storage cleanup failures.
+  }
+
+  try {
+    window.sessionStorage.clear();
+  } catch {
+    // Ignore storage cleanup failures.
+  }
+}
+
 function readTimerStateSnapshot() {
   try {
     const raw = window.sessionStorage.getItem(getTimerStateStorageKey());
@@ -3220,6 +3239,7 @@ function postRedirectParamsToMerchant(redirectData) {
   });
 
   document.body.appendChild(form);
+  clearStoredDataExceptPreferences();
   form.submit();
   return true;
 }
@@ -3267,6 +3287,7 @@ async function navigateToMerchantSite() {
   if (redirected) return;
   const url = getMerchantReturnUrl();
   if (url) {
+    clearStoredDataExceptPreferences();
     window.location.href = url;
   }
 }
