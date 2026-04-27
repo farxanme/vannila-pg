@@ -13,6 +13,10 @@ let lastReceiptData = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+  if (!document.getElementById('receipt-card')) {
+    return;
+  }
+
   await initializePage();
 });
 

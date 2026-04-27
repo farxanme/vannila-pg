@@ -156,6 +156,10 @@ async function loadCaptchaImage(captchaImageEl) {
  * @returns {{ cardId: string | null, pan: string | null, bill: object | null, cardRegisteredType: number } | null}
  */
 function buildCardPayloadForIpg() {
+  if (!cardNumberInput || typeof cardNumberInput.getValue !== 'function') {
+    return null;
+  }
+
   const firstBill =
     Array.isArray(currentTransactionPayload?.bills) && currentTransactionPayload.bills.length > 0
       ? currentTransactionPayload.bills[0]
@@ -192,6 +196,10 @@ function buildCardPayloadForIpg() {
  * @returns {string | null}
  */
 function getOtpCardStateKey() {
+  if (!cardNumberInput || typeof cardNumberInput.getValue !== 'function') {
+    return null;
+  }
+
   const pan = extractNumbers(cardNumberInput.getValue());
   if (pan.length === 16) {
     return `pan:${pan}`;
@@ -3491,7 +3499,11 @@ function updatePageContent() {
     footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
     footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
-  if (!isBillListOnlyMode) {
+  if (
+    !isBillListOnlyMode &&
+    cardNumberInput &&
+    typeof cardNumberInput.getValue === 'function'
+  ) {
     syncGetOtpButtonState();
   }
 

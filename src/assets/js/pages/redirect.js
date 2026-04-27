@@ -6,6 +6,11 @@ import { i18n } from '../main.js';
 import { LoadingScreen } from '../components/LoadingScreen.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
+  const form = document.getElementById('redirect-form');
+  if (!form) {
+    return;
+  }
+
   await i18n.readyPromise;
 
   const loadingScreen = new LoadingScreen({
@@ -15,7 +20,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
   loadingScreen.show();
 
-  const form = document.getElementById('redirect-form');
   const urlParams = new URLSearchParams(window.location.search);
   const redirectUrl = urlParams.get('url') || '/';
   const data = urlParams.get('data');

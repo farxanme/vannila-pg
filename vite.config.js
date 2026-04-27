@@ -1,9 +1,31 @@
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
+import { cp, rm, stat } from 'node:fs/promises';
+
+function copyImagesWithStructurePlugin() {
+  return {
+    name: 'copy-images-with-structure',
+    apply: 'build',
+    async closeBundle() {
+      const sourceImagesPath = resolve(__dirname, 'src/assets/images');
+      const outputImagesPath = resolve(__dirname, 'dist/assets/images');
+
+      try {
+        await stat(sourceImagesPath);
+      } catch {
+        return;
+      }
+
+      await rm(outputImagesPath, { recursive: true, force: true });
+      await cp(sourceImagesPath, outputImagesPath, { recursive: true, force: true });
+    },
+  };
+}
 
 export default defineConfig({
   root: 'src',
   publicDir: '../public',
+  plugins: [copyImagesWithStructurePlugin()],
   build: {
     outDir: '../dist',
     emptyOutDir: true,
@@ -36,6 +58,9 @@ export default defineConfig({
           }
           if (/\.(woff2?|ttf|otf|eot)$/i.test(assetName)) {
             return 'assets/fonts/[name][extname]';
+          }
+          if (/\.(png|jpe?g|gif|svg|webp|avif|ico)$/i.test(assetName)) {
+            return 'assets/images/[name][extname]';
           }
           return 'assets/[name][extname]';
         },
