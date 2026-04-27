@@ -2037,16 +2037,6 @@ async function initializeTransactionInfo() {
   const amountInTomans = Math.floor(transactionData.amount / 10);
   const amountInWords = numberToWordsByLang(amountInTomans, i18n.getLanguage());
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
-  const billIconFileByTypeKey = {
-    'bill.type.water': 'icn-display.svg',
-    'bill.type.electricity': 'icn-brush.svg',
-    'bill.type.gas': 'icn-refresh.svg',
-    'bill.type.phone': 'icn-volume.svg',
-    'bill.type.mobile': 'icn-credit-card.svg',
-    'bill.type.municipality': 'icn-shop.svg',
-    'bill.type.tax': 'icn-square-info.svg',
-    'bill.type.traffic': 'icn-logout.svg',
-  };
   const txTypeIconMask = `<span class="app-icon" style="--app-icon-src:url('${transactionTypeInfo.icon}')" aria-hidden="true"></span>`;
 
   container.innerHTML = `
@@ -2245,7 +2235,9 @@ function renderBillListSection(bills) {
         <div class="bill-list-item-main">
           <div class="bill-list-item-logo-circle" aria-hidden="true">
             ${appIconHtml(
-              bill.billTypeKey ? billIconFileByTypeKey[bill.billTypeKey] || 'icn-cash-banknote.svg' : 'icn-cash-banknote.svg'
+              bill.billTypeKey
+                ? billIconFileByTypeKey[bill.billTypeKey] || 'icn-cash-banknote.svg'
+                : 'icn-cash-banknote.svg'
             )}
           </div>
           <div class="bill-list-item-meta">
@@ -3499,11 +3491,7 @@ function updatePageContent() {
     footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
     footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
-  if (
-    !isBillListOnlyMode &&
-    cardNumberInput &&
-    typeof cardNumberInput.getValue === 'function'
-  ) {
+  if (!isBillListOnlyMode && cardNumberInput && typeof cardNumberInput.getValue === 'function') {
     syncGetOtpButtonState();
   }
 

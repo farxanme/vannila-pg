@@ -26,4 +26,3 @@ export function detectBillTypeKey(billId) {
   const typeCode = Number(normalizedBillId.slice(-2, -1));
   return billTypeKeyByCode[typeCode] || null;
 }
-

@@ -107,7 +107,7 @@ function buildInitTemplate(indexHtml) {
 
   const replacedAppInner = appInnerHtml.replace(
     /<!-- SSR:[\s\S]*?<\/div>/,
-    `<!-- SSR: session fields (same as former Data.* hidden inputs). Server fills data-* values. -->\n${razorInitData}`,
+    `<!-- SSR: session fields (same as former Data.* hidden inputs). Server fills data-* values. -->\n${razorInitData}`
   );
 
   return `@model ApiResponse<InitializedTransactionMessage>
