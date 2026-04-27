@@ -125,7 +125,7 @@
 .receipt-return-timer {
   margin-top: var(--spacing-sm);
   color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  font-size: var(--font-size-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -147,6 +147,10 @@
 }
 
 .receipt-return-timer .timer-progress {
+  width: 14px;
+  height: 14px;
+  min-width: 14px;
+  flex: 0 0 14px;
   --timer-fill-color: var(--color-primary);
 }
 
@@ -319,10 +323,6 @@
   padding: 0;
   flex: 0 0 48px;
   border-radius: var(--radius-md);
-}
-
-.receipt-download-icon-button .btn-icon .app-icon {
-  --app-icon-size: 20px;
 }
 
 .receipt-download-icon-button .btn-icon .app-icon {
