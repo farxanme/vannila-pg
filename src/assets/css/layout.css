@@ -564,6 +564,7 @@
 .footer-copyright {
   font-size: var(--font-size-xs);
   color: var(--color-footer-copyright);
+  font-family: var(--font-family-vazirmatn);
   text-align: center;
   white-space: pre-line;
   line-height: 1.8;
@@ -609,7 +610,7 @@
   background: var(--color-bg-white);
   border: 1px solid var(--color-stroke);
   border-radius: var(--radius-lg);
-  padding: var(--spacing-lg);
+  padding: var(--spacing-md);
   box-shadow: var(--shadow-default);
 }
 

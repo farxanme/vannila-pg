@@ -304,6 +304,11 @@
   text-align: right;
 }
 
+#payment-receipt-row-merchant-site .receipt-info-row-label,
+#payment-receipt-merchant-site {
+  font-family: var(--font-family-vazirmatn);
+}
+
 .receipt-download-button {
   flex: 1 1 auto;
 }

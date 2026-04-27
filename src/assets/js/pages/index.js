@@ -89,6 +89,7 @@ let captchaTokenKey = null;
 let captchaAudioButton = null;
 
 let paymentInitErrorScreen = null;
+let paymentOfflineErrorScreen = null;
 let activeMainErrorType = null;
 
 /** From GET /transaction `appSettings.otpSettings` (mutable `maxTries` is tracked per card below). */
@@ -122,6 +123,7 @@ let transactionExpiredRemainingSeconds = 60;
 let receiptRedirectLoadingTimeoutId = null;
 let receiptRedirectManualButtonTimeoutId = null;
 let paySubmitInFlight = false;
+let merchantRedirectInProgress = false;
 const clickLockMap = new WeakMap();
 const timerStateStoragePrefix = 'pg-timer-state-v1';
 let timerStateStorageKeyCache = null;
@@ -154,7 +156,34 @@ function getPrimaryPageSections() {
   );
 }
 
+function ensureOfflineErrorScreen() {
+  const offlineRoot = document.getElementById('payment-offline-root');
+  if (!offlineRoot) return null;
+  if (!paymentOfflineErrorScreen) {
+    paymentOfflineErrorScreen = new PaymentInitErrorScreen({
+      container: offlineRoot,
+      image: '/assets/images/icons/icn-x.svg',
+      title: i18n.t('network.offline.title'),
+      description: i18n.t('network.offline.description'),
+      ariaLabel: i18n.t('network.offline.title'),
+    });
+  } else {
+    paymentOfflineErrorScreen.updateTexts({
+      title: i18n.t('network.offline.title'),
+      description: i18n.t('network.offline.description'),
+    });
+  }
+
+  const headingEl = offlineRoot.querySelector('.empty-state-title');
+  if (headingEl) {
+    headingEl.id = 'payment-offline-title';
+  }
+
+  return paymentOfflineErrorScreen;
+}
+
 function showOfflineSection(offlineSection) {
+  ensureOfflineErrorScreen();
   const primarySections = getPrimaryPageSections();
   if (offlineSection.hidden) {
     const visibleSection = primarySections.find((section) => section.hidden === false);
@@ -863,15 +892,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 async function initializePage() {
   const loadingScreen = new LoadingScreen({
     logo: '/assets/images/logo-full.svg',
-    // Non-empty so .loading-text exists for updateText() after i18n is ready
-    text: '\u00A0',
     showProgressBar: true,
-    ariaLabel: '\u00A0',
+    ariaLabel: 'Loading',
   });
   loadingScreen.show();
 
   await i18n.readyPromise;
-  loadingScreen.updateText(i18n.t('common.loading'));
   if (loadingScreen.element) {
     loadingScreen.element.setAttribute('aria-label', i18n.t('common.loading'));
   }
@@ -1065,7 +1091,7 @@ function initializeTimer(durationSeconds = 900) {
         mode: 'toast',
         type: 'warning',
       });
-      showTransactionExpiredScreen();
+      void navigateToMerchantSite();
     },
   });
 
@@ -2923,13 +2949,12 @@ function openCancelPaymentConfirm() {
       {
         text: i18n.t('cancelConfirm.confirmLeave'),
         type: 'danger',
-        onClick: () => {
-          ipgService
-            .cancelTransaction()
-            .catch((err) => console.warn('Cancel transaction request failed:', err))
-            .finally(() => {
-              window.location.href = '/';
-            });
+        onClick: async () => {
+          const redirected = await cancelAndRedirectViaReceiptParams();
+          if (!redirected) {
+            const fallbackUrl = getMerchantReturnUrl();
+            window.location.href = fallbackUrl || '/';
+          }
         },
       },
     ],
@@ -3176,7 +3201,70 @@ function getMerchantReturnUrl() {
   return `https://${site}`;
 }
 
-function navigateToMerchantSite() {
+function postRedirectParamsToMerchant(redirectData) {
+  const redirectUrl = String(redirectData?.redirectUrl || '').trim();
+  if (!redirectUrl) return false;
+
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = redirectUrl;
+  form.style.display = 'none';
+
+  Object.entries(redirectData || {}).forEach(([key, value]) => {
+    if (key === 'redirectUrl' || value == null) return;
+    const input = document.createElement('input');
+    input.type = 'hidden';
+    input.name = key;
+    input.value = String(value);
+    form.appendChild(input);
+  });
+
+  document.body.appendChild(form);
+  form.submit();
+  return true;
+}
+
+async function cancelAndRedirectViaReceiptParams() {
+  if (merchantRedirectInProgress) return true;
+  merchantRedirectInProgress = true;
+
+  try {
+    await ipgService.cancelTransaction();
+  } catch (cancelError) {
+    console.warn('Cancel transaction request failed:', cancelError);
+  }
+
+  try {
+    const redirectRes = await ipgService.getReceiptRedirectParams();
+    if (postRedirectParamsToMerchant(redirectRes?.data)) {
+      return true;
+    }
+  } catch (redirectError) {
+    console.warn('Receipt redirect params request failed:', redirectError);
+  }
+
+  merchantRedirectInProgress = false;
+  return false;
+}
+
+async function redirectViaReceiptParams() {
+  if (merchantRedirectInProgress) return true;
+  merchantRedirectInProgress = true;
+  try {
+    const redirectRes = await ipgService.getReceiptRedirectParams();
+    if (postRedirectParamsToMerchant(redirectRes?.data)) {
+      return true;
+    }
+  } catch (redirectError) {
+    console.warn('Receipt redirect params request failed:', redirectError);
+  }
+  merchantRedirectInProgress = false;
+  return false;
+}
+
+async function navigateToMerchantSite() {
+  const redirected = await cancelAndRedirectViaReceiptParams();
+  if (redirected) return;
   const url = getMerchantReturnUrl();
   if (url) {
     window.location.href = url;
@@ -3205,13 +3293,15 @@ function showReceiptRedirectLoadingScreen() {
   if (redirectSection) redirectSection.hidden = false;
   if (redirectManualButton) {
     redirectManualButton.hidden = true;
-    redirectManualButton.onclick = () => navigateToMerchantSite();
+    redirectManualButton.onclick = () => {
+      void redirectViaReceiptParams();
+    };
   }
 
   const url = getMerchantReturnUrl();
   if (!url) return;
   receiptRedirectLoadingTimeoutId = setTimeout(() => {
-    navigateToMerchantSite();
+    void redirectViaReceiptParams();
   }, receiptRedirectAutoNavigateDelayMs);
   receiptRedirectManualButtonTimeoutId = setTimeout(() => {
     if (redirectManualButton) {
@@ -3250,7 +3340,9 @@ function showTransactionExpiredScreen() {
   }
 
   if (returnBtn) {
-    returnBtn.onclick = () => navigateToMerchantSite();
+    returnBtn.onclick = () => {
+      void navigateToMerchantSite();
+    };
   }
 
   transactionExpiredReturnIntervalId = setInterval(() => {
@@ -3265,7 +3357,7 @@ function showTransactionExpiredScreen() {
     }
     if (transactionExpiredRemainingSeconds <= 0) {
       clearTransactionExpiredReturnTimer();
-      navigateToMerchantSite();
+      void navigateToMerchantSite();
     }
   }, 1000);
 }
@@ -3541,7 +3633,7 @@ function attachPaymentReceiptActions() {
 
   if (completeBtn && completeBtn.dataset.bound !== '1') {
     completeBtn.dataset.bound = '1';
-    completeBtn.addEventListener('click', () => {
+    completeBtn.addEventListener('click', async () => {
       if (isButtonClickLocked(completeBtn)) return;
       lockButtonClick(completeBtn);
       const url = getMerchantReturnUrl();
@@ -3549,7 +3641,10 @@ function attachPaymentReceiptActions() {
         unlockButtonClick(completeBtn);
         return;
       }
-      window.location.href = url;
+      const redirected = await redirectViaReceiptParams();
+      if (!redirected) {
+        unlockButtonClick(completeBtn);
+      }
     });
   }
 }

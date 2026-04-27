@@ -5,9 +5,8 @@ export class LoadingScreen {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
-      text: options.text || '',
       showProgressBar: options.showProgressBar !== false,
-      ariaLabel: options.ariaLabel || options.text || 'Loading',
+      ariaLabel: options.ariaLabel || 'Loading',
       ...options,
     };
 
@@ -65,14 +64,6 @@ export class LoadingScreen {
       container.appendChild(progressBar);
     }
 
-    // Text
-    if (this.options.text) {
-      const text = document.createElement('div');
-      text.className = 'loading-text';
-      text.textContent = this.options.text;
-      container.appendChild(text);
-    }
-
     loading.appendChild(container);
     this.element = loading;
     document.body.appendChild(loading);
@@ -95,17 +86,6 @@ export class LoadingScreen {
     if (this.element) {
       this.element.classList.remove('show');
       document.body.style.overflow = '';
-    }
-  }
-
-  /**
-   * Update text
-   * @param {string} text - New text
-   */
-  updateText(text) {
-    const textElement = this.element?.querySelector('.loading-text');
-    if (textElement) {
-      textElement.textContent = text;
     }
   }
 

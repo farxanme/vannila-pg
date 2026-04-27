@@ -15,7 +15,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const loadingScreen = new LoadingScreen({
     logo: '/assets/images/logo-full.svg',
-    text: i18n.t('redirect.loading'),
     showProgressBar: true,
   });
   loadingScreen.show();

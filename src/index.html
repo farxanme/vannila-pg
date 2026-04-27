@@ -37,10 +37,10 @@
       hidden
     >
       <div class="init-error-container">
-        <div class="card init-error-card browser-unsupported-card">
+        <div class="card browser-unsupported-card">
           <h2 id="browser-unsupported-title">مرورگر شما پشتیبانی نمی‌شود</h2>
           <p>
-            نسخه مرورگر شما با این سرویس سازگار نیست. لطفاً مرورگر خود را به‌روز کنید یا از مرورگر
+            نسخه مرورگر شما با این سرویس سازگار نیست. لطفا مرورگر خود را به‌روز کنید یا از مرورگر
             جدیدتری استفاده کنید.
           </p>
         </div>
@@ -510,7 +510,7 @@
             aria-labelledby="redirect-loading-title"
           >
             <div class="init-error-container">
-              <div class="card init-error-card redirect-loading-card">
+              <div class="card redirect-loading-card">
                 <div class="redirect-loading-content">
                   <div class="redirect-loading-spinner spinner" aria-hidden="true"></div>
                   <h2 id="redirect-loading-title" data-i18n="redirect.loadingTitle"></h2>
@@ -534,7 +534,7 @@
             aria-labelledby="transaction-expired-title"
           >
             <div class="init-error-container">
-              <div class="card init-error-card transaction-expired-card">
+              <div class="card transaction-expired-card">
                 <div class="transaction-expired-content">
                   <h2 id="transaction-expired-title" data-i18n="timer.transactionExpiredTitle"></h2>
                   <p data-i18n="timer.transactionExpiredDescription"></p>
@@ -561,13 +561,8 @@
             aria-labelledby="payment-offline-title"
           >
             <div class="init-error-container">
-              <div class="card init-error-card network-offline-card" role="alert">
-                <h2 id="payment-offline-title" data-i18n="network.offline.title">
-                  دسترسی اینترنت قطع است
-                </h2>
-                <p data-i18n="network.offline.description">
-                  پس از اتصال مجدد اینترنت، ادامه همین صفحه نمایش داده می‌شود.
-                </p>
+              <div class="card init-error-card" id="payment-offline-root">
+                <!-- Filled by PaymentInitErrorScreen (EmptyState) -->
               </div>
             </div>
           </section>

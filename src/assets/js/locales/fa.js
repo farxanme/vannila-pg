@@ -74,13 +74,13 @@ export default {
   'form.back': 'بازگشت',
   'form.pay.securePrefix': 'پرداخت امن',
   'form.pay.secureWithAmount': 'پرداخت امن ({{amount}} {{currency}})',
-  'form.pay.disabled': 'لطفاً اطلاعات را کامل وارد کنید',
+  'form.pay.disabled': 'لطفا اطلاعات را کامل وارد کنید',
   'form.pay.processing': 'در حال اتصال به بانک...',
   'form.pay.success': 'پرداخت با موفقیت ثبت شد',
   'form.cancel': 'انصراف',
   'form.title': 'اطلاعات کارت خود را وارد کنید',
   'form.captcha.placeholder': 'کد را وارد کنید',
-  'form.validation.error': 'لطفاً تمام فیلدها را به درستی پر کنید',
+  'form.validation.error': 'لطفا تمام فیلدها را به درستی پر کنید',
   'form.showCards': 'نمایش کارت‌ها',
   'form.virtualPinPad': 'صفحه کلید مجازی',
   'form.reloadCaptcha': 'بارگذاری مجدد کد امنیتی',
@@ -103,9 +103,9 @@ export default {
   // Payment init (SSR session)
   'paymentInit.error.title': 'خطا در شروع پرداخت',
   'paymentInit.error.description':
-    'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفاً از مسیر صحیح وارد درگاه شوید یا بعداً دوباره تلاش کنید.',
+    'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفا از مسیر صحیح وارد درگاه شوید یا بعدا دوباره تلاش کنید.',
   'transactionInit.error.title': 'خطا در دریافت اطلاعات تراکنش',
-  'transactionInit.error.description': 'ارتباط با سرویس تراکنش برقرار نشد. لطفاً دوباره تلاش کنید.',
+  'transactionInit.error.description': 'ارتباط با سرویس تراکنش برقرار نشد. لطفا دوباره تلاش کنید.',
 
   // Accessibility
   'accessibility.selectLanguage': 'انتخاب زبان',
