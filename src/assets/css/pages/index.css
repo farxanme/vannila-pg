@@ -531,14 +531,6 @@ html.app-ready #app .main-content {
   display: none;
 }
 
-/* Init error / inline receipt: full width inside .container (match page content width) */
-.init-error-container {
-  width: 100%;
-  max-width: 100%;
-  margin: 0 auto;
-  box-sizing: border-box;
-}
-
 .init-error-section .payment-init-error .empty-state {
   padding-top: 0;
   padding-bottom: 0;

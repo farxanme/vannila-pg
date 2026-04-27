@@ -30,7 +30,7 @@ import {
   extractNumbers,
   numberToWordsByLang,
 } from '../utils/numberConverter.js';
-import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
+import { formatCurrencyAmountLabel, getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
 import { getTransactionTypeInfo } from '../utils/transactionType.js';
@@ -2806,8 +2806,7 @@ function refreshTransactionAmountValues() {
   if (typeof amount !== 'number' || Number.isNaN(amount)) return;
 
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const locale = getNumberLocaleForLang(lang);
-  rialEl.textContent = `${amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  rialEl.textContent = formatCurrencyAmountLabel(amount, lang, (key) => i18n.t(key));
   rialEl.setAttribute('data-amount', String(amount));
 
   const amountInTomans = Math.floor(amount / 10);
@@ -3109,8 +3108,7 @@ function setPaymentReceiptOptionalRow(rowId, valueElId, value, displayValue = va
 
 function getCurrencyAmountLabel(amount) {
   const lang = typeof i18n.getLanguage === 'function' ? i18n.getLanguage() : 'fa';
-  const locale = getNumberLocaleForLang(lang);
-  return `${Number(amount).toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  return formatCurrencyAmountLabel(amount, lang, (key) => i18n.t(key));
 }
 
 function summarizeDigitalReceipt(value) {

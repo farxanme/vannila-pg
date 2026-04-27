@@ -19,6 +19,14 @@
   transition: none;
 }
 
+.init-error-container,
+.receipt-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 .header.scrolled {
   height: 110px;
 }

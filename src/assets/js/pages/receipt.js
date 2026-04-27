@@ -4,7 +4,7 @@
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
 import { shareContent } from '../utils/contentSharing.js';
-import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
+import { formatCurrencyAmountLabel, getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { i18n } from '../main.js';
 
 let header, footer;
@@ -101,7 +101,9 @@ function updateReceiptContent(data) {
       ? i18n.t('receipt.paymentSuccessDesc')
       : i18n.t('receipt.paymentFailedDesc');
 
-  amount.textContent = `${data.amount.toLocaleString(locale)} ${i18n.t('transaction.rial')}`;
+  amount.textContent = formatCurrencyAmountLabel(data.amount, i18n.getLanguage(), (key) =>
+    i18n.t(key)
+  );
   transactionId.textContent = data.id;
   transactionDate.textContent =
     typeof data.dateMs === 'number' ? new Date(data.dateMs).toLocaleString(locale) : data.date;
