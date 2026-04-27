@@ -12,6 +12,7 @@ export default {
   'common.required': 'Bu alan zorunludur',
   'common.processing': 'İşleniyor...',
   'common.loading': 'Yükleniyor...',
+  'common.tryAgain': 'Tekrar dene',
 
   // Redirect
   'redirect.loading': 'Yönlendiriliyor...',
@@ -102,6 +103,9 @@ export default {
   'paymentInit.error.title': 'Ödeme başlatılamadı',
   'paymentInit.error.description':
     'Ödeme oturum verileri eksik veya geçersiz. Lütfen geçit için doğru bağlantıyı kullanın veya daha sonra tekrar deneyin.',
+  'transactionInit.error.title': 'Islem bilgileri yuklenemedi',
+  'transactionInit.error.description':
+    'Islem servisine su anda ulasilamiyor. Lutfen tekrar deneyin.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Dil seçin',

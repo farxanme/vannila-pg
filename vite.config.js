@@ -22,6 +22,34 @@ function copyImagesWithStructurePlugin() {
   };
 }
 
+function appendStaticAssetVersionPlugin() {
+  const assetUrlRegex = /\/assets\/[^\s"'`)<]+?\.(?:css|js|svg)(?!\?)/g;
+  const buildVersion = Date.now().toString(36);
+
+  const addVersion = (content) =>
+    content.replace(assetUrlRegex, (url) => `${url}?v=${buildVersion}`);
+
+  return {
+    name: 'append-static-asset-version',
+    apply: 'build',
+    generateBundle(_options, bundle) {
+      Object.values(bundle).forEach((item) => {
+        if (item.type === 'chunk') {
+          item.code = addVersion(item.code);
+          return;
+        }
+
+        if (typeof item.source === 'string') {
+          const isTextAsset = /\.(html|css|js)$/i.test(item.fileName);
+          if (isTextAsset) {
+            item.source = addVersion(item.source);
+          }
+        }
+      });
+    },
+  };
+}
+
 export default defineConfig(({ command }) => {
   const isBuild = command === 'build';
   const mockAlias = isBuild
@@ -41,7 +69,7 @@ export default defineConfig(({ command }) => {
     root: 'src',
     envDir: '..',
     publicDir: '../public',
-    plugins: [copyImagesWithStructurePlugin()],
+    plugins: [copyImagesWithStructurePlugin(), appendStaticAssetVersionPlugin()],
     resolve: {
       alias: mockAlias,
     },
@@ -52,8 +80,6 @@ export default defineConfig(({ command }) => {
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'src/index.html'),
-          receipt: resolve(__dirname, 'src/receipt.html'),
-          redirect: resolve(__dirname, 'src/redirect.html'),
         },
         output: {
           entryFileNames: 'assets/js/[name].js',

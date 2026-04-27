@@ -12,6 +12,7 @@ export default {
   'common.required': 'Обязательное поле',
   'common.processing': 'Обработка...',
   'common.loading': 'Загрузка...',
+  'common.tryAgain': 'Повторить',
 
   // Redirect
   'redirect.loading': 'Перенаправление...',
@@ -102,6 +103,9 @@ export default {
   'paymentInit.error.title': 'Невозможно начать оплату',
   'paymentInit.error.description':
     'Данные платёжной сессии отсутствуют или недействительны. Откройте шлюз по правильной ссылке или повторите попытку позже.',
+  'transactionInit.error.title': 'Не удалось загрузить данные транзакции',
+  'transactionInit.error.description':
+    'Сервис транзакций сейчас недоступен. Пожалуйста, повторите попытку.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Выбрать язык',

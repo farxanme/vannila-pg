@@ -87,6 +87,7 @@ let selectedSavedCardForApi = null;
 let captchaTokenKey = null;
 
 let paymentInitErrorScreen = null;
+let activeMainErrorType = null;
 
 /** From GET /transaction `appSettings.otpSettings` (mutable `maxTries` is tracked per card below). */
 let transactionOtpSettings = { maxTries: 5, nextTrySeconds: 120 };
@@ -345,11 +346,102 @@ function getExpiryDateForApi() {
 }
 
 function handlePaymentInitLanguageChange() {
-  if (!paymentInitErrorScreen) return;
+  if (!paymentInitErrorScreen || !activeMainErrorType) return;
+  const titleKey =
+    activeMainErrorType === 'transaction'
+      ? 'transactionInit.error.title'
+      : 'paymentInit.error.title';
+  const descriptionKey =
+    activeMainErrorType === 'transaction'
+      ? 'transactionInit.error.description'
+      : 'paymentInit.error.description';
   paymentInitErrorScreen.updateTexts({
-    title: i18n.t('paymentInit.error.title'),
-    description: i18n.t('paymentInit.error.description'),
+    title: i18n.t(titleKey),
+    description: i18n.t(descriptionKey),
   });
+  if (activeMainErrorType === 'transaction') {
+    const retryButton = document.getElementById('payment-init-error-retry-button');
+    if (retryButton) {
+      retryButton.textContent = i18n.t('common.tryAgain');
+      retryButton.setAttribute('aria-label', i18n.t('common.tryAgain'));
+    }
+  }
+}
+
+function stopAndHideMainTimer() {
+  if (timer && typeof timer.stop === 'function') {
+    timer.stop();
+  }
+  timer = null;
+
+  const timerContainer = document.getElementById('timer-container');
+  const timerHeader = document.getElementById('timer-header');
+  const timerProgress = timerContainer?.querySelector('.timer-progress');
+  const timerValue = timerContainer?.querySelector('.timer-value');
+
+  if (timerHeader) {
+    timerHeader.classList.remove('warning', 'danger');
+  }
+  if (timerValue) {
+    timerValue.textContent = '00:00';
+  }
+  setTimerProgressIndicator(timerProgress, 0);
+  if (timerContainer) {
+    timerContainer.setAttribute('hidden', '');
+  }
+}
+
+function showMainErrorScreen({ type = 'paymentInit', withRetry = false } = {}) {
+  const initErrorRoot = document.getElementById('payment-init-error-root');
+  const initErrorSection = document.getElementById('payment-init-error-section');
+  const paymentFlowSection = document.getElementById('payment-flow-section');
+  if (!initErrorRoot || !initErrorSection || !paymentFlowSection) {
+    return false;
+  }
+
+  activeMainErrorType = type;
+  stopAndHideMainTimer();
+  paymentFlowSection.setAttribute('hidden', '');
+  initErrorSection.removeAttribute('hidden');
+
+  paymentInitErrorScreen?.destroy();
+  paymentInitErrorScreen = null;
+  initErrorRoot.innerHTML = '';
+
+  const titleKey =
+    type === 'transaction' ? 'transactionInit.error.title' : 'paymentInit.error.title';
+  const descriptionKey =
+    type === 'transaction' ? 'transactionInit.error.description' : 'paymentInit.error.description';
+  const buttons = withRetry
+    ? [
+        {
+          type: 'success',
+          text: i18n.t('common.tryAgain'),
+          onClick: () => {
+            window.location.reload();
+          },
+        },
+      ]
+    : [];
+
+  paymentInitErrorScreen = new PaymentInitErrorScreen({
+    container: initErrorRoot,
+    image: '/assets/images/icons/icn-x.svg',
+    title: i18n.t(titleKey),
+    description: i18n.t(descriptionKey),
+    buttons,
+    ariaLabel: i18n.t(titleKey),
+  });
+
+  if (withRetry) {
+    const retryButton = initErrorRoot.querySelector('.empty-state-buttons .btn');
+    if (retryButton) {
+      retryButton.id = 'payment-init-error-retry-button';
+      retryButton.setAttribute('aria-label', i18n.t('common.tryAgain'));
+    }
+  }
+
+  return true;
 }
 
 function isVisibleInputField(field) {
@@ -650,10 +742,7 @@ async function initializePage() {
 
   const paymentInitCheck = validatePaymentInitData();
   if (!paymentInitCheck.valid) {
-    const initErrorRoot = document.getElementById('payment-init-error-root');
-    const initErrorSection = document.getElementById('payment-init-error-section');
-    const paymentFlowSection = document.getElementById('payment-flow-section');
-    if (!initErrorRoot || !initErrorSection || !paymentFlowSection) {
+    if (!showMainErrorScreen({ type: 'paymentInit', withRetry: false })) {
       loadingScreen.hide();
       loadingScreen.destroy();
       markAppReady();
@@ -678,17 +767,6 @@ async function initializePage() {
         supportPrefix: i18n.t('footer.supportPrefix'),
         supportPhone: i18n.t('footer.supportPhone'),
         copyright: i18n.t('footer.copyright'),
-      });
-
-      paymentFlowSection.setAttribute('hidden', '');
-      initErrorSection.removeAttribute('hidden');
-
-      paymentInitErrorScreen = new PaymentInitErrorScreen({
-        container: initErrorRoot,
-        image: '/assets/images/icons/icn-x.svg',
-        title: i18n.t('paymentInit.error.title'),
-        description: i18n.t('paymentInit.error.description'),
-        ariaLabel: i18n.t('paymentInit.error.title'),
       });
 
       updatePageContent();
@@ -753,11 +831,26 @@ async function initializePage() {
     markAppReady();
   } catch (error) {
     console.error('Initialization error:', error);
-    errorHandler.show({
-      message: i18n.t('error.unknown'),
-      mode: 'toast',
-      type: 'error',
-    });
+    if (error?.code === 'transaction_init_failed') {
+      const shown = showMainErrorScreen({ type: 'transaction', withRetry: true });
+      if (shown) {
+        updatePageContent();
+        document.addEventListener('languageChange', handleLanguageChange);
+        document.addEventListener('languageChange', handlePaymentInitLanguageChange);
+      } else {
+        errorHandler.show({
+          message: i18n.t('error.unknown'),
+          mode: 'toast',
+          type: 'error',
+        });
+      }
+    } else {
+      errorHandler.show({
+        message: i18n.t('error.unknown'),
+        mode: 'toast',
+        type: 'error',
+      });
+    }
     loadingScreen.hide();
     loadingScreen.destroy();
     markAppReady();
@@ -767,6 +860,13 @@ async function initializePage() {
 function initializeTimer(durationSeconds = 900) {
   const timerContainer = document.getElementById('timer-container');
   const timerHeader = document.getElementById('timer-header');
+  if (!timerContainer) return;
+
+  timerContainer.removeAttribute('hidden');
+  if (timer && typeof timer.stop === 'function') {
+    timer.stop();
+  }
+
   const timerProgress = timerContainer.querySelector('.timer-progress');
   const timerValue = timerContainer.querySelector('.timer-value');
   const total = Math.max(1, durationSeconds);
@@ -953,11 +1053,11 @@ function initializeFormInputs() {
       expiryYearInput.setValue('');
       expiryMonthInput.setPlaceholder('\u2022\u2022');
       expiryYearInput.setPlaceholder('\u2022\u2022');
-      expiryMonthInput.wrapper.classList.add('expiry-date-field--locked-placeholder');
-      expiryYearInput.wrapper.classList.add('expiry-date-field--locked-placeholder');
+      expiryMonthInput.wrapper.classList.add('expiry-date-field-locked-placeholder');
+      expiryYearInput.wrapper.classList.add('expiry-date-field-locked-placeholder');
     } else {
-      expiryMonthInput.wrapper.classList.remove('expiry-date-field--locked-placeholder');
-      expiryYearInput.wrapper.classList.remove('expiry-date-field--locked-placeholder');
+      expiryMonthInput.wrapper.classList.remove('expiry-date-field-locked-placeholder');
+      expiryYearInput.wrapper.classList.remove('expiry-date-field-locked-placeholder');
       expiryMonthInput.setPlaceholder(i18n.t('form.expiryMonth'));
       expiryYearInput.setPlaceholder(i18n.t('form.expiryYear'));
     }
@@ -1966,7 +2066,10 @@ async function initializeTransactionInfo() {
     currentTransactionPayload = txPayload;
   } catch (e) {
     console.error('getTransaction failed:', e);
-    currentTransactionPayload = null;
+    const transactionInitError = new Error('Transaction initialization failed');
+    transactionInitError.code = 'transaction_init_failed';
+    transactionInitError.cause = e;
+    throw transactionInitError;
   }
 
   const terminalFromSession =
@@ -3201,7 +3304,7 @@ function generatePaymentReceiptPlainText() {
 }
 
 /**
- * Show full-width receipt section (same layout as init-error / receipt.html) and hide checkout grid.
+ * Show full-width receipt section and hide checkout grid.
  */
 function showPaymentReceiptScreen(paymentReceipt) {
   clearTransactionExpiredReturnTimer();

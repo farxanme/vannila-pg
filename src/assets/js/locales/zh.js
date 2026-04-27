@@ -19,6 +19,7 @@ export default {
   'common.clear': '清除',
   'common.processing': '处理中...',
   'common.loading': '加载中...',
+  'common.tryAgain': '重试',
 
   // Accessibility
   'accessibility.selectLanguage': '选择语言',
@@ -119,4 +120,6 @@ export default {
   'timer.transactionExpiredDescription': '您将在一分钟后跳转到商户网站。',
   'timer.returnToMerchant': '跳转到商户网站',
   'redirect.loadingTitle': '正在跳转到商户网站',
+  'transactionInit.error.title': '无法加载交易信息',
+  'transactionInit.error.description': '交易服务暂时不可用，请重试。',
 };

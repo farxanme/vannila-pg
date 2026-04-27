@@ -12,6 +12,7 @@ export default {
   'common.required': 'هذا الحقل مطلوب',
   'common.processing': 'جاري المعالجة...',
   'common.loading': 'جاري التحميل...',
+  'common.tryAgain': 'حاول مرة أخرى',
 
   // Redirect
   'redirect.loading': 'جاري التحويل...',
@@ -100,6 +101,8 @@ export default {
   'paymentInit.error.title': 'تعذر بدء الدفع',
   'paymentInit.error.description':
     'بيانات جلسة الدفع غير مكتملة أو غير صالحة. يرجى فتح البوابة عبر الرابط الصحيح أو المحاولة لاحقاً.',
+  'transactionInit.error.title': 'تعذر تحميل معلومات المعاملة',
+  'transactionInit.error.description': 'خدمة المعاملات غير متاحة حالياً. يرجى المحاولة مرة أخرى.',
 
   // Accessibility
   'accessibility.selectLanguage': 'اختيار اللغة',

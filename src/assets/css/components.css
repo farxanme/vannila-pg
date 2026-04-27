@@ -463,12 +463,12 @@
   flex-basis: 100%;
 }
 
-.bottom-sheet-buttons--stacked {
+.bottom-sheet-buttons-stacked {
   flex-direction: column;
   align-items: stretch;
 }
 
-.bottom-sheet-buttons--stacked .btn {
+.bottom-sheet-buttons-stacked .btn {
   width: 100%;
 }
 
@@ -613,13 +613,13 @@
   flex-basis: 100%;
 }
 
-.modal-buttons--stacked {
+.modal-buttons-stacked {
   flex-direction: column;
   align-items: stretch;
   justify-content: stretch;
 }
 
-.modal-buttons--stacked .btn {
+.modal-buttons-stacked .btn {
   width: 100%;
 }
 

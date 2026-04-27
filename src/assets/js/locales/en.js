@@ -12,6 +12,7 @@ export default {
   'common.required': 'This field is required',
   'common.processing': 'Processing...',
   'common.loading': 'Loading...',
+  'common.tryAgain': 'Try Again',
 
   // Redirect
   'redirect.loading': 'Redirecting...',
@@ -101,6 +102,9 @@ export default {
   'paymentInit.error.title': 'Cannot start payment',
   'paymentInit.error.description':
     'Payment session data is missing or invalid. Please use the correct link to open the gateway or try again later.',
+  'transactionInit.error.title': 'Cannot load transaction information',
+  'transactionInit.error.description':
+    'The transaction service is unavailable right now. Please try again.',
 
   // Accessibility
   'accessibility.selectLanguage': 'Select language',

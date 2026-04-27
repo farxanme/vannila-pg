@@ -12,6 +12,7 @@ export default {
   'common.required': 'این فیلد الزامی است',
   'common.processing': 'در حال پردازش...',
   'common.loading': 'در حال بارگذاری...',
+  'common.tryAgain': 'تلاش دوباره',
 
   // Redirect
   'redirect.loading': 'در حال انتقال...',
@@ -101,6 +102,8 @@ export default {
   'paymentInit.error.title': 'خطا در شروع پرداخت',
   'paymentInit.error.description':
     'اطلاعات نشست پرداخت کامل نیست یا نامعتبر است. لطفاً از مسیر صحیح وارد درگاه شوید یا بعداً دوباره تلاش کنید.',
+  'transactionInit.error.title': 'خطا در دریافت اطلاعات تراکنش',
+  'transactionInit.error.description': 'ارتباط با سرویس تراکنش برقرار نشد. لطفاً دوباره تلاش کنید.',
 
   // Accessibility
   'accessibility.selectLanguage': 'انتخاب زبان',

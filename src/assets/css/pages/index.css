@@ -701,7 +701,7 @@ html.app-ready #app .main-content {
 /* Equal month/year width (both slots use flex: 1 1 0) */
 
 /* Locked expiry: empty value, bullet placeholder in password-style font */
-.expiry-date-field--locked-placeholder .input-field:disabled::placeholder {
+.expiry-date-field-locked-placeholder .input-field:disabled::placeholder {
   font-family: 'password', 'Lucida Grande', sans-serif;
   font-size: var(--font-size-xs);
   letter-spacing: 0.12em;
@@ -709,7 +709,7 @@ html.app-ready #app .main-content {
   text-security: disc;
 }
 
-.expiry-date-field--locked-placeholder .input-field:disabled {
+.expiry-date-field-locked-placeholder .input-field:disabled {
   font-family: var(--font-family-base);
   -webkit-text-security: none;
   text-security: none;

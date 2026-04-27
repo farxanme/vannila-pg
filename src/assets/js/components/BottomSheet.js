@@ -93,7 +93,7 @@ export class BottomSheet {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'bottom-sheet-buttons';
       if (this.options.buttonsStacked) {
-        buttonsContainer.classList.add('bottom-sheet-buttons--stacked');
+        buttonsContainer.classList.add('bottom-sheet-buttons-stacked');
       }
 
       this.options.buttons.forEach((button, _index) => {

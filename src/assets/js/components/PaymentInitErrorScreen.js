@@ -9,6 +9,7 @@ export class PaymentInitErrorScreen {
       image: options.image || '/assets/images/icons/icn-x.svg',
       title: options.title || '',
       description: options.description || '',
+      buttons: Array.isArray(options.buttons) ? options.buttons : [],
       ariaLabel: options.ariaLabel || options.title || 'Error',
       container: options.container ?? null,
       ...options,
@@ -37,6 +38,7 @@ export class PaymentInitErrorScreen {
       image: this.options.image,
       title: this.options.title,
       description: this.options.description,
+      buttons: this.options.buttons,
     });
 
     const headingEl = root.querySelector('.empty-state-title');

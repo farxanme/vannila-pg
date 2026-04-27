@@ -256,7 +256,7 @@ export class Modal {
       const buttonsContainer = document.createElement('div');
       buttonsContainer.className = 'modal-buttons';
       if (this.options.buttonsStacked) {
-        buttonsContainer.classList.add('modal-buttons--stacked');
+        buttonsContainer.classList.add('modal-buttons-stacked');
       }
 
       this.options.buttons.forEach((button) => {

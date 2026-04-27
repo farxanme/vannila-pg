@@ -115,6 +115,16 @@ class I18n {
       const key = el.getAttribute('data-i18n');
       if (key) el.textContent = this.t(key);
     });
+
+    root.querySelectorAll('[data-i18n-aria-label]').forEach((el) => {
+      const key = el.getAttribute('data-i18n-aria-label');
+      if (key) el.setAttribute('aria-label', this.t(key));
+    });
+
+    root.querySelectorAll('[data-i18n-title]').forEach((el) => {
+      const key = el.getAttribute('data-i18n-title');
+      if (key) el.setAttribute('title', this.t(key));
+    });
   }
 
   /**
