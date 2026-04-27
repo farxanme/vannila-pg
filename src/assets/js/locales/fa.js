@@ -13,6 +13,8 @@ export default {
   'common.processing': 'در حال پردازش...',
   'common.loading': 'در حال بارگذاری...',
   'common.tryAgain': 'تلاش دوباره',
+  'network.offline.title': 'دسترسی اینترنت قطع است',
+  'network.offline.description': 'پس از اتصال مجدد اینترنت، ادامه همین صفحه نمایش داده می‌شود.',
 
   // Redirect
   'redirect.loading': 'در حال انتقال...',
@@ -140,10 +142,10 @@ export default {
   'receipt.plain.merchant': 'پذیرنده:',
   'receipt.plain.transactionId': 'شماره تراکنش:',
   'receipt.plain.date': 'تاریخ:',
-  'receipt.plain.card': 'شماره کارت:',
+  'receipt.plain.card': 'شماره کارت',
   'receipt.sectionMerchant': 'اطلاعات پذیرنده',
   'receipt.sectionTransaction': 'اطلاعات تراکنش',
-  'receipt.internetTitle': 'جزئیات تراکنش',
+  'receipt.receiptTitle': 'رسید',
   'receipt.sectionInstallmentInfo': 'اطلاعات تراکنش اقساطی',
   'receipt.sectionBillInfo': 'اطلاعات قبوض پرداختی',
   'receipt.installmentCount': 'تعداد اقساط',
@@ -168,7 +170,9 @@ export default {
   'receipt.paymentFacilitator': 'پرداخت یار',
   'receipt.merchantSiteAddress': 'آدرس سایت پذیرنده',
   'receipt.noticePolicy':
-    'در صورتی که طی 30 دقیقه، فروشنده تایید تحویل کالا یا خدمت را به شرکت سِپ اطلاع رسانی نکند، مبلغ کسر شده طی 72 ساعت به حساب شما برگشت داده می‌شود.',
+    'در صورتی که طی 30 دقیقه، پذیرنده تایید تحویل کالا یا خدمت را به شرکت سِپ اطلاع رسانی نکند، مبلغ کسر شده طی 72 ساعت به حساب شما برگشت داده می‌شود.',
+  'receipt.finalizationNotice':
+    'این رسید نهایی نیست، پس از تایید تحویل کالا یا خدمت توسط پذیرنده نهایی می شود.',
   'receipt.traceNo': 'شماره پیگیری',
   'receipt.rrn': 'شماره مرجع (RRN)',
   'receipt.pTraceNo': 'شماره پیگیری ترمینال',
@@ -218,7 +222,7 @@ export default {
   'transaction.rial': 'ریال',
   'transaction.amountInWordsPrefix': 'معادل',
   'transaction.toman': 'تومان',
-  'transaction.demo.merchantName': 'فروشگاه نمونه',
+  'transaction.demo.merchantName': 'پذیرنده نمونه',
   'transaction.demo.siteHost': 'example.com',
 
   // Pin Pad

@@ -3,7 +3,7 @@
  */
 import { Header } from '../components/Header.js';
 import { Footer } from '../components/Footer.js';
-import { shareContent } from '../utils/share.js';
+import { shareContent } from '../utils/contentSharing.js';
 import { getNumberLocaleForLang } from '../utils/localeHelpers.js';
 import { i18n } from '../main.js';
 

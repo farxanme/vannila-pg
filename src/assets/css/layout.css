@@ -562,7 +562,7 @@
 }
 
 .footer-copyright {
-  font-size: var(--font-size-footer-copyright);
+  font-size: var(--font-size-xs);
   color: var(--color-footer-copyright);
   text-align: center;
   white-space: pre-line;
@@ -570,7 +570,7 @@
 }
 
 .footer-support {
-  font-size: var(--font-size-footer-contact);
+  font-size: var(--font-size-sm);
   color: var(--color-footer-contact);
   text-align: center;
 }

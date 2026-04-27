@@ -30,6 +30,22 @@
     <link rel="stylesheet" href="/assets/css/pages/receipt.css" />
   </head>
   <body>
+    <section
+      id="browser-unsupported-section"
+      class="init-error-section browser-unsupported-section"
+      aria-labelledby="browser-unsupported-title"
+      hidden
+    >
+      <div class="init-error-container">
+        <div class="card init-error-card browser-unsupported-card">
+          <h2 id="browser-unsupported-title">مرورگر شما پشتیبانی نمی‌شود</h2>
+          <p>
+            نسخه مرورگر شما با این سرویس سازگار نیست. لطفاً مرورگر خود را به‌روز کنید یا از مرورگر
+            جدیدتری استفاده کنید.
+          </p>
+        </div>
+      </div>
+    </section>
     <div id="app">
       <!-- SSR: session fields (same as former Data.* hidden inputs). Server fills data-* values. -->
       <div
@@ -208,33 +224,52 @@
             <div class="init-error-container receipt-container">
               <div class="card init-error-card" id="payment-receipt-card">
                 <div class="receipt-header">
+                  <span
+                    class="receipt-status-icon app-icon"
+                    id="payment-receipt-status-icon"
+                    aria-hidden="true"
+                  ></span>
                   <h1 class="receipt-title" id="payment-receipt-title"></h1>
                   <p class="receipt-subtitle" id="payment-receipt-subtitle"></p>
                   <div class="receipt-amount-bar">
                     <div class="receipt-amount" id="payment-receipt-amount"></div>
                     <div class="receipt-type" id="payment-receipt-headline"></div>
                   </div>
-                  <button
-                    type="button"
-                    class="btn btn-success receipt-complete-button"
-                    id="payment-receipt-complete-button"
-                  >
-                    <span data-i18n="receipt.completeAndReturn"
-                      ></span
+                  <div class="receipt-header-actions">
+                    <button
+                      type="button"
+                      class="btn btn-primary receipt-complete-button"
+                      id="payment-receipt-complete-button"
                     >
-                  </button>
+                      <span data-i18n="receipt.completeAndReturn"></span>
+                    </button>
+                    <button
+                      type="button"
+                      class="btn btn-primary receipt-download-button receipt-download-icon-button"
+                      id="payment-receipt-save-button"
+                    >
+                      <span class="btn-icon" aria-hidden="true">
+                        <span
+                          class="app-icon"
+                          style="--app-icon-src: url('/assets/images/icons/icn-square-plus.svg')"
+                        ></span>
+                      </span>
+                      <span class="sr-only" data-i18n="receipt.download"></span>
+                    </button>
+                  </div>
                   <div class="receipt-return-timer" id="payment-receipt-return-timer" hidden>
                     <span class="timer-progress" aria-hidden="true"></span>
                     <span data-i18n="receipt.autoReturnPrefix"></span>
                     <strong id="payment-receipt-return-time-value"></strong>
                   </div>
+                  <p class="receipt-header-notice" data-i18n="receipt.finalizationNotice"></p>
                 </div>
 
                 <div class="transaction-divider"></div>
 
                 <section class="receipt-main-grid">
                   <div class="receipt-main-grid-header">
-                    <h2 data-i18n="receipt.internetTitle"></h2>
+                    <h2 data-i18n="receipt.receiptTitle"></h2>
                   </div>
 
                   <div class="receipt-main-grid-columns" id="payment-receipt-columns">
@@ -242,27 +277,24 @@
                       <h3
                         class="transaction-info-section-title"
                         data-i18n="receipt.sectionTransaction"
-                      >
-                        
-                      </h3>
+                      ></h3>
                       <div class="receipt-info-rows">
                         <div
                           class="receipt-info-row"
                           id="payment-receipt-row-transaction-type"
                           hidden
                         >
-                          <span class="receipt-info-row-label" data-i18n="receipt.transactionType"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.transactionType"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-transaction-type"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-status" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.status"
-                            ></span
-                          >
+                          <span class="receipt-info-row-label" data-i18n="receipt.status"></span>
                           <span class="receipt-info-row-value">
                             <span
                               class="badge badge-success"
@@ -271,9 +303,7 @@
                           </span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-trace" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.traceCode"
-                            ></span
-                          >
+                          <span class="receipt-info-row-label" data-i18n="receipt.traceCode"></span>
                           <span class="receipt-info-row-value" id="payment-receipt-trace"></span>
                         </div>
                         <div
@@ -281,48 +311,51 @@
                           id="payment-receipt-row-digital-receipt"
                           hidden
                         >
-                          <span class="receipt-info-row-label" data-i18n="receipt.digitalReceipt"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.digitalReceipt"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-digital-receipt"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-rrn" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.rrn"
-                            ></span
-                          >
+                          <span class="receipt-info-row-label" data-i18n="receipt.rrn"></span>
                           <span class="receipt-info-row-value" id="payment-receipt-rrn"></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-card" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.plain.card"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.plain.card"
+                          ></span>
                           <span
                             class="receipt-info-row-value payment-receipt-card-number"
                             id="payment-receipt-card-number"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-bank" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.issuerBank"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.issuerBank"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-issuer-bank"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-date" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.transactionTime"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.transactionTime"
+                          ></span>
                           <span class="receipt-info-row-value" id="payment-receipt-date"></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-total-amount" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.transactionAmount"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.transactionAmount"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-total-amount"
@@ -333,9 +366,10 @@
                           id="payment-receipt-row-discount-amount"
                           hidden
                         >
-                          <span class="receipt-info-row-label" data-i18n="receipt.discountAmount"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.discountAmount"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-discount-amount"
@@ -346,9 +380,10 @@
                           id="payment-receipt-row-affective-amount"
                           hidden
                         >
-                          <span class="receipt-info-row-label" data-i18n="receipt.deductedAmount"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.deductedAmount"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-affective-amount"
@@ -367,9 +402,7 @@
                         class="transaction-info-section-title"
                         id="payment-receipt-extra-title"
                         data-i18n="receipt.sectionInstallmentInfo"
-                      >
-                        
-                      </h3>
+                      ></h3>
                       <div class="receipt-info-rows" id="payment-receipt-extra-rows"></div>
                     </div>
 
@@ -377,33 +410,34 @@
                       <h3
                         class="transaction-info-section-title"
                         data-i18n="receipt.sectionMerchant"
-                      >
-                        
-                      </h3>
+                      ></h3>
                       <div class="receipt-info-rows">
                         <div
                           class="receipt-info-row"
                           id="payment-receipt-row-merchant-number"
                           hidden
                         >
-                          <span class="receipt-info-row-label" data-i18n="receipt.merchantNumber"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.merchantNumber"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-merchant-number"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-terminal" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.terminalNumber"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.terminalNumber"
+                          ></span>
                           <span class="receipt-info-row-value" id="payment-receipt-terminal"></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-gateway-code" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.gatewayCode"
-                            ></span
-                          >
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="receipt.gatewayCode"
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-gateway-code"
@@ -413,17 +447,14 @@
                           <span
                             class="receipt-info-row-label"
                             data-i18n="receipt.paymentFacilitator"
-                            ></span
-                          >
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-facilitator"
                           ></span>
                         </div>
                         <div class="receipt-info-row" id="payment-receipt-row-merchant-name" hidden>
-                          <span class="receipt-info-row-label" data-i18n="receipt.merchant"
-                            ></span
-                          >
+                          <span class="receipt-info-row-label" data-i18n="receipt.merchant"></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-merchant-name"
@@ -433,8 +464,7 @@
                           <span
                             class="receipt-info-row-label"
                             data-i18n="receipt.merchantSiteAddress"
-                            ></span
-                          >
+                          ></span>
                           <span
                             class="receipt-info-row-value"
                             id="payment-receipt-merchant-site"
@@ -448,37 +478,9 @@
                 <div class="transaction-divider"></div>
 
                 <div class="receipt-notice" role="note">
-                  <span data-i18n="receipt.noticePolicy"></span>
+                  <p data-i18n="receipt.noticePolicy"></p>
                 </div>
 
-                <div class="receipt-actions">
-                  <button
-                    type="button"
-                    class="btn btn-primary btn-bordered receipt-share-button"
-                    id="payment-receipt-share-button"
-                  >
-                    <span class="btn-icon" aria-hidden="true">
-                      <span
-                        class="app-icon"
-                        style="--app-icon-src: url('/assets/images/icons/icn-world.svg')"
-                      ></span>
-                    </span>
-                    <span class="sr-only" data-i18n="receipt.share"></span>
-                  </button>
-                  <button
-                    type="button"
-                    class="btn btn-success receipt-download-button"
-                    id="payment-receipt-save-button"
-                  >
-                    <span class="btn-icon" aria-hidden="true">
-                      <span
-                        class="app-icon"
-                        style="--app-icon-src: url('/assets/images/icons/icn-square-plus.svg')"
-                      ></span>
-                    </span>
-                    <span data-i18n="receipt.download"></span>
-                  </button>
-                </div>
                 <div class="receipt-logos">
                   <img src="/assets/images/logo-shaparak.svg" alt="Shaparak" />
                 </div>
@@ -512,6 +514,13 @@
                 <div class="redirect-loading-content">
                   <div class="redirect-loading-spinner spinner" aria-hidden="true"></div>
                   <h2 id="redirect-loading-title" data-i18n="redirect.loadingTitle"></h2>
+                  <button
+                    type="button"
+                    class="btn btn-primary redirect-manual-button"
+                    id="redirect-manual-button"
+                    data-i18n="timer.returnToMerchant"
+                    hidden
+                  ></button>
                 </div>
               </div>
             </div>
@@ -535,12 +544,30 @@
                   </p>
                   <button
                     type="button"
-                    class="btn btn-success"
+                    class="btn btn-primary"
                     id="transaction-expired-return-button"
                     data-i18n="timer.returnToMerchant"
-                  >
-                  </button>
+                  ></button>
                 </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Network offline screen -->
+          <section
+            id="payment-offline-section"
+            class="init-error-section"
+            hidden
+            aria-labelledby="payment-offline-title"
+          >
+            <div class="init-error-container">
+              <div class="card init-error-card network-offline-card" role="alert">
+                <h2 id="payment-offline-title" data-i18n="network.offline.title">
+                  دسترسی اینترنت قطع است
+                </h2>
+                <p data-i18n="network.offline.description">
+                  پس از اتصال مجدد اینترنت، ادامه همین صفحه نمایش داده می‌شود.
+                </p>
               </div>
             </div>
           </section>
@@ -551,6 +578,18 @@
     </div>
 
     <!-- Scripts -->
+    <script nomodule>
+      (function showUnsupportedBrowserScreen() {
+        var appRoot = document.getElementById('app');
+        var unsupportedSection = document.getElementById('browser-unsupported-section');
+        if (appRoot) {
+          appRoot.setAttribute('hidden', '');
+        }
+        if (unsupportedSection) {
+          unsupportedSection.hidden = false;
+        }
+      })();
+    </script>
     <script type="module" src="/assets/js/main.js"></script>
     <script type="module" src="/assets/js/pages/index.js"></script>
   </body>

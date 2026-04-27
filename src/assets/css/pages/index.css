@@ -549,7 +549,8 @@ html.app-ready #app .main-content {
 }
 
 .redirect-loading-card,
-.transaction-expired-card {
+.transaction-expired-card,
+.network-offline-card {
   min-height: 240px;
   display: flex;
   align-items: center;
@@ -571,6 +572,29 @@ html.app-ready #app .main-content {
   border: 3px solid var(--color-gray-100);
   border-top-color: var(--color-primary);
   border-radius: 50%;
+}
+
+.redirect-manual-button {
+  margin-top: var(--spacing-xs);
+}
+
+.network-offline-card {
+  width: 100%;
+  max-width: 100%;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  text-align: center;
+}
+
+.network-offline-card h2 {
+  margin: 0 0 var(--spacing-sm) 0;
+  font-size: var(--font-size-lg);
+}
+
+.network-offline-card p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
 .transaction-expired-countdown-text {

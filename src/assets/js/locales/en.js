@@ -13,6 +13,9 @@ export default {
   'common.processing': 'Processing...',
   'common.loading': 'Loading...',
   'common.tryAgain': 'Try Again',
+  'network.offline.title': 'Internet connection is unavailable',
+  'network.offline.description':
+    'Once your connection is restored, this page will continue from where you left off.',
 
   // Redirect
   'redirect.loading': 'Redirecting...',
@@ -137,14 +140,14 @@ export default {
   'receipt.status': 'Transaction status',
   'receipt.statusSuccessDetail': 'Card debit completed successfully',
   'receipt.statusFailedDetail': 'Card debit could not be completed',
-  'receipt.plain.amount': 'Amount:',
+  'receipt.plain.amount': 'Amount',
   'receipt.plain.merchant': 'Merchant:',
-  'receipt.plain.transactionId': 'Transaction ID:',
-  'receipt.plain.date': 'Date:',
-  'receipt.plain.card': 'Card number:',
+  'receipt.plain.transactionId': 'Transaction ID',
+  'receipt.plain.date': 'Date',
+  'receipt.plain.card': 'Card number',
   'receipt.sectionMerchant': 'Acceptor details',
   'receipt.sectionTransaction': 'Transaction details',
-  'receipt.internetTitle': 'Transaction details',
+  'receipt.receiptTitle': 'Receipt',
   'receipt.sectionInstallmentInfo': 'Installment transaction details',
   'receipt.sectionBillInfo': 'Paid bills details',
   'receipt.installmentCount': 'Installment count',
@@ -170,6 +173,8 @@ export default {
   'receipt.merchantSiteAddress': 'Merchant website',
   'receipt.noticePolicy':
     'If the merchant does not confirm delivery of goods or services to SEP within 30 minutes, the deducted amount will be returned to your account within 72 hours.',
+  'receipt.finalizationNotice':
+    'This receipt is not final. It becomes final after delivery of goods or services is confirmed by the acceptor.',
   'receipt.traceNo': 'Trace number',
   'receipt.rrn': 'RRN',
   'receipt.pTraceNo': 'Terminal trace',

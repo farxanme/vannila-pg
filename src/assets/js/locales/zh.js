@@ -20,6 +20,8 @@ export default {
   'common.processing': '处理中...',
   'common.loading': '加载中...',
   'common.tryAgain': '重试',
+  'network.offline.title': '网络连接不可用',
+  'network.offline.description': '网络恢复后，本页面将从中断处继续。',
 
   // Accessibility
   'accessibility.selectLanguage': '选择语言',
@@ -52,14 +54,14 @@ export default {
   'receipt.status': '交易状态',
   'receipt.statusSuccessDetail': '已成功从银行卡完成扣款',
   'receipt.statusFailedDetail': '未能从银行卡完成扣款',
-  'receipt.plain.amount': '金额:',
-  'receipt.plain.merchant': '商户:',
-  'receipt.plain.transactionId': '交易号:',
-  'receipt.plain.date': '日期:',
-  'receipt.plain.card': '卡号:',
+  'receipt.plain.amount': '金额',
+  'receipt.plain.merchant': '商户',
+  'receipt.plain.transactionId': '交易号',
+  'receipt.plain.date': '日期',
+  'receipt.plain.card': '卡号',
   'receipt.sectionMerchant': '商户信息',
   'receipt.sectionTransaction': '交易信息',
-  'receipt.internetTitle': '交易明细',
+  'receipt.receiptTitle': '收据',
   'receipt.sectionInstallmentInfo': '分期交易信息',
   'receipt.sectionBillInfo': '已缴账单信息',
   'receipt.installmentCount': '分期期数',
@@ -89,6 +91,7 @@ export default {
   'receipt.demo.transactionType': '购买',
   'receipt.noticePolicy':
     '若商户在30分钟内未向 SEP 确认商品或服务已交付，扣款金额将在72小时内退回您的账户。',
+  'receipt.finalizationNotice': '此回执非最终结果，待受理方确认商品或服务交付后生效。',
 
   // Transaction
   'transaction.merchant': '商户',

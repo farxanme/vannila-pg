@@ -20,6 +20,7 @@ import {
   detectBank,
   detectBankFromMaskedPan,
   formatCardNumber,
+  formatPanGroups,
   getBankLogo,
   getLocalizedBankName,
   initializeBankBins,
@@ -46,9 +47,9 @@ import { fetchCaptcha, fetchCaptchaAudio } from '../services/captchaService.js';
 import * as ipgService from '../services/ipgService.js';
 import { i18n } from '../main.js';
 import { errorHandler } from '../utils/errorHandler.js';
-import { soundManager } from '../utils/sound.js';
+import { soundManager } from '../utils/soundManager.js';
 import { Modal } from '../components/Modal.js';
-import { shareContent, downloadElementAsPng } from '../utils/share.js';
+import { downloadElementAsPng } from '../utils/contentSharing.js';
 import { appIconHtml, createAppIcon, setAppIconFile } from '../utils/icons.js';
 
 // Initialize sound manager
@@ -85,6 +86,7 @@ let hasUserEnabledExpiryDateEdit = false;
 let selectedSavedCardForApi = null;
 
 let captchaTokenKey = null;
+let captchaAudioButton = null;
 
 let paymentInitErrorScreen = null;
 let activeMainErrorType = null;
@@ -118,8 +120,13 @@ let paymentReceiptReturnIntervalId = null;
 let transactionExpiredReturnIntervalId = null;
 let transactionExpiredRemainingSeconds = 60;
 let receiptRedirectLoadingTimeoutId = null;
+let receiptRedirectManualButtonTimeoutId = null;
 let paySubmitInFlight = false;
 const clickLockMap = new WeakMap();
+const timerStateStoragePrefix = 'pg-timer-state-v1';
+let timerStateStorageKeyCache = null;
+const receiptRedirectAutoNavigateDelayMs = 1000;
+const receiptRedirectManualButtonDelayMs = 3000;
 
 /** Last `paymentReceipt` from pay API when inline receipt is shown (for i18n refresh). */
 let lastPaymentReceiptData = null;
@@ -134,6 +141,129 @@ function markAppReady() {
   const root = document.documentElement;
   root.classList.remove('app-booting');
   root.classList.add('app-ready');
+}
+
+function getPrimaryPageSections() {
+  const flow = document.getElementById('payment-flow-section');
+  const receiptSection = document.getElementById('payment-receipt-section');
+  const initErrorSection = document.getElementById('payment-init-error-section');
+  const redirectSection = document.getElementById('payment-redirect-loading-section');
+  const txExpiredSection = document.getElementById('payment-transaction-expired-section');
+  return [flow, receiptSection, initErrorSection, redirectSection, txExpiredSection].filter(
+    Boolean
+  );
+}
+
+function showOfflineSection(offlineSection) {
+  const primarySections = getPrimaryPageSections();
+  if (offlineSection.hidden) {
+    const visibleSection = primarySections.find((section) => section.hidden === false);
+    if (visibleSection) {
+      offlineSection.dataset.previousSectionId = visibleSection.id;
+    }
+  }
+  primarySections.forEach((section) => {
+    section.hidden = true;
+  });
+  offlineSection.hidden = false;
+}
+
+function hideOfflineSection(offlineSection) {
+  if (offlineSection.hidden) return;
+
+  offlineSection.hidden = true;
+  const previousSectionId = offlineSection.dataset.previousSectionId;
+  delete offlineSection.dataset.previousSectionId;
+  const previousSection = previousSectionId ? document.getElementById(previousSectionId) : null;
+  if (previousSection) {
+    previousSection.hidden = false;
+    return;
+  }
+  const flow = document.getElementById('payment-flow-section');
+  if (flow) {
+    flow.hidden = false;
+  }
+}
+
+function syncOfflineOverlayState() {
+  const offlineSection = document.getElementById('payment-offline-section');
+  if (!offlineSection) return;
+  if (navigator.onLine !== false) {
+    hideOfflineSection(offlineSection);
+    return;
+  }
+  showOfflineSection(offlineSection);
+}
+
+function setupOfflineOverlayHandlers() {
+  syncOfflineOverlayState();
+  window.addEventListener('offline', () => {
+    syncOfflineOverlayState();
+  });
+  window.addEventListener('online', () => {
+    syncOfflineOverlayState();
+  });
+}
+
+function getTimerStateStorageKey() {
+  if (timerStateStorageKeyCache) return timerStateStorageKeyCache;
+  const init = getPaymentInitData();
+  const tx = String(init?.transactionId ?? 'unknown').trim() || 'unknown';
+  const ref = String(init?.refNum ?? 'unknown').trim() || 'unknown';
+  timerStateStorageKeyCache = `${timerStateStoragePrefix}:${tx}:${ref}`;
+  return timerStateStorageKeyCache;
+}
+
+function readTimerStateSnapshot() {
+  try {
+    const raw = window.sessionStorage.getItem(getTimerStateStorageKey());
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function writeTimerStateSnapshot(nextState) {
+  try {
+    window.sessionStorage.setItem(getTimerStateStorageKey(), JSON.stringify(nextState || {}));
+  } catch {
+    // Ignore storage failures.
+  }
+}
+
+function saveTimerDeadline(stateKey, totalSeconds, deadlineMs) {
+  const state = readTimerStateSnapshot();
+  state[stateKey] = {
+    totalSeconds: Math.max(0, Number(totalSeconds) || 0),
+    deadlineMs: Math.max(0, Number(deadlineMs) || 0),
+  };
+  writeTimerStateSnapshot(state);
+}
+
+function clearTimerDeadline(stateKey) {
+  const state = readTimerStateSnapshot();
+  if (!(stateKey in state)) return;
+  delete state[stateKey];
+  writeTimerStateSnapshot(state);
+}
+
+function getTimerRemainingFromState(stateKey, totalSeconds) {
+  const total = Math.max(0, Number(totalSeconds) || 0);
+  if (total <= 0) return { totalSeconds: total, remainingSeconds: 0, deadlineMs: 0 };
+
+  const state = readTimerStateSnapshot();
+  const saved = state[stateKey];
+  const now = Date.now();
+  const savedTotal = Math.max(0, Number(saved?.totalSeconds) || 0);
+  const savedDeadline = Math.max(0, Number(saved?.deadlineMs) || 0);
+  const canReuse = savedTotal === total && savedDeadline > now;
+  const deadlineMs = canReuse ? savedDeadline : now + total * 1000;
+  const remainingSeconds = Math.max(0, Math.ceil((deadlineMs - now) / 1000));
+
+  saveTimerDeadline(stateKey, total, deadlineMs);
+  return { totalSeconds: total, remainingSeconds, deadlineMs };
 }
 
 async function loadCaptchaImage(captchaImageEl) {
@@ -389,6 +519,7 @@ function stopAndHideMainTimer() {
   if (timerContainer) {
     timerContainer.setAttribute('hidden', '');
   }
+  clearTimerDeadline('main');
 }
 
 function showMainErrorScreen({ type = 'paymentInit', withRetry = false } = {}) {
@@ -415,7 +546,7 @@ function showMainErrorScreen({ type = 'paymentInit', withRetry = false } = {}) {
   const buttons = withRetry
     ? [
         {
-          type: 'success',
+          type: 'primary',
           text: i18n.t('common.tryAgain'),
           onClick: () => {
             window.location.reload();
@@ -721,6 +852,11 @@ function removeCardFromList(cardListKey) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    setupOfflineOverlayHandlers();
+  } catch {
+    // Keep app boot resilient even if offline handlers fail.
+  }
   await initializePage();
 });
 
@@ -869,7 +1005,9 @@ function initializeTimer(durationSeconds = 900) {
 
   const timerProgress = timerContainer.querySelector('.timer-progress');
   const timerValue = timerContainer.querySelector('.timer-value');
-  const total = Math.max(1, durationSeconds);
+  const timerState = getTimerRemainingFromState('main', Math.max(1, durationSeconds));
+  const total = timerState.totalSeconds;
+  const initialRemaining = timerState.remainingSeconds;
   const defaultHeaderTitle = i18n.t('header.title');
 
   const syncMobileHeaderTitleWithTimer = (timeLabel) => {
@@ -882,21 +1020,30 @@ function initializeTimer(durationSeconds = 900) {
     headerTitleEl.textContent = defaultHeaderTitle;
   };
 
+  if (initialRemaining <= 0) {
+    setTimerProgressIndicator(timerProgress, 0);
+    if (timerValue) timerValue.textContent = '00:00';
+    clearTimerDeadline('main');
+    showTransactionExpiredScreen();
+    return;
+  }
+
   timer = new Timer({
-    duration: total,
-    onTick: (remaining) => {
-      const minutes = Math.floor(remaining / 60);
-      const seconds = remaining % 60;
+    duration: initialRemaining,
+    onTick: (_remaining) => {
+      const liveRemaining = Math.max(0, Math.ceil((timerState.deadlineMs - Date.now()) / 1000));
+      const minutes = Math.floor(liveRemaining / 60);
+      const seconds = liveRemaining % 60;
       const timeLabel = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      timerValue.textContent = timeLabel;
-      setTimerProgressIndicator(timerProgress, remaining / total);
+      if (timerValue) timerValue.textContent = timeLabel;
+      setTimerProgressIndicator(timerProgress, liveRemaining / total);
       syncMobileHeaderTitleWithTimer(timeLabel);
 
       // Update timer header style based on progress
       if (timerHeader) {
         timerHeader.classList.remove('warning', 'danger');
       }
-      const progress = remaining / total;
+      const progress = liveRemaining / total;
       if (progress <= 1 / 3) {
         if (timerHeader) timerHeader.classList.add('danger');
       } else if (progress <= 2 / 3) {
@@ -910,6 +1057,7 @@ function initializeTimer(durationSeconds = 900) {
       if (timerHeader) timerHeader.classList.add('danger');
     },
     onEnd: () => {
+      clearTimerDeadline('main');
       setTimerProgressIndicator(timerProgress, 0);
       syncMobileHeaderTitleWithTimer('00:00');
       errorHandler.show({
@@ -921,7 +1069,10 @@ function initializeTimer(durationSeconds = 900) {
     },
   });
 
-  setTimerProgressIndicator(timerProgress, 1);
+  if (timerValue) {
+    timerValue.textContent = formatSecondsAsMmSs(initialRemaining);
+  }
+  setTimerProgressIndicator(timerProgress, initialRemaining / total);
   timer.start();
 }
 
@@ -1096,6 +1247,13 @@ function initializeFormInputs() {
     input.enable();
   };
 
+  const setCaptchaAudioLockedByOtpCooldown = (locked) => {
+    if (!captchaAudioButton) return;
+    captchaAudioButton.disabled = Boolean(locked);
+    captchaAudioButton.setAttribute('aria-disabled', locked ? 'true' : 'false');
+    captchaAudioButton.dataset.lockedByOtp = locked ? 'true' : 'false';
+  };
+
   const syncOtpLockedFieldsState = () => {
     const key = getOtpCardStateKey();
     const until = key != null ? otpCooldownUntilByCardKey[key] : null;
@@ -1110,6 +1268,7 @@ function initializeFormInputs() {
     }
     setInputLockedByOtpCooldown(cvv2Input, isLocked);
     setInputLockedByOtpCooldown(captchaInput, isLocked);
+    setCaptchaAudioLockedByOtpCooldown(isLocked);
     applyExpiryDateModeForSelectedCard();
   };
 
@@ -1800,23 +1959,23 @@ function initializeFormInputs() {
   captchaCluster.appendChild(captchaImage);
 
   // Create audio button (outside input, like OTP button)
-  const captchaAudio = document.createElement('button');
-  captchaAudio.type = 'button';
-  captchaAudio.className = 'btn btn-primary btn-bordered captcha-audio-btn';
-  captchaAudio.setAttribute('aria-label', i18n.t('form.captchaAudio'));
-  captchaAudio.innerHTML = `
+  captchaAudioButton = document.createElement('button');
+  captchaAudioButton.type = 'button';
+  captchaAudioButton.className = 'btn btn-primary btn-bordered captcha-audio-btn';
+  captchaAudioButton.setAttribute('aria-label', i18n.t('form.captchaAudio'));
+  captchaAudioButton.innerHTML = `
     <span class="captcha-audio-btn-label" data-i18n="form.audioPlay">${i18n.t('form.audioPlay')}</span>
     <span class="btn-icon" aria-hidden="true">
       ${appIconHtml('icn-volume.svg')}
     </span>
   `;
-  captchaAudio.onclick = async () => {
+  captchaAudioButton.onclick = async () => {
     if (!captchaTokenKey) {
       await loadCaptchaImage(captchaImage);
       if (!captchaTokenKey) return;
     }
 
-    captchaAudio.disabled = true;
+    captchaAudioButton.disabled = true;
     try {
       const captchaAudioBlob = await fetchCaptchaAudio(captchaTokenKey);
       await soundManager.playAudioBlob(captchaAudioBlob);
@@ -1828,11 +1987,15 @@ function initializeFormInputs() {
         type: 'error',
       });
     } finally {
-      captchaAudio.disabled = false;
+      if (captchaAudioButton.dataset.lockedByOtp === 'true') {
+        captchaAudioButton.disabled = true;
+      } else {
+        captchaAudioButton.disabled = false;
+      }
     }
   };
 
-  captchaRow.appendChild(captchaAudio);
+  captchaRow.appendChild(captchaAudioButton);
   captchaContainer.appendChild(captchaRow);
 
   loadCaptchaImage(captchaImage).catch(() => {});
@@ -1908,7 +2071,7 @@ function initializeFormInputs() {
   const getOtpButton = document.createElement('button');
   getOtpButton.type = 'button';
   getOtpButton.id = 'get-otp-button';
-  getOtpButton.className = 'btn btn-success btn-bordered';
+  getOtpButton.className = 'btn btn-primary btn-bordered';
   getOtpButton.textContent = i18n.t('form.getOtp');
   getOtpButton.onclick = async () => {
     syncGetOtpButtonState();
@@ -2059,7 +2222,7 @@ async function initializeTransactionInfo() {
 
   const init = getPaymentInitData();
 
-  let txPayload = null;
+  let txPayload;
   try {
     const res = await ipgService.getTransaction();
     txPayload = res?.data ?? null;
@@ -2754,7 +2917,7 @@ function openCancelPaymentConfirm() {
     buttons: [
       {
         text: i18n.t('cancelConfirm.continuePay'),
-        type: 'success',
+        type: 'primary',
         onClick: () => {},
       },
       {
@@ -2780,11 +2943,12 @@ function openCancelPaymentConfirm() {
 
 function getPaymentReceiptCardDisplay(paymentReceipt) {
   if (paymentReceipt?.maskedPan != null && String(paymentReceipt.maskedPan).trim() !== '') {
-    return String(paymentReceipt.maskedPan).replace(/\*/g, '●');
+    const maskedPan = String(paymentReceipt.maskedPan).replace(/\*/g, '●');
+    return formatPanGroups(maskedPan, '-');
   }
   const digits = extractNumbers(cardNumberInput?.getValue?.() || '');
   if (digits.length >= 4) {
-    return `****${digits.slice(-4)}`;
+    return formatPanGroups(`****${digits.slice(-4)}`, '-');
   }
   return 'â€”';
 }
@@ -2951,10 +3115,13 @@ function renderReceiptIssuerBankRow(paymentReceipt) {
   bankRow.hidden = false;
 }
 
-function clearPaymentReceiptReturnTimer() {
+function clearPaymentReceiptReturnTimer({ preserveState = false } = {}) {
   if (paymentReceiptReturnIntervalId != null) {
     clearInterval(paymentReceiptReturnIntervalId);
     paymentReceiptReturnIntervalId = null;
+  }
+  if (!preserveState) {
+    clearTimerDeadline('receiptReturn');
   }
 }
 
@@ -2963,12 +3130,17 @@ function clearTransactionExpiredReturnTimer() {
     clearInterval(transactionExpiredReturnIntervalId);
     transactionExpiredReturnIntervalId = null;
   }
+  clearTimerDeadline('transactionExpiredReturn');
 }
 
 function clearReceiptRedirectLoadingTimeout() {
   if (receiptRedirectLoadingTimeoutId != null) {
     window.clearTimeout(receiptRedirectLoadingTimeoutId);
     receiptRedirectLoadingTimeoutId = null;
+  }
+  if (receiptRedirectManualButtonTimeoutId != null) {
+    window.clearTimeout(receiptRedirectManualButtonTimeoutId);
+    receiptRedirectManualButtonTimeoutId = null;
   }
 }
 
@@ -3024,18 +3196,28 @@ function showReceiptRedirectLoadingScreen() {
   const initErrorSection = document.getElementById('payment-init-error-section');
   const txExpiredSection = document.getElementById('payment-transaction-expired-section');
   const redirectSection = document.getElementById('payment-redirect-loading-section');
+  const redirectManualButton = document.getElementById('redirect-manual-button');
 
   if (flow) flow.hidden = true;
   if (receiptSection) receiptSection.hidden = true;
   if (initErrorSection) initErrorSection.hidden = true;
   if (txExpiredSection) txExpiredSection.hidden = true;
   if (redirectSection) redirectSection.hidden = false;
+  if (redirectManualButton) {
+    redirectManualButton.hidden = true;
+    redirectManualButton.onclick = () => navigateToMerchantSite();
+  }
 
   const url = getMerchantReturnUrl();
   if (!url) return;
   receiptRedirectLoadingTimeoutId = setTimeout(() => {
     navigateToMerchantSite();
-  }, 1000);
+  }, receiptRedirectAutoNavigateDelayMs);
+  receiptRedirectManualButtonTimeoutId = setTimeout(() => {
+    if (redirectManualButton) {
+      redirectManualButton.hidden = false;
+    }
+  }, receiptRedirectAutoNavigateDelayMs + receiptRedirectManualButtonDelayMs);
 }
 
 function showTransactionExpiredScreen() {
@@ -3045,6 +3227,7 @@ function showTransactionExpiredScreen() {
   if (timer && typeof timer.stop === 'function') {
     timer.stop();
   }
+  clearTimerDeadline('main');
 
   const flow = document.getElementById('payment-flow-section');
   const receiptSection = document.getElementById('payment-receipt-section');
@@ -3060,7 +3243,8 @@ function showTransactionExpiredScreen() {
   if (redirectSection) redirectSection.hidden = true;
   if (txExpiredSection) txExpiredSection.hidden = false;
 
-  transactionExpiredRemainingSeconds = 60;
+  const expiredTimer = getTimerRemainingFromState('transactionExpiredReturn', 60);
+  transactionExpiredRemainingSeconds = expiredTimer.remainingSeconds;
   if (returnValueEl) {
     returnValueEl.textContent = formatSecondsAsMmSs(transactionExpiredRemainingSeconds);
   }
@@ -3070,7 +3254,10 @@ function showTransactionExpiredScreen() {
   }
 
   transactionExpiredReturnIntervalId = setInterval(() => {
-    transactionExpiredRemainingSeconds -= 1;
+    transactionExpiredRemainingSeconds = Math.max(
+      0,
+      Math.ceil((expiredTimer.deadlineMs - Date.now()) / 1000)
+    );
     if (returnValueEl) {
       returnValueEl.textContent = formatSecondsAsMmSs(
         Math.max(0, transactionExpiredRemainingSeconds)
@@ -3084,14 +3271,18 @@ function showTransactionExpiredScreen() {
 }
 
 function syncPaymentReceiptReturnTimer() {
-  clearPaymentReceiptReturnTimer();
+  clearPaymentReceiptReturnTimer({ preserveState: true });
   const timerWrap = document.getElementById('payment-receipt-return-timer');
   const timerValue = document.getElementById('payment-receipt-return-time-value');
   const timerProgress = timerWrap?.querySelector('.timer-progress');
   if (!timerWrap || !timerValue) return;
 
-  const totalSeconds = Math.max(0, Number(paymentReceiptReturnSeconds) || 0);
-  let remaining = totalSeconds;
+  const timerState = getTimerRemainingFromState(
+    'receiptReturn',
+    Math.max(0, Number(paymentReceiptReturnSeconds) || 0)
+  );
+  const totalSeconds = timerState.totalSeconds;
+  let remaining = timerState.remainingSeconds;
   if (remaining <= 0 || !getMerchantReturnUrl()) {
     timerWrap.hidden = true;
     return;
@@ -3102,7 +3293,7 @@ function syncPaymentReceiptReturnTimer() {
   timerValue.textContent = formatSecondsAsMmSs(remaining);
   setTimerProgressIndicator(timerProgress, totalSeconds > 0 ? remaining / totalSeconds : 0);
   paymentReceiptReturnIntervalId = setInterval(() => {
-    remaining -= 1;
+    remaining = Math.max(0, Math.ceil((timerState.deadlineMs - Date.now()) / 1000));
     const ratio = totalSeconds > 0 ? remaining / totalSeconds : 0;
     timerWrap.classList.toggle('danger', ratio <= 1 / 3);
     timerWrap.classList.toggle('warning', ratio > 1 / 3 && ratio <= 2 / 3);
@@ -3130,6 +3321,7 @@ function fillPaymentReceiptFromService(paymentReceipt) {
   const typeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
 
   const statusBadge = document.getElementById('payment-receipt-status-badge');
+  const statusIcon = document.getElementById('payment-receipt-status-icon');
   const title = document.getElementById('payment-receipt-title');
   const subtitle = document.getElementById('payment-receipt-subtitle');
   const amountEl = document.getElementById('payment-receipt-amount');
@@ -3141,6 +3333,25 @@ function fillPaymentReceiptFromService(paymentReceipt) {
     statusBadge.textContent = success
       ? i18n.t('receipt.statusSuccessDetail')
       : i18n.t('receipt.statusFailedDetail');
+  }
+  if (statusIcon) {
+    setAppIconFile(statusIcon, success ? 'icn-square-check.svg' : 'icn-x.svg');
+    statusIcon.classList.remove(
+      'receipt-status-icon-success',
+      'receipt-status-icon-failed',
+      'receipt-status-icon-animate-success',
+      'receipt-status-icon-animate-failed'
+    );
+    // Force reflow so animation replays on every receipt render.
+    void statusIcon.offsetWidth;
+    statusIcon.classList.add(
+      success ? 'receipt-status-icon-success' : 'receipt-status-icon-failed',
+      success ? 'receipt-status-icon-animate-success' : 'receipt-status-icon-animate-failed'
+    );
+    statusIcon.setAttribute(
+      'aria-label',
+      success ? i18n.t('receipt.success') : i18n.t('receipt.failed')
+    );
   }
   if (title) {
     title.textContent = success ? i18n.t('receipt.success') : i18n.t('receipt.failed');
@@ -3284,25 +3495,6 @@ function fillPaymentReceiptFromService(paymentReceipt) {
   i18n.applyDataI18n(document.getElementById('payment-receipt-card') || document);
 }
 
-function generatePaymentReceiptPlainText() {
-  const title = document.getElementById('payment-receipt-title')?.textContent ?? '';
-  const amount = document.getElementById('payment-receipt-amount')?.textContent ?? '';
-  const merchant = document.getElementById('payment-receipt-merchant-name')?.textContent ?? '';
-  const trace = document.getElementById('payment-receipt-trace')?.textContent ?? '';
-  const date = document.getElementById('payment-receipt-date')?.textContent ?? '';
-  const rrnRow = document.getElementById('payment-receipt-row-rrn');
-  const rrn = !rrnRow?.hidden
-    ? (document.getElementById('payment-receipt-rrn')?.textContent ?? '')
-    : '';
-
-  let text =
-    `${title}\n${i18n.t('receipt.plain.amount')} ${amount}\n${i18n.t('receipt.plain.merchant')} ${merchant}\n${i18n.t('receipt.traceNo')}: ${trace}\n${i18n.t('receipt.plain.date')} ${date}`.trim();
-  if (rrn) {
-    text += `\n${i18n.t('receipt.rrn')}: ${rrn}`;
-  }
-  return text;
-}
-
 /**
  * Show full-width receipt section and hide checkout grid.
  */
@@ -3312,6 +3504,7 @@ function showPaymentReceiptScreen(paymentReceipt) {
   if (timer && typeof timer.stop === 'function') {
     timer.stop();
   }
+  clearTimerDeadline('main');
 
   const flow = document.getElementById('payment-flow-section');
   const receiptSection = document.getElementById('payment-receipt-section');
@@ -3327,47 +3520,27 @@ function showPaymentReceiptScreen(paymentReceipt) {
 }
 
 function attachPaymentReceiptActions() {
-  const shareBtn = document.getElementById('payment-receipt-share-button');
   const saveBtn = document.getElementById('payment-receipt-save-button');
   const completeBtn = document.getElementById('payment-receipt-complete-button');
   const card = document.getElementById('payment-receipt-card');
-  if (!shareBtn || shareBtn.dataset.bound === '1') return;
-  shareBtn.dataset.bound = '1';
-  saveBtn.dataset.bound = '1';
-  if (completeBtn) {
-    completeBtn.dataset.bound = '1';
+  if (saveBtn && saveBtn.dataset.bound !== '1') {
+    saveBtn.dataset.bound = '1';
+    saveBtn.addEventListener('click', async () => {
+      if (isButtonClickLocked(saveBtn)) return;
+      lockButtonClick(saveBtn);
+      try {
+        const ok = await downloadElementAsPng(card, 'receipt.png');
+        if (!ok) {
+          alert(i18n.t('receipt.saveError'));
+        }
+      } finally {
+        unlockButtonClick(saveBtn);
+      }
+    });
   }
 
-  shareBtn.addEventListener('click', async () => {
-    if (isButtonClickLocked(shareBtn)) return;
-    lockButtonClick(shareBtn);
-    try {
-      const receiptText = generatePaymentReceiptPlainText();
-      const ok = await shareContent({ text: receiptText });
-      if (!ok) {
-        const { copyToClipboard } = await import('../utils/clipboard.js');
-        await copyToClipboard(receiptText);
-        alert(i18n.t('receipt.copied'));
-      }
-    } finally {
-      unlockButtonClick(shareBtn);
-    }
-  });
-
-  saveBtn.addEventListener('click', async () => {
-    if (isButtonClickLocked(saveBtn)) return;
-    lockButtonClick(saveBtn);
-    try {
-      const ok = await downloadElementAsPng(card, 'receipt.png');
-      if (!ok) {
-        alert(i18n.t('receipt.saveError'));
-      }
-    } finally {
-      unlockButtonClick(saveBtn);
-    }
-  });
-
-  if (completeBtn) {
+  if (completeBtn && completeBtn.dataset.bound !== '1') {
+    completeBtn.dataset.bound = '1';
     completeBtn.addEventListener('click', () => {
       if (isButtonClickLocked(completeBtn)) return;
       lockButtonClick(completeBtn);
@@ -3731,10 +3904,8 @@ function updatePageContent() {
     fillPaymentReceiptFromService(lastPaymentReceiptData);
   }
 
-  const receiptShareBtn = document.getElementById('payment-receipt-share-button');
   const receiptSaveBtn = document.getElementById('payment-receipt-save-button');
   const txExpiredTime = document.getElementById('transaction-expired-return-time-value');
-  if (receiptShareBtn) receiptShareBtn.setAttribute('aria-label', i18n.t('receipt.share'));
   if (receiptSaveBtn) receiptSaveBtn.setAttribute('aria-label', i18n.t('receipt.save'));
   if (txExpiredTime && !document.getElementById('payment-transaction-expired-section')?.hidden) {
     txExpiredTime.textContent = formatSecondsAsMmSs(

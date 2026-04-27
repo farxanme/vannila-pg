@@ -538,11 +538,25 @@ export function formatCardNumber(cardNumber) {
   if (!cardNumber) return '';
 
   const numbers = cardNumber.replace(/\D/g, '');
+  return formatPanGroups(numbers, ' ');
+}
+
+/**
+ * Format PAN-like value in 4-char groups.
+ * Keeps masked values and replaces separators only.
+ * @param {string} panValue - PAN or masked PAN
+ * @param {string} separator - Group separator
+ * @returns {string}
+ */
+export function formatPanGroups(panValue, separator = ' ') {
+  if (!panValue) return '';
+
+  const compactValue = String(panValue).replace(/[\s-]+/g, '');
+  if (!compactValue) return '';
+
   const parts = [];
-
-  for (let i = 0; i < numbers.length; i += 4) {
-    parts.push(numbers.substring(i, i + 4));
+  for (let i = 0; i < compactValue.length; i += 4) {
+    parts.push(compactValue.substring(i, i + 4));
   }
-
-  return parts.join(' ');
+  return parts.join(separator);
 }

@@ -13,10 +13,13 @@ export default {
   'common.processing': 'Обработка...',
   'common.loading': 'Загрузка...',
   'common.tryAgain': 'Повторить',
+  'network.offline.title': 'Нет подключения к интернету',
+  'network.offline.description':
+    'После восстановления подключения эта страница продолжит работу с прежнего состояния.',
 
   // Redirect
   'redirect.loading': 'Перенаправление...',
-  'redirect.loadingTitle': 'Перенаправление на сайт продавца',
+  'redirect.loadingTitle': 'Перенаправление на сайт получателя',
 
   // Header
   'header.title': 'Платежный шлюз',
@@ -138,14 +141,14 @@ export default {
   'receipt.status': 'Статус транзакции',
   'receipt.statusSuccessDetail': 'Списание с карты выполнено успешно',
   'receipt.statusFailedDetail': 'Списание с карты не выполнено',
-  'receipt.plain.amount': 'Сумма:',
-  'receipt.plain.merchant': 'Торговец:',
-  'receipt.plain.transactionId': 'Номер операции:',
+  'receipt.plain.amount': 'Сумма',
+  'receipt.plain.merchant': 'Торговец',
+  'receipt.plain.transactionId': 'Номер операции',
   'receipt.plain.date': 'Дата:',
-  'receipt.plain.card': 'Номер карты:',
-  'receipt.sectionMerchant': 'Данные продавца',
+  'receipt.plain.card': 'Номер карты',
+  'receipt.sectionMerchant': 'Данные получателя',
   'receipt.sectionTransaction': 'Данные транзакции',
-  'receipt.internetTitle': 'Детали транзакции',
+  'receipt.receiptTitle': 'Квитанция',
   'receipt.sectionInstallmentInfo': 'Данные рассрочки',
   'receipt.sectionBillInfo': 'Данные оплаченных счетов',
   'receipt.installmentCount': 'Количество платежей',
@@ -154,7 +157,7 @@ export default {
   'receipt.billInfoId': 'ID счета',
   'receipt.billId': 'Номер счета',
   'receipt.payId': 'ID оплаты',
-  'receipt.completeAndReturn': 'Завершить процесс и вернуться на сайт продавца',
+  'receipt.completeAndReturn': 'Завершить процесс и вернуться на сайт получателя',
   'receipt.autoReturnPrefix': 'Автовозврат через',
   'receipt.traceCode': 'Код отслеживания',
   'receipt.digitalReceipt': 'Цифровая квитанция',
@@ -164,13 +167,15 @@ export default {
   'receipt.discountAmount': 'Сумма скидки',
   'receipt.deductedAmount': 'Списано с карты',
   'receipt.issuerBank': 'Банк-эмитент карты',
-  'receipt.merchantNumber': 'Номер продавца',
+  'receipt.merchantNumber': 'Номер получателя',
   'receipt.terminalNumber': 'Номер терминала',
   'receipt.gatewayCode': 'Код шлюза',
   'receipt.paymentFacilitator': 'Платежный посредник',
-  'receipt.merchantSiteAddress': 'Адрес сайта продавца',
+  'receipt.merchantSiteAddress': 'Адрес сайта получателя',
   'receipt.noticePolicy':
-    'Если продавец не подтвердит SEP доставку товара или услуги в течение 30 минут, списанная сумма будет возвращена на ваш счет в течение 72 часов.',
+    'Если получатель не подтвердит SEP доставку товара или услуги в течение 30 минут, списанная сумма будет возвращена на ваш счет в течение 72 часов.',
+  'receipt.finalizationNotice':
+    'Этот чек не является окончательным. Он станет окончательным после подтверждения доставки товара или услуги получателем.',
   'receipt.traceNo': 'Номер следа',
   'receipt.rrn': 'RRN',
   'receipt.pTraceNo': 'След терминала',
@@ -232,8 +237,8 @@ export default {
   'timer.expired': 'Время истекло',
   'timer.transactionExpiredTitle': 'Время выполнения транзакции истекло',
   'timer.transactionExpiredDescription':
-    'Через одну минуту вы будете перенаправлены на сайт продавца.',
-  'timer.returnToMerchant': 'Перейти на сайт продавца',
+    'Через одну минуту вы будете перенаправлены на сайт получателя.',
+  'timer.returnToMerchant': 'Перейти на сайт получателя',
 
   // Errors
   'error.network': 'Ошибка сети',
