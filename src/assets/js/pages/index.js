@@ -3634,13 +3634,47 @@ function attachPaymentReceiptActions() {
   const saveBtn = document.getElementById('payment-receipt-save-button');
   const completeBtn = document.getElementById('payment-receipt-complete-button');
   const card = document.getElementById('payment-receipt-card');
+
+  const createReceiptSnapshotElement = () => {
+    if (!card) return null;
+    const snapshot = card.cloneNode(true);
+    snapshot.id = 'payment-receipt-card-snapshot';
+    snapshot.classList.add('receipt-save-image-mode');
+    snapshot.style.position = 'fixed';
+    snapshot.style.left = '-10000px';
+    snapshot.style.top = '0';
+    snapshot.style.width = `${card.offsetWidth || 980}px`;
+    snapshot.style.maxWidth = '980px';
+    snapshot.style.zIndex = '-1';
+
+    const extraColumn = snapshot.querySelector('#payment-receipt-extra-column');
+    if (extraColumn) {
+      extraColumn.setAttribute('hidden', '');
+    }
+
+    const logosWrap = snapshot.querySelector('.receipt-logos');
+    const hasSepLogo = Boolean(logosWrap?.querySelector('img[src="/assets/images/logo.svg"]'));
+    if (logosWrap && !hasSepLogo) {
+      const sepLogo = document.createElement('img');
+      sepLogo.src = '/assets/images/logo.svg';
+      sepLogo.alt = 'SEP';
+      logosWrap.appendChild(sepLogo);
+    }
+
+    document.body.appendChild(snapshot);
+    return snapshot;
+  };
+
   if (saveBtn && saveBtn.dataset.bound !== '1') {
     saveBtn.dataset.bound = '1';
     saveBtn.addEventListener('click', async () => {
       if (isButtonClickLocked(saveBtn)) return;
       lockButtonClick(saveBtn);
       try {
-        const ok = await downloadElementAsPng(card, 'receipt.png');
+        const snapshot = createReceiptSnapshotElement();
+        const target = snapshot || card;
+        const ok = await downloadElementAsPng(target, 'receipt.png');
+        snapshot?.remove();
         if (!ok) {
           alert(i18n.t('receipt.saveError'));
         }

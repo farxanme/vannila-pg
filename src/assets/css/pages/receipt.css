@@ -376,6 +376,20 @@
   object-fit: contain;
 }
 
+.receipt-save-image-mode .receipt-main-grid-columns {
+  display: flex;
+  flex-direction: column;
+}
+
+.receipt-save-image-mode #payment-receipt-extra-column {
+  display: none !important;
+}
+
+.receipt-save-image-mode .receipt-header-actions,
+.receipt-save-image-mode .receipt-return-timer {
+  display: none !important;
+}
+
 @media (max-width: 1024px) {
   .receipt-main-grid-columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
