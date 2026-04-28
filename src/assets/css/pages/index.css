@@ -17,13 +17,13 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: small card on LEFT, large card on RIGHT */
-[dir='rtl'] .grid.grid-2-col>.card-small {
+[dir='rtl'] .grid.grid-2-col > .card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir='rtl'] .grid.grid-2-col>.card-large {
+[dir='rtl'] .grid.grid-2-col > .card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -31,13 +31,13 @@ html.app-ready #app .main-content {
 }
 
 /* LTR: small card on RIGHT, large card on LEFT */
-[dir='ltr'] .grid.grid-2-col>.card-small {
+[dir='ltr'] .grid.grid-2-col > .card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir='ltr'] .grid.grid-2-col>.card-large {
+[dir='ltr'] .grid.grid-2-col > .card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -50,16 +50,16 @@ html.app-ready #app .main-content {
   }
 
   /* Mobile: keep timer card first across directions */
-  [dir='rtl'] .grid.grid-2-col>.card-small,
-  [dir='ltr'] .grid.grid-2-col>.card-small {
+  [dir='rtl'] .grid.grid-2-col > .card-small,
+  [dir='ltr'] .grid.grid-2-col > .card-small {
     order: 1;
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
   }
 
-  [dir='rtl'] .grid.grid-2-col>.card-large,
-  [dir='ltr'] .grid.grid-2-col>.card-large {
+  [dir='rtl'] .grid.grid-2-col > .card-large,
+  [dir='ltr'] .grid.grid-2-col > .card-large {
     order: 2;
     flex: 0 0 auto;
     width: 100%;
@@ -138,7 +138,7 @@ html.app-ready #app .main-content {
   flex-direction: column;
 }
 
-.otp-input-container>.input-label {
+.otp-input-container > .input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -187,7 +187,7 @@ html.app-ready #app .main-content {
   flex-direction: column;
 }
 
-.captcha-container>.input-label {
+.captcha-container > .input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -302,7 +302,10 @@ html.app-ready #app .main-content {
 }
 
 /* Hover: treat field + image as one control */
-.captcha-container .captcha-input-cluster:hover .input-wrapper .input-container:not(.disabled):not(.focused):not(.error) {
+.captcha-container
+  .captcha-input-cluster:hover
+  .input-wrapper
+  .input-container:not(.disabled):not(.focused):not(.error) {
   border-color: var(--color-gray-200);
 }
 
@@ -312,13 +315,19 @@ html.app-ready #app .main-content {
   border-right-color: var(--color-gray-200);
 }
 
-[dir='rtl'] .captcha-container .captcha-input-cluster:not(:has(.input-container.error)):hover .captcha-image {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-cluster:not(:has(.input-container.error)):hover
+  .captcha-image {
   border-left-color: var(--color-gray-200);
   border-right-color: transparent;
 }
 
 /* Update captcha image border when input is focused */
-.captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.focused)~.captcha-image {
+.captcha-container
+  .captcha-input-cluster
+  .input-wrapper:has(.input-container.focused)
+  ~ .captcha-image {
   border-top-color: var(--color-primary-300);
   border-bottom-color: var(--color-primary-300);
   border-right-color: var(--color-primary-300);
@@ -326,14 +335,21 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: Update left border instead of right */
-[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.focused)~.captcha-image {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-cluster
+  .input-wrapper:has(.input-container.focused)
+  ~ .captcha-image {
   border-left-color: var(--color-primary-300);
   border-right-color: transparent;
   box-shadow: var(--shadow-input-focus);
 }
 
 /* Update captcha image border when input has error */
-.captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.error)~.captcha-image {
+.captcha-container
+  .captcha-input-cluster
+  .input-wrapper:has(.input-container.error)
+  ~ .captcha-image {
   border-top-color: var(--color-error-300);
   border-bottom-color: var(--color-error-300);
   border-right-color: var(--color-error-300);
@@ -341,7 +357,11 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: Update left border instead of right */
-[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.error)~.captcha-image {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-cluster
+  .input-wrapper:has(.input-container.error)
+  ~ .captcha-image {
   border-left-color: var(--color-error-300);
   border-right-color: transparent;
   box-shadow: var(--shadow-input-error);
@@ -435,7 +455,7 @@ html.app-ready #app .main-content {
   --color-icon: var(--color-gray-200);
 }
 
-.save-card-checkbox:checked+.save-card-icon {
+.save-card-checkbox:checked + .save-card-icon {
   color: var(--color-primary);
   --color-icon: var(--color-primary);
 }
@@ -619,6 +639,10 @@ html.app-ready #app .main-content {
   align-items: center;
 }
 
+.bill-selector-hint-paid {
+  color: var(--color-primary);
+}
+
 .card-list-sheet-item .bill-dropdown-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -739,7 +763,7 @@ html.app-ready #app .main-content {
   }
 
   /* Hide payment form card strip (title + help) */
-  .card-large>.card-header {
+  .card-large > .card-header {
     display: none;
   }
 

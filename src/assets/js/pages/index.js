@@ -13,7 +13,6 @@ import {
   validateCardNumber,
   validateMobile,
   validateEmail,
-  validateOTP,
   validateExpiryDate,
 } from '../utils/validators.js';
 import {
@@ -340,21 +339,17 @@ function buildCardPayloadForIpg() {
     return null;
   }
 
-  const firstBill =
-    selectedBillForApi ||
-    (Array.isArray(currentTransactionPayload?.bills) && currentTransactionPayload.bills.length > 0
-      ? currentTransactionPayload.bills[0]
-      : null);
+  const selectedBill = isBillTransactionView ? selectedBillForApi : null;
   const bill =
-    firstBill &&
-    typeof firstBill === 'object' &&
-    (firstBill.billId !== undefined ||
-      firstBill.payId !== undefined ||
-      firstBill.amount !== undefined)
+    selectedBill &&
+    typeof selectedBill === 'object' &&
+    (selectedBill.billId !== undefined ||
+      selectedBill.payId !== undefined ||
+      selectedBill.amount !== undefined)
       ? {
-          billId: firstBill.billId ?? '',
-          payId: firstBill.payId ?? '',
-          amount: firstBill.amount ?? null,
+          billId: selectedBill.billId ?? '',
+          payId: selectedBill.payId ?? '',
+          amount: selectedBill.amount ?? null,
         }
       : null;
   const pan = extractNumbers(cardNumberInput.getValue());
@@ -426,6 +421,15 @@ function maybeStartOtpButtonCountdownTicker() {
  * @returns {boolean}
  */
 function validateFieldsForOtpRequest() {
+  if (!billSelectorInput?.validate?.()) {
+    billSelectorInput?.focus?.();
+    errorHandler.show({
+      message: i18n.t('form.validation.error'),
+      mode: 'toast',
+      type: 'error',
+    });
+    return false;
+  }
   const order = [cardNumberInput, expiryDateInput, cvv2Input, captchaInput];
   for (const input of order) {
     const ok = input.validate();
@@ -1407,6 +1411,11 @@ function initializeFormInputs() {
         cardDropdown.updateItems(buildCardDropdownItems());
       }
     },
+    onFocus: () => {
+      if (!hasCardListUi || !isMobileCardListViewport()) return;
+      cardNumberInput?.blur?.();
+      void toggleCardList();
+    },
   });
 
   const syncCardDropdownAfterListChange = () => {
@@ -1647,6 +1656,7 @@ function initializeFormInputs() {
         inlineNotice.className = 'gift-card-inline-notice';
       }
     }
+    syncOtpFieldTexts();
   }
 
   function handleGiftCardNotification(pan, forceGiftCard = null) {
@@ -1677,9 +1687,37 @@ function initializeFormInputs() {
           inlineNotice.className = 'gift-card-inline-notice';
         }
       }
+      syncOtpFieldTexts();
       return;
     }
     handleGiftCardNotificationFromPan(pan);
+  }
+
+  function getOtpFieldTranslationKeys() {
+    if (isCurrentGiftCard) {
+      return {
+        labelKey: 'form.otp.gift',
+        placeholderKey: 'form.otp.gift.placeholder',
+        requiredKey: 'form.otp.gift.required',
+        invalidLengthRangeKey: 'form.otp.gift.invalidLengthRange',
+      };
+    }
+    return {
+      labelKey: 'form.otp',
+      placeholderKey: 'form.otp.placeholder',
+      requiredKey: 'form.otp.required',
+      invalidLengthRangeKey: 'form.otp.invalidLengthRange',
+    };
+  }
+
+  function syncOtpFieldTexts() {
+    const otpKeys = getOtpFieldTranslationKeys();
+    if (otpLabelElement) {
+      otpLabelElement.textContent = i18n.t(otpKeys.labelKey);
+    }
+    if (otpInput) {
+      otpInput.setPlaceholder(i18n.t(otpKeys.placeholderKey));
+    }
   }
 
   // CVV2 Input
@@ -1963,7 +2001,7 @@ function initializeFormInputs() {
     label: '',
     placeholder: i18n.t('form.captcha.placeholder'),
     required: true,
-    requiredMessageKey: 'common.required',
+    requiredMessageKey: 'form.captcha.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
     maxLength: captchaCodeLength,
     inputMode: 'numeric',
@@ -2054,7 +2092,7 @@ function initializeFormInputs() {
   otpLabelElement = document.createElement('label');
   otpLabelElement.className = 'input-label';
   otpLabelElement.setAttribute('for', 'otp');
-  otpLabelElement.textContent = i18n.t('form.otp');
+  otpLabelElement.textContent = i18n.t(getOtpFieldTranslationKeys().labelKey);
   otpContainer.appendChild(otpLabelElement);
 
   // Create flex wrapper for input and button
@@ -2068,11 +2106,26 @@ function initializeFormInputs() {
     type: 'password',
     autocomplete: 'off',
     label: '',
-    placeholder: i18n.t('form.otp.placeholder'),
-    required: true,
-    requiredMessageKey: 'form.otp.required',
+    placeholder: i18n.t(getOtpFieldTranslationKeys().placeholderKey),
+    required: false,
     clearButtonAriaLabel: i18n.t('common.clear'),
-    validator: validateOTP,
+    validator: (value) => {
+      const otpKeys = getOtpFieldTranslationKeys();
+      const numbers = extractNumbers(value);
+      if (!numbers || numbers.length === 0) {
+        return { valid: false, message: i18n.t(otpKeys.requiredKey) };
+      }
+      if (numbers.length < otpLengthConfig.minLength || numbers.length > otpLengthConfig.maxLength) {
+        return {
+          valid: false,
+          message: i18n.t(otpKeys.invalidLengthRangeKey, {
+            min: String(otpLengthConfig.minLength),
+            max: String(otpLengthConfig.maxLength),
+          }),
+        };
+      }
+      return { valid: true, message: '' };
+    },
     inputMode: 'numeric',
     maskWithPasswordFont: true,
     maxLength: otpLengthConfig.maxLength,
@@ -2557,9 +2610,7 @@ function renderBillListSection(bills) {
     selectedBillForApi &&
     enrichedBills.some((b) => getBillKey(b) === getBillKey(selectedBillForApi))
       ? enrichedBills.find((b) => getBillKey(b) === getBillKey(selectedBillForApi))
-      : enrichedBills.length === 1
-        ? enrichedBills[0]
-        : null;
+      : null;
   const getBillLabel = (bill) => {
     const typeLabel = bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown');
     const billId = extractNumbers(bill.billId) || '-';
@@ -2644,7 +2695,13 @@ function renderBillListSection(bills) {
       autocomplete: 'off',
       label: i18n.t('bill.selector.title'),
       placeholder: i18n.t('bill.selector.title'),
-      required: false,
+      required: true,
+      requiredMessageKey: 'bill.selector.required',
+      liveValidation: false,
+      validator: () => ({
+        valid: Boolean(selectedBillForApi),
+        message: i18n.t('bill.selector.required'),
+      }),
       clearButtonAriaLabel: i18n.t('common.clear'),
       rightAction: {
         icon: appIconHtml('icn-credit-card.svg'),
@@ -2655,8 +2712,7 @@ function renderBillListSection(bills) {
       },
       onInput: () => {},
     });
-    billSelectorInput.element.readOnly = true;
-    billSelectorInput.element.setAttribute('aria-readonly', 'true');
+    billSelectorInput.element.setAttribute('aria-required', 'true');
     if (billSelectorInput.clearButton) {
       billSelectorInput.clearButton.style.display = 'none';
     }
@@ -2693,6 +2749,7 @@ function renderBillListSection(bills) {
           if (!next) return;
           selectedBillForApi = next;
           billSelectorInput.setValue(getBillLabel(next));
+          billSelectorInput.validate();
           const iconFile = next.billTypeKey
             ? billIconFileByTypeKey[next.billTypeKey] || 'icn-cash-banknote.svg'
             : 'icn-cash-banknote.svg';
@@ -2728,6 +2785,7 @@ function renderBillListSection(bills) {
         if (!next) return;
         selectedBillForApi = next;
         billSelectorInput.setValue(getBillLabel(next));
+        billSelectorInput.validate();
         const iconFile = next.billTypeKey
           ? billIconFileByTypeKey[next.billTypeKey] || 'icn-cash-banknote.svg'
           : 'icn-cash-banknote.svg';
@@ -2775,8 +2833,8 @@ function renderBillListSection(bills) {
     }
   }
   selectorHint.innerHTML = `
-    <span>${i18n.t('bill.hint.payableCount', { count: String(payableCount) })}</span>
-    <span>${i18n.t('bill.hint.paidCount', { count: String(paidCount) })}</span>
+    <span class="bill-selector-hint-ready">${i18n.t('bill.hint.payableCount', { count: String(payableCount) })}</span>
+    <span class="bill-selector-hint-paid">${i18n.t('bill.hint.paidCount', { count: String(paidCount) })}</span>
   `;
 }
 
@@ -3737,13 +3795,24 @@ function attachFormEvents() {
     if (paySubmitInFlight) return;
     paySubmitInFlight = true;
 
-    const isValid = [
-      cardNumberInput.validate(),
-      cvv2Input.validate(),
-      expiryDateInput.validate(),
-      captchaInput.validate(),
-      otpInput.validate(),
-    ].every((v) => v);
+    const validationOrder = [
+      {
+        validate: () => billSelectorInput?.validate?.() ?? true,
+        focus: () => billSelectorInput?.focus(),
+      },
+      { validate: () => cardNumberInput.validate(), focus: () => cardNumberInput.focus() },
+      { validate: () => cvv2Input.validate(), focus: () => cvv2Input.focus() },
+      { validate: () => expiryDateInput.validate(), focus: () => expiryDateInput.focus() },
+      { validate: () => captchaInput.validate(), focus: () => captchaInput.focus() },
+      { validate: () => otpInput.validate(), focus: () => otpInput.focus() },
+    ];
+    const isValid = validationOrder.every((field) => {
+      const ok = field.validate();
+      if (!ok) {
+        field.focus();
+      }
+      return ok;
+    });
 
     if (!isValid) {
       setPayButtonState('disabled');
@@ -4005,13 +4074,9 @@ function updatePageContent() {
   const captchaAudioBtn = document.querySelector('.captcha-audio-btn');
   if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
-    otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
+    syncOtpFieldTexts();
     otpInput.setRightActionAriaLabel(i18n.t('form.virtualPinPad'));
     otpInput.setClearButtonAriaLabel(i18n.t('common.clear'));
-    // Update separate OTP label
-    if (otpLabelElement) {
-      otpLabelElement.textContent = i18n.t('form.otp');
-    }
   }
   if (mobileInput) {
     mobileInput.setLabel(i18n.t('form.mobile'));
