@@ -267,6 +267,10 @@
   background: var(--color-bg-light);
 }
 
+.dropdown-item.disabled {
+  cursor: default;
+}
+
 .dropdown-empty {
   padding: var(--spacing-md);
   text-align: center;

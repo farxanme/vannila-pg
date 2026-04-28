@@ -696,11 +696,6 @@
   align-items: start;
 }
 
-/* Bill + dynamic PIN: hide CVV2 column and stretch expiry row full width */
-.form-row.bill-dynamic-expiry-full {
-  grid-template-columns: minmax(0, 1fr);
-}
-
 /* Prevent grid/flex children (CVV2 + expiry) from overflowing the row */
 .form-row > * {
   min-width: 0;

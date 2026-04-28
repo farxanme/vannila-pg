@@ -108,10 +108,11 @@ let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
 let currentTransactionPayload = null;
-let isBillListOnlyMode = false;
 let isBillTransactionView = false;
-let billListAllowsStaticPinMode = false;
-let billFlowMode = 'list';
+let selectedBillForApi = null;
+let billSelectorInput = null;
+let billDropdown = null;
+let billListSheetRef = null;
 
 /** Merchant / transaction type snapshot for inline receipt (from getTransaction). */
 let paymentReceiptMerchantContext = null;
@@ -340,9 +341,10 @@ function buildCardPayloadForIpg() {
   }
 
   const firstBill =
-    Array.isArray(currentTransactionPayload?.bills) && currentTransactionPayload.bills.length > 0
+    selectedBillForApi ||
+    (Array.isArray(currentTransactionPayload?.bills) && currentTransactionPayload.bills.length > 0
       ? currentTransactionPayload.bills[0]
-      : null;
+      : null);
   const bill =
     firstBill &&
     typeof firstBill === 'object' &&
@@ -993,8 +995,6 @@ async function initializePage() {
 
     // Always initialize form inputs; bill flow switches between list and form views.
     initializeFormInputs();
-    isBillListOnlyMode = Boolean(txUi?.showBillList);
-
     // Initialize partner logos (merchant logo from transaction when available)
     initializePartnerLogos(txUi?.merchantLogoUrl ?? null);
 
@@ -2253,6 +2253,31 @@ function updateBankLogo(bank) {
   logoWrapper.classList.remove('hidden');
 }
 
+function updateBillSelectorLogo(iconFile, altText = '') {
+  if (!billSelectorInput || !billSelectorInput.element) return;
+  const wrapper = billSelectorInput.element.closest('.input-wrapper');
+  if (!wrapper) return;
+  const container = wrapper.querySelector('.input-container');
+  if (!container) return;
+
+  let logoWrapper = container.querySelector('.bill-selector-logo');
+  if (!logoWrapper) {
+    logoWrapper = document.createElement('div');
+    logoWrapper.className = 'card-bank-logo bill-selector-logo';
+    container.insertBefore(logoWrapper, container.firstChild);
+  }
+
+  if (!iconFile) {
+    logoWrapper.innerHTML = '';
+    logoWrapper.classList.add('hidden');
+    return;
+  }
+
+  const safeAlt = String(altText || '').replace(/"/g, '&quot;');
+  logoWrapper.innerHTML = `<img src="/assets/images/icons/${iconFile}" alt="${safeAlt}" />`;
+  logoWrapper.classList.remove('hidden');
+}
+
 function toggleCardList() {
   if (isMobileCardListViewport()) {
     if (typeof openCardListSheetFn === 'function') {
@@ -2474,17 +2499,16 @@ async function initializeTransactionInfo() {
   const bills = Array.isArray(txPayload?.bills) ? txPayload.bills : [];
   const showBillList = currentTransactionPrCode === 40 && bills.length > 0;
   if (showBillList) {
-    billFlowMode = 'list';
-    isBillListOnlyMode = true;
     renderBillListSection(bills);
   } else {
     isBillTransactionView = false;
-    billFlowMode = 'list';
-    isBillListOnlyMode = false;
+    selectedBillForApi = null;
     restorePaymentFormSection();
+    const selectorGroup = document.getElementById('bill-selector-group');
+    if (selectorGroup) selectorGroup.remove();
   }
 
-  return { durationSeconds, merchantLogoUrl, showBillList };
+  return { durationSeconds, merchantLogoUrl, showBillList: false };
 }
 
 function restorePaymentFormSection() {
@@ -2504,27 +2528,15 @@ function restorePaymentFormSection() {
 
 function renderBillListSection(bills) {
   const paymentFormRegion = document.getElementById('payment-form-region');
+  const paymentForm = document.getElementById('payment-form');
   const largeCardTitle = document.querySelector('.card-large .card-title');
-  if (!paymentFormRegion) return;
+  if (!paymentFormRegion || !paymentForm) return;
 
-  const totalAmount = bills.reduce((sum, bill) => sum + (Number(bill?.amount) || 0), 0);
-  const staticPinThreshold = 1000000;
   isBillTransactionView = true;
-  billListAllowsStaticPinMode = totalAmount < staticPinThreshold;
-
-  paymentFormRegion.hidden = billFlowMode === 'list';
+  paymentFormRegion.hidden = false;
   if (largeCardTitle) {
-    largeCardTitle.textContent = i18n.t('transaction.billListTitle');
+    largeCardTitle.textContent = i18n.t('form.title');
   }
-  let billSection = document.getElementById('bill-list-section');
-  if (!billSection) {
-    billSection = document.createElement('section');
-    billSection.id = 'bill-list-section';
-    billSection.className = 'transaction-info';
-    paymentFormRegion.parentElement?.appendChild(billSection);
-  }
-  billSection.hidden = billFlowMode !== 'list';
-
   const amountLocale = getNumberLocaleForLang(i18n.getLanguage());
   const billIconFileByTypeKey = {
     'bill.type.water': 'icn-display.svg',
@@ -2540,246 +2552,240 @@ function renderBillListSection(bills) {
     ...bill,
     billTypeKey: detectBillTypeKey(bill?.billId),
   }));
-
-  const billRowsHtml = enrichedBills
-    .map(
-      (bill) => `
-      <div class="transaction-info-item">
-        <div class="bill-list-item-main">
-          <div class="bill-list-item-logo-circle" aria-hidden="true">
-            ${appIconHtml(
-              bill.billTypeKey
-                ? billIconFileByTypeKey[bill.billTypeKey] || 'icn-cash-banknote.svg'
-                : 'icn-cash-banknote.svg'
-            )}
+  const getBillKey = (bill) => String(bill?.id ?? `${bill?.billId || ''}:${bill?.payId || ''}`);
+  selectedBillForApi =
+    selectedBillForApi &&
+    enrichedBills.some((b) => getBillKey(b) === getBillKey(selectedBillForApi))
+      ? enrichedBills.find((b) => getBillKey(b) === getBillKey(selectedBillForApi))
+      : enrichedBills.length === 1
+        ? enrichedBills[0]
+        : null;
+  const getBillLabel = (bill) => {
+    const typeLabel = bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown');
+    const billId = extractNumbers(bill.billId) || '-';
+    return `${typeLabel} - ${billId}`;
+  };
+  const payableCount = enrichedBills.filter((bill) => !bill.hasReceipt).length;
+  const paidCount = enrichedBills.filter((bill) => Boolean(bill.hasReceipt)).length;
+  const buildBillDropdownItems = () =>
+    enrichedBills.map((bill) => {
+      const isSelected = getBillKey(bill) === getBillKey(selectedBillForApi);
+      return {
+        value: getBillKey(bill),
+        text: getBillLabel(bill),
+        disabled: Boolean(bill.hasReceipt),
+        html: `
+          <div class="bill-dropdown-item ${isSelected ? 'active' : ''}">
+            <div class="bill-list-item-main">
+              <div class="bill-list-item-logo-circle" aria-hidden="true">
+                ${appIconHtml(
+                  bill.billTypeKey
+                    ? billIconFileByTypeKey[bill.billTypeKey] || 'icn-cash-banknote.svg'
+                    : 'icn-cash-banknote.svg'
+                )}
+              </div>
+              <div class="bill-list-item-meta">
+                <div class="bill-list-item-title">${bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown')}</div>
+                <div class="bill-list-item-id">${extractNumbers(bill.billId) || '-'}</div>
+                <span class="bill-list-item-status-badge ${bill.hasReceipt ? 'is-paid' : 'is-ready'}">
+                  ${bill.hasReceipt ? i18n.t('bill.status.paid') : i18n.t('bill.status.ready')}
+                </span>
+              </div>
+            </div>
+            <div class="bill-list-item-side">
+              <div class="bill-list-item-amount">${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
+              ${
+                bill.hasReceipt
+                  ? `<button type="button" class="bill-dropdown-receipt-button" data-bill-key="${getBillKey(bill)}">${i18n.t('bill.action.viewReceipt')}</button>`
+                  : ''
+              }
+            </div>
           </div>
-          <div class="bill-list-item-meta">
-            <div class="bill-list-item-title">${bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown')}</div>
-            <div class="bill-list-item-id">${extractNumbers(bill.billId) || '-'}</div>
-            <span class="bill-list-item-status-badge ${bill.hasReceipt ? 'is-paid' : 'is-ready'}">
-              ${bill.hasReceipt ? i18n.t('bill.status.paid') : i18n.t('bill.status.ready')}
-            </span>
-          </div>
-        </div>
-        <div class="bill-list-item-amount">${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
-      </div>
-    `
-    )
-    .join('');
-  const paymentButtonsHtml = billListAllowsStaticPinMode
-    ? `
-      <div class="bill-list-actions-row">
-        <button type="button" class="btn btn-success" id="bill-list-pay-dynamic-button" data-i18n="form.payDynamicPin">
-          ${i18n.t('form.payDynamicPin')}
-        </button>
-        <button type="button" class="btn btn-success btn-bordered" id="bill-list-pay-static-button" data-i18n="form.payStaticPin">
-          ${i18n.t('form.payStaticPin')}
-        </button>
-      </div>
-      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
-        ${i18n.t('form.cancel')}
-      </button>
-    `
-    : `
-      <button type="button" class="btn btn-success" id="bill-list-pay-button" data-i18n="form.pay">
-        ${i18n.t('form.pay')}
-      </button>
-      <button type="button" class="btn btn-primary btn-bordered" id="bill-list-cancel-button" data-i18n="form.cancel">
-        ${i18n.t('form.cancel')}
-      </button>
-    `;
+        `,
+        onRender: (li) => {
+          const actionButton = li.querySelector('.bill-dropdown-receipt-button');
+          if (!actionButton) return;
+          actionButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const targetBill = enrichedBills.find(
+              (b) => getBillKey(b) === actionButton.dataset.billKey
+            );
+            if (targetBill?.paymentReceipt) {
+              showPaymentReceiptScreen(targetBill.paymentReceipt);
+              billDropdown?.close?.();
+              return;
+            }
+            errorHandler.show({
+              message: i18n.t('receipt.paymentFailedDesc'),
+              mode: 'toast',
+              type: 'warning',
+            });
+          });
+        },
+      };
+    });
 
-  billSection.innerHTML = `
-    <div class="more-content show" id="bill-list-content">${billRowsHtml}</div>
-    <div class="form-actions bill-list-actions">
-      ${paymentButtonsHtml}
-    </div>
+  let selectorGroup = document.getElementById('bill-selector-group');
+  if (!selectorGroup) {
+    selectorGroup = document.createElement('div');
+    selectorGroup.id = 'bill-selector-group';
+    selectorGroup.className = 'form-group bill-selector-group';
+    selectorGroup.innerHTML = '<div id="bill-selector-input-container"></div>';
+    paymentForm.prepend(selectorGroup);
+  }
+
+  if (!billSelectorInput) {
+    const selectorContainer = document.getElementById('bill-selector-input-container');
+    billSelectorInput = new Input(selectorContainer, {
+      id: 'bill-selector-input',
+      name: 'billSelector',
+      type: 'text',
+      autocomplete: 'off',
+      label: i18n.t('bill.selector.title'),
+      placeholder: i18n.t('bill.selector.title'),
+      required: false,
+      clearButtonAriaLabel: i18n.t('common.clear'),
+      rightAction: {
+        icon: appIconHtml('icn-credit-card.svg'),
+        label: i18n.t('bill.selector.title'),
+        onClick: () => {
+          billDropdown?.toggle();
+        },
+      },
+      onInput: () => {},
+    });
+    billSelectorInput.element.readOnly = true;
+    billSelectorInput.element.setAttribute('aria-readonly', 'true');
+    if (billSelectorInput.clearButton) {
+      billSelectorInput.clearButton.style.display = 'none';
+    }
+  } else {
+    billSelectorInput.setLabel(i18n.t('bill.selector.title'));
+  }
+
+  const dropdownItems = buildBillDropdownItems();
+  const openBillListSheet = async () => {
+    if (!isMobileCardListViewport()) {
+      billDropdown?.open?.();
+      return;
+    }
+    if (billListSheetRef) {
+      billListSheetRef.destroy();
+      billListSheetRef = null;
+    }
+    const { BottomSheet } = await import('../components/BottomSheet.js');
+    const content = document.createElement('div');
+    content.className = 'card-list-sheet';
+    const ul = document.createElement('ul');
+    ul.className = 'card-list-sheet-list';
+    buildBillDropdownItems().forEach((itemDef) => {
+      const li = document.createElement('li');
+      li.className =
+        `dropdown-item card-list-sheet-item ${itemDef.disabled ? 'disabled' : ''}`.trim();
+      li.innerHTML = itemDef.html || '';
+      if (typeof itemDef.onRender === 'function') {
+        itemDef.onRender(li);
+      }
+      if (!itemDef.disabled) {
+        li.addEventListener('click', () => {
+          const next = enrichedBills.find((b) => getBillKey(b) === itemDef.value);
+          if (!next) return;
+          selectedBillForApi = next;
+          billSelectorInput.setValue(getBillLabel(next));
+          const iconFile = next.billTypeKey
+            ? billIconFileByTypeKey[next.billTypeKey] || 'icn-cash-banknote.svg'
+            : 'icn-cash-banknote.svg';
+          updateBillSelectorLogo(iconFile, next.billTypeKey ? i18n.t(next.billTypeKey) : '');
+          billDropdown?.updateItems(buildBillDropdownItems());
+          if (billListSheetRef) billListSheetRef.close();
+        });
+      }
+      ul.appendChild(li);
+    });
+    content.appendChild(ul);
+    const sheet = new BottomSheet({
+      title: i18n.t('bill.selector.title'),
+      content,
+      scrollable: true,
+      onClose: () => {
+        if (billListSheetRef === sheet) {
+          billListSheetRef = null;
+        }
+        sheet.destroy();
+      },
+    });
+    billListSheetRef = sheet;
+    sheet.open();
+  };
+
+  if (!billDropdown) {
+    billDropdown = new Dropdown(billSelectorInput.element, {
+      items: dropdownItems,
+      desktopOnlyAutoOpen: true,
+      onSelect: (item) => {
+        const next = enrichedBills.find((b) => getBillKey(b) === item.value);
+        if (!next) return;
+        selectedBillForApi = next;
+        billSelectorInput.setValue(getBillLabel(next));
+        const iconFile = next.billTypeKey
+          ? billIconFileByTypeKey[next.billTypeKey] || 'icn-cash-banknote.svg'
+          : 'icn-cash-banknote.svg';
+        updateBillSelectorLogo(iconFile, next.billTypeKey ? i18n.t(next.billTypeKey) : '');
+        billDropdown.updateItems(buildBillDropdownItems());
+      },
+    });
+    billSelectorInput.element.addEventListener('click', () => {
+      if (!isMobileCardListViewport()) return;
+      void openBillListSheet();
+    });
+  } else {
+    billDropdown.updateItems(dropdownItems);
+  }
+  billSelectorInput.options.rightAction.onClick = () => {
+    void openBillListSheet();
+  };
+
+  if (selectedBillForApi) {
+    billSelectorInput.setValue(getBillLabel(selectedBillForApi));
+    const iconFile = selectedBillForApi.billTypeKey
+      ? billIconFileByTypeKey[selectedBillForApi.billTypeKey] || 'icn-cash-banknote.svg'
+      : 'icn-cash-banknote.svg';
+    updateBillSelectorLogo(
+      iconFile,
+      selectedBillForApi.billTypeKey ? i18n.t(selectedBillForApi.billTypeKey) : ''
+    );
+  } else {
+    billSelectorInput.setValue('');
+    updateBillSelectorLogo(null);
+  }
+  let selectorHint = document.getElementById('bill-selector-hint');
+  if (!selectorHint) {
+    selectorHint = document.createElement('div');
+    selectorHint.id = 'bill-selector-hint';
+    selectorHint.className = 'input-hint bill-selector-hint';
+  }
+  const billInputWrapper = billSelectorInput?.wrapper || null;
+  const inlineHintOrError = billInputWrapper?.querySelector('.input-hint, .input-error');
+  if (billInputWrapper && selectorHint.parentElement !== billInputWrapper) {
+    if (inlineHintOrError) {
+      billInputWrapper.insertBefore(selectorHint, inlineHintOrError);
+    } else {
+      billInputWrapper.appendChild(selectorHint);
+    }
+  }
+  selectorHint.innerHTML = `
+    <span>${i18n.t('bill.hint.payableCount', { count: String(payableCount) })}</span>
+    <span>${i18n.t('bill.hint.paidCount', { count: String(paidCount) })}</span>
   `;
 }
 
 function attachBillListEvents() {
-  const cancelBtn = document.getElementById('bill-list-cancel-button');
-  const payBtn = document.getElementById('bill-list-pay-button');
-  const payDynamicBtn = document.getElementById('bill-list-pay-dynamic-button');
-  const payStaticBtn = document.getElementById('bill-list-pay-static-button');
-
-  if (cancelBtn) {
-    cancelBtn.onclick = () => {
-      if (isButtonClickLocked(cancelBtn)) return;
-      lockButtonClick(cancelBtn);
-      openCancelPaymentConfirm();
-      setTimeout(() => unlockButtonClick(cancelBtn), 700);
-    };
-  }
-
-  if (payBtn) {
-    payBtn.onclick = () => {
-      showBillPaymentForm('static');
-    };
-  }
-
-  if (payDynamicBtn) {
-    payDynamicBtn.onclick = () => {
-      showBillPaymentForm('dynamic');
-    };
-  }
-
-  if (payStaticBtn) {
-    payStaticBtn.onclick = () => {
-      showBillPaymentForm('static');
-    };
-  }
-}
-
-function setBillDynamicEntryModeUi(enabled) {
-  const cvv2Container = document.getElementById('cvv2-input-container');
-  const otpGroup = otpInput?.wrapper?.closest('.form-group');
-  const expiryGroup = document.getElementById('expiry-date-container')?.closest('.form-group');
-  const cvv2Slot = cvv2Container?.closest('div');
-  const expiryRow = cvv2Slot?.closest('.form-row');
-  if (cvv2Container) {
-    cvv2Container.hidden = enabled;
-    cvv2Container.style.display = enabled ? 'none' : '';
-  }
-  if (cvv2Slot) {
-    cvv2Slot.hidden = enabled;
-  }
-  if (expiryRow) {
-    expiryRow.classList.toggle('bill-dynamic-expiry-full', enabled);
-  }
-  if (otpGroup) otpGroup.hidden = enabled;
-  // In dynamic PIN flow, expiry date must remain visible.
-  if (expiryGroup) expiryGroup.hidden = false;
-}
-
-function setOtpFieldMode(mode) {
-  if (!otpInput) return;
-  const getOtpButton = document.getElementById('get-otp-button');
-  const isStaticPinMode = mode === 'static-pin';
-
-  if (isStaticPinMode) {
-    if (getOtpButton) {
-      getOtpButton.hidden = true;
-      getOtpButton.style.display = 'none';
-    }
-    if (otpLabelElement) {
-      otpLabelElement.textContent = i18n.t('form.internetPin');
-    }
-    otpInput.setPlaceholder(i18n.t('form.internetPin.placeholder'));
-    otpInput.options.requiredMessageKey = 'form.internetPin.required';
-    otpInput.options.validator = (value) => {
-      const digits = extractNumbers(value);
-      if (!digits) {
-        return { valid: false, message: i18n.t('form.internetPin.required') };
-      }
-      if (digits.length < 4 || digits.length > 12) {
-        return {
-          valid: false,
-          message: i18n.t('form.internetPin.invalidLengthRange', { min: '4', max: '12' }),
-        };
-      }
-      return { valid: true };
-    };
-    otpInput.clearValidation?.();
-    return;
-  }
-
-  if (getOtpButton) {
-    getOtpButton.hidden = false;
-    getOtpButton.style.display = '';
-  }
-  if (otpLabelElement) {
-    otpLabelElement.textContent = i18n.t('form.otp');
-  }
-  otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
-  otpInput.options.requiredMessageKey = 'form.otp.required';
-  otpInput.options.validator = validateOTP;
-  otpInput.clearValidation?.();
-  syncGetOtpButtonState();
+  // Bill selection is rendered inside the main payment form.
 }
 
 function syncBillFormActionButtons() {
-  const formActions = document.querySelector('#payment-form .form-actions');
-  const cancelButton = document.getElementById('cancel-button');
-  const payButton = document.getElementById('pay-button');
-  if (!formActions || !cancelButton || !payButton) return;
-
-  let backButton = document.getElementById('bill-form-back-button');
-  const showBack = isBillTransactionView && billFlowMode !== 'list';
-
-  if (showBack) {
-    if (!backButton) {
-      backButton = document.createElement('button');
-      backButton.type = 'button';
-      backButton.id = 'bill-form-back-button';
-      backButton.className = 'btn btn-primary btn-bordered';
-      backButton.textContent = i18n.t('form.back');
-      formActions.appendChild(backButton);
-      backButton.addEventListener('click', () => {
-        showBillListView();
-      });
-    } else {
-      backButton.hidden = false;
-      backButton.textContent = i18n.t('form.back');
-    }
-    formActions.classList.add('bill-form-actions-with-back');
-  } else {
-    if (backButton) {
-      backButton.hidden = true;
-    }
-    formActions.classList.remove('bill-form-actions-with-back');
-  }
-}
-
-function showBillListView() {
-  billFlowMode = 'list';
-  isBillListOnlyMode = true;
-  const paymentFormRegion = document.getElementById('payment-form-region');
-  const billSection = document.getElementById('bill-list-section');
-  const largeCardTitle = document.querySelector('.card-large .card-title');
-  if (paymentFormRegion) paymentFormRegion.hidden = true;
-  if (billSection) {
-    billSection.hidden = false;
-    billSection.style.display = '';
-  }
-  if (largeCardTitle) {
-    largeCardTitle.textContent = i18n.t('transaction.billListTitle');
-  }
-  setBillDynamicEntryModeUi(false);
-  setOtpFieldMode('default');
-  syncBillFormActionButtons();
-}
-
-function showBillPaymentForm(mode) {
-  billFlowMode = mode === 'dynamic' ? 'dynamic' : 'static';
-  isBillListOnlyMode = false;
-
-  const paymentFormRegion = document.getElementById('payment-form-region');
-  const billSection = document.getElementById('bill-list-section');
-  const largeCardTitle = document.querySelector('.card-large .card-title');
-  if (paymentFormRegion) paymentFormRegion.hidden = false;
-  if (billSection) {
-    billSection.hidden = true;
-    billSection.style.display = 'none';
-  }
-  if (largeCardTitle) {
-    largeCardTitle.textContent = i18n.t('form.title');
-  }
-
-  const payButton = document.getElementById('pay-button');
-  const cancelButton = document.getElementById('cancel-button');
-  if (mode === 'dynamic') {
-    setBillDynamicEntryModeUi(true);
-    setOtpFieldMode('default');
-    if (payButton) payButton.textContent = i18n.t('form.continue');
-    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
-  } else {
-    setBillDynamicEntryModeUi(false);
-    setOtpFieldMode('static-pin');
-    if (payButton) setPayButtonState('active');
-    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
-  }
-  syncBillFormActionButtons();
+  // Keep for API compatibility with older call sites.
 }
 
 function getTransactionAmountFromDom() {
@@ -3731,27 +3737,16 @@ function attachFormEvents() {
     if (paySubmitInFlight) return;
     paySubmitInFlight = true;
 
-    const isBillDynamicEntry = isBillTransactionView && billFlowMode === 'dynamic';
-    // Validate all fields (dynamic bill entry does not require CVV2/OTP).
-    const isValid = (
-      isBillDynamicEntry
-        ? [cardNumberInput.validate(), expiryDateInput.validate(), captchaInput.validate()]
-        : [
-            cardNumberInput.validate(),
-            cvv2Input.validate(),
-            expiryDateInput.validate(),
-            captchaInput.validate(),
-            otpInput.validate(),
-          ]
-    ).every((v) => v);
+    const isValid = [
+      cardNumberInput.validate(),
+      cvv2Input.validate(),
+      expiryDateInput.validate(),
+      captchaInput.validate(),
+      otpInput.validate(),
+    ].every((v) => v);
 
     if (!isValid) {
-      if (isBillDynamicEntry) {
-        const payButton = document.getElementById('pay-button');
-        if (payButton) payButton.textContent = i18n.t('form.continue');
-      } else {
-        setPayButtonState('disabled');
-      }
+      setPayButtonState('disabled');
       errorHandler.show({
         message: i18n.t('form.validation.error'),
         mode: 'toast',
@@ -3760,12 +3755,7 @@ function attachFormEvents() {
 
       // Restore active state after a short delay
       setTimeout(() => {
-        if (isBillDynamicEntry) {
-          const payButton = document.getElementById('pay-button');
-          if (payButton) payButton.textContent = i18n.t('form.continue');
-        } else {
-          setPayButtonState('active');
-        }
+        setPayButtonState('active');
       }, 2000);
       paySubmitInFlight = false;
       return;
@@ -3782,9 +3772,7 @@ function attachFormEvents() {
       return;
     }
 
-    if (!isBillDynamicEntry) {
-      setPayButtonState('processing');
-    }
+    setPayButtonState('processing');
     soundManager.beep();
 
     try {
@@ -3794,13 +3782,20 @@ function attachFormEvents() {
 
       const payBody = {
         ...cardPart,
-        cvv2: isBillDynamicEntry ? '' : extractNumbers(cvv2Input.getValue()),
-        pin2: isBillDynamicEntry ? '' : extractNumbers(otpInput.getValue()),
+        cvv2: extractNumbers(cvv2Input.getValue()),
+        pin2: extractNumbers(otpInput.getValue()),
         cellNumber:
           receiptOpen && mobileInput ? extractNumbers(mobileInput.getValue()) || null : null,
         email: receiptOpen && emailInput ? emailInput.getValue().trim() || null : null,
         saveCardAfterPay: Boolean(saveCardEl?.checked),
-        bill: null,
+        bill:
+          isBillTransactionView && selectedBillForApi
+            ? {
+                billId: selectedBillForApi.billId ?? '',
+                payId: selectedBillForApi.payId ?? '',
+                amount: selectedBillForApi.amount ?? null,
+              }
+            : null,
       };
       if (cardPart.cardId != null && !shouldSendExpiryDateInPayRequest()) {
         payBody.expiryDate = null;
@@ -3808,9 +3803,12 @@ function attachFormEvents() {
         payBody.expiryDate = getExpiryDateForApi();
       }
 
-      if (isBillDynamicEntry) {
-        // For dynamic bill flow, first step is a lightweight entry screen.
-        showBillPaymentForm('static');
+      if (isBillTransactionView && !payBody.bill) {
+        errorHandler.show({
+          message: i18n.t('form.validation.error'),
+          mode: 'toast',
+          type: 'error',
+        });
         setPayButtonState('active');
         return;
       }
@@ -3849,9 +3847,7 @@ function attachFormEvents() {
         type: 'error',
       });
     } finally {
-      if (!(isBillTransactionView && billFlowMode === 'dynamic')) {
-        setPayButtonState('active');
-      }
+      setPayButtonState('active');
       paySubmitInFlight = false;
     }
   });
@@ -3936,17 +3932,16 @@ function updatePageContent() {
     footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
     footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }
-  if (!isBillListOnlyMode && cardNumberInput && typeof cardNumberInput.getValue === 'function') {
+  if (cardNumberInput && typeof cardNumberInput.getValue === 'function') {
     syncGetOtpButtonState();
   }
 
   i18n.applyDataI18n(document);
-  if (isBillListOnlyMode) {
+  if (isBillTransactionView) {
     const bills = Array.isArray(currentTransactionPayload?.bills)
       ? currentTransactionPayload.bills
       : [];
     renderBillListSection(bills);
-    attachBillListEvents();
   }
   syncBillFormActionButtons();
   const headerHelpButton = document.getElementById('card-header-help-button');
@@ -4010,15 +4005,12 @@ function updatePageContent() {
   const captchaAudioBtn = document.querySelector('.captcha-audio-btn');
   if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
-    const isStaticPinMode = isBillTransactionView && billFlowMode === 'static';
-    otpInput.setPlaceholder(
-      i18n.t(isStaticPinMode ? 'form.internetPin.placeholder' : 'form.otp.placeholder')
-    );
+    otpInput.setPlaceholder(i18n.t('form.otp.placeholder'));
     otpInput.setRightActionAriaLabel(i18n.t('form.virtualPinPad'));
     otpInput.setClearButtonAriaLabel(i18n.t('common.clear'));
     // Update separate OTP label
     if (otpLabelElement) {
-      otpLabelElement.textContent = i18n.t(isStaticPinMode ? 'form.internetPin' : 'form.otp');
+      otpLabelElement.textContent = i18n.t('form.otp');
     }
   }
   if (mobileInput) {
@@ -4083,15 +4075,7 @@ function updatePageContent() {
   }
 
   // Ensure pay button label uses current language and amount
-  if (!isBillListOnlyMode && !(isBillTransactionView && billFlowMode === 'dynamic')) {
-    setPayButtonState('active');
-  }
-  if (isBillTransactionView && billFlowMode === 'dynamic') {
-    const payButton = document.getElementById('pay-button');
-    const cancelButton = document.getElementById('cancel-button');
-    if (payButton) payButton.textContent = i18n.t('form.continue');
-    if (cancelButton) cancelButton.textContent = i18n.t('form.cancel');
-  }
+  setPayButtonState('active');
 
   revalidateVisibleFormErrorsAfterLanguageChange();
 }

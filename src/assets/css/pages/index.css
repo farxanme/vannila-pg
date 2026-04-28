@@ -17,13 +17,13 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: small card on LEFT, large card on RIGHT */
-[dir='rtl'] .grid.grid-2-col > .card-small {
+[dir='rtl'] .grid.grid-2-col>.card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir='rtl'] .grid.grid-2-col > .card-large {
+[dir='rtl'] .grid.grid-2-col>.card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -31,13 +31,13 @@ html.app-ready #app .main-content {
 }
 
 /* LTR: small card on RIGHT, large card on LEFT */
-[dir='ltr'] .grid.grid-2-col > .card-small {
+[dir='ltr'] .grid.grid-2-col>.card-small {
   order: 2;
   flex: 0 0 320px;
   /* fixed 320px column */
 }
 
-[dir='ltr'] .grid.grid-2-col > .card-large {
+[dir='ltr'] .grid.grid-2-col>.card-large {
   order: 1;
   flex: 1 1 auto;
   /* take remaining space */
@@ -50,16 +50,16 @@ html.app-ready #app .main-content {
   }
 
   /* Mobile: keep timer card first across directions */
-  [dir='rtl'] .grid.grid-2-col > .card-small,
-  [dir='ltr'] .grid.grid-2-col > .card-small {
+  [dir='rtl'] .grid.grid-2-col>.card-small,
+  [dir='ltr'] .grid.grid-2-col>.card-small {
     order: 1;
     flex: 0 0 auto;
     width: 100%;
     max-width: 100%;
   }
 
-  [dir='rtl'] .grid.grid-2-col > .card-large,
-  [dir='ltr'] .grid.grid-2-col > .card-large {
+  [dir='rtl'] .grid.grid-2-col>.card-large,
+  [dir='ltr'] .grid.grid-2-col>.card-large {
     order: 2;
     flex: 0 0 auto;
     width: 100%;
@@ -138,7 +138,7 @@ html.app-ready #app .main-content {
   flex-direction: column;
 }
 
-.otp-input-container > .input-label {
+.otp-input-container>.input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -187,7 +187,7 @@ html.app-ready #app .main-content {
   flex-direction: column;
 }
 
-.captcha-container > .input-label {
+.captcha-container>.input-label {
   margin-bottom: var(--spacing-xs);
 }
 
@@ -302,10 +302,7 @@ html.app-ready #app .main-content {
 }
 
 /* Hover: treat field + image as one control */
-.captcha-container
-  .captcha-input-cluster:hover
-  .input-wrapper
-  .input-container:not(.disabled):not(.focused):not(.error) {
+.captcha-container .captcha-input-cluster:hover .input-wrapper .input-container:not(.disabled):not(.focused):not(.error) {
   border-color: var(--color-gray-200);
 }
 
@@ -315,19 +312,13 @@ html.app-ready #app .main-content {
   border-right-color: var(--color-gray-200);
 }
 
-[dir='rtl']
-  .captcha-container
-  .captcha-input-cluster:not(:has(.input-container.error)):hover
-  .captcha-image {
+[dir='rtl'] .captcha-container .captcha-input-cluster:not(:has(.input-container.error)):hover .captcha-image {
   border-left-color: var(--color-gray-200);
   border-right-color: transparent;
 }
 
 /* Update captcha image border when input is focused */
-.captcha-container
-  .captcha-input-cluster
-  .input-wrapper:has(.input-container.focused)
-  ~ .captcha-image {
+.captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.focused)~.captcha-image {
   border-top-color: var(--color-primary-300);
   border-bottom-color: var(--color-primary-300);
   border-right-color: var(--color-primary-300);
@@ -335,21 +326,14 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: Update left border instead of right */
-[dir='rtl']
-  .captcha-container
-  .captcha-input-cluster
-  .input-wrapper:has(.input-container.focused)
-  ~ .captcha-image {
+[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.focused)~.captcha-image {
   border-left-color: var(--color-primary-300);
   border-right-color: transparent;
   box-shadow: var(--shadow-input-focus);
 }
 
 /* Update captcha image border when input has error */
-.captcha-container
-  .captcha-input-cluster
-  .input-wrapper:has(.input-container.error)
-  ~ .captcha-image {
+.captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.error)~.captcha-image {
   border-top-color: var(--color-error-300);
   border-bottom-color: var(--color-error-300);
   border-right-color: var(--color-error-300);
@@ -357,11 +341,7 @@ html.app-ready #app .main-content {
 }
 
 /* RTL: Update left border instead of right */
-[dir='rtl']
-  .captcha-container
-  .captcha-input-cluster
-  .input-wrapper:has(.input-container.error)
-  ~ .captcha-image {
+[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper:has(.input-container.error)~.captcha-image {
   border-left-color: var(--color-error-300);
   border-right-color: transparent;
   box-shadow: var(--shadow-input-error);
@@ -455,7 +435,7 @@ html.app-ready #app .main-content {
   --color-icon: var(--color-gray-200);
 }
 
-.save-card-checkbox:checked + .save-card-icon {
+.save-card-checkbox:checked+.save-card-icon {
   color: var(--color-primary);
   --color-icon: var(--color-primary);
 }
@@ -578,6 +558,91 @@ html.app-ready #app .main-content {
   gap: var(--spacing-md);
 }
 
+.bill-selector-group .dropdown-item {
+  padding: 0;
+  background: transparent;
+}
+
+.bill-selector-group .dropdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.bill-selector-group .bill-dropdown-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border: 1px solid var(--color-stroke);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-white);
+}
+
+.bill-selector-group .dropdown-item:hover .bill-dropdown-item,
+.bill-selector-group .bill-dropdown-item.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-50);
+}
+
+.bill-selector-group .dropdown-item.disabled .bill-dropdown-item {
+  background: var(--color-bg-light);
+  border-color: var(--color-stroke);
+}
+
+.bill-dropdown-receipt-button {
+  flex-shrink: 0;
+  height: 30px;
+  padding: 0 10px;
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-white);
+  color: var(--color-primary);
+  font-size: var(--font-size-xs);
+  cursor: pointer;
+}
+
+.bill-list-item-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--spacing-xs);
+  flex-shrink: 0;
+  min-width: max-content;
+}
+
+.bill-selector-hint {
+  margin-top: var(--spacing-xs);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-list-sheet-item .bill-dropdown-item {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  column-gap: var(--spacing-sm);
+}
+
+.card-list-sheet-item .bill-list-item-main {
+  min-width: 0;
+}
+
+.card-list-sheet-item .bill-list-item-side {
+  align-items: flex-end;
+  min-width: max-content;
+}
+
+.card-list-sheet-list .card-list-sheet-item .bill-dropdown-item {
+  margin-bottom: var(--spacing-xs);
+}
+
+.card-list-sheet-list .card-list-sheet-item:last-child .bill-dropdown-item {
+  margin-bottom: 0;
+}
+
 .bill-list-item-main {
   display: flex;
   align-items: center;
@@ -660,16 +725,6 @@ html.app-ready #app .main-content {
   width: 100%;
 }
 
-.payment-form .form-actions.bill-form-actions-with-back {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--spacing-sm);
-}
-
-.payment-form .form-actions.bill-form-actions-with-back > .btn.btn-success {
-  grid-column: 1 / -1;
-}
-
 /* Mobile: captcha audio = icon only; checkout card headers minimized */
 @media (max-width: 768px) {
   .captcha-container .captcha-input-row .captcha-audio-btn .captcha-audio-btn-label {
@@ -684,7 +739,7 @@ html.app-ready #app .main-content {
   }
 
   /* Hide payment form card strip (title + help) */
-  .card-large > .card-header {
+  .card-large>.card-header {
     display: none;
   }
 

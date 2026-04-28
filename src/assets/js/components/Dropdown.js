@@ -133,6 +133,11 @@ export class Dropdown {
       const li = document.createElement('li');
       li.className = 'dropdown-item';
       li.dataset.index = index;
+      const itemDisabled = typeof item === 'object' && Boolean(item?.disabled);
+      if (itemDisabled) {
+        li.classList.add('disabled');
+        li.setAttribute('aria-disabled', 'true');
+      }
 
       if (typeof item === 'string') {
         li.textContent = item;
@@ -152,6 +157,7 @@ export class Dropdown {
       }
 
       li.addEventListener('click', () => {
+        if (itemDisabled) return;
         this.selectItem(item);
       });
 
