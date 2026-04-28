@@ -7,13 +7,11 @@
   left: 0;
   right: 0;
   height: 110px;
-  background: linear-gradient(
-    to bottom,
-    var(--color-primary) 0,
-    var(--color-primary) 68px,
-    transparent 68px,
-    transparent 110px
-  );
+  background: linear-gradient(to bottom,
+      var(--color-primary) 0,
+      var(--color-primary) 68px,
+      transparent 68px,
+      transparent 110px);
   border-bottom: none;
   z-index: var(--z-fixed);
   transition: none;
@@ -436,13 +434,11 @@
     --header-mobile-expanded-height: 148px;
     --header-mobile-collapsed-height: 110px;
     height: 148px;
-    background: linear-gradient(
-      to bottom,
-      var(--color-primary) 0,
-      var(--color-primary) 104px,
-      transparent 104px,
-      transparent 148px
-    );
+    background: linear-gradient(to bottom,
+        var(--color-primary) 0,
+        var(--color-primary) 104px,
+        transparent 104px,
+        transparent 148px);
     transition:
       height var(--transition-base),
       background var(--transition-base);
@@ -450,13 +446,11 @@
 
   .header.scrolled {
     height: var(--header-mobile-collapsed-height);
-    background: linear-gradient(
-      to bottom,
-      var(--color-primary) 0,
-      var(--color-primary) 68px,
-      transparent 68px,
-      transparent 110px
-    );
+    background: linear-gradient(to bottom,
+        var(--color-primary) 0,
+        var(--color-primary) 68px,
+        transparent 68px,
+        transparent 110px);
   }
 
   .header-container {
@@ -596,7 +590,6 @@
 
 /* Main Content */
 .main-content {
-  min-height: calc(100vh - 110px - 200px);
   padding-top: calc(110px + 14px);
   padding-bottom: 14px;
 }
@@ -608,7 +601,7 @@
     transition: padding-top var(--transition-base);
   }
 
-  .header.scrolled ~ #app .main-content {
+  .header.scrolled~#app .main-content {
     padding-top: calc(110px + 14px);
   }
 }
@@ -698,7 +691,7 @@
 }
 
 /* Prevent grid/flex children (CVV2 + expiry) from overflowing the row */
-.form-row > * {
+.form-row>* {
   min-width: 0;
   max-width: 100%;
 }
@@ -998,10 +991,8 @@
   border-radius: 50%;
   flex: 0 0 18px;
   display: inline-block;
-  background: conic-gradient(
-    var(--timer-fill-color) calc(var(--timer-progress) * 1turn),
-    var(--timer-track-color) 0
-  );
+  background: conic-gradient(var(--timer-fill-color) calc(var(--timer-progress) * 1turn),
+      var(--timer-track-color) 0);
 }
 
 #timer-header.warning .timer-progress {
