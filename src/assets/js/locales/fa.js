@@ -198,6 +198,8 @@ export default {
   'bill.type.tax': 'قبض مالیات',
   'bill.type.traffic': 'قبض راهنمایی و رانندگی',
   'bill.type.unknown': 'نوع قبض نامشخص',
+  'bill.status.paid': 'پرداخت شده',
+  'bill.status.ready': 'آماده پرداخت',
   'transaction.descriptionExpand': 'نمایش کامل توضیحات',
   'transaction.descriptionCollapse': 'نمایش کمتر',
   'transaction.type.balance': 'مانده گیری',

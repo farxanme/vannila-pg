@@ -200,6 +200,8 @@ export default {
   'bill.type.tax': 'Vergi Faturasi',
   'bill.type.traffic': 'Trafik Cezasi',
   'bill.type.unknown': 'Bilinmeyen Fatura Turu',
+  'bill.status.paid': 'Odendi',
+  'bill.status.ready': 'Odeme icin hazir',
   'transaction.descriptionExpand': 'Tam açıklamayı göster',
   'transaction.descriptionCollapse': 'Daha az göster',
   'transaction.type.balance': 'Bakiye Sorgulama',

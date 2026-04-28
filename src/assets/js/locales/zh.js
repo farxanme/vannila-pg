@@ -200,6 +200,8 @@ export default {
   'bill.type.tax': '税费账单',
   'bill.type.traffic': '交通罚单',
   'bill.type.unknown': '未知账单类型',
+  'bill.status.paid': '已支付',
+  'bill.status.ready': '可支付',
   'transaction.descriptionExpand': '显示完整说明',
   'transaction.descriptionCollapse': '收起说明',
   'transaction.type.balance': '余额查询',

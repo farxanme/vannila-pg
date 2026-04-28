@@ -200,6 +200,8 @@ export default {
   'bill.type.tax': 'Tax Bill',
   'bill.type.traffic': 'Traffic Fine',
   'bill.type.unknown': 'Unknown Bill Type',
+  'bill.status.paid': 'Paid',
+  'bill.status.ready': 'Ready to pay',
   'transaction.descriptionExpand': 'Show full description',
   'transaction.descriptionCollapse': 'Show less',
   'transaction.type.balance': 'Balance Inquiry',

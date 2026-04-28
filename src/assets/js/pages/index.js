@@ -359,12 +359,14 @@ function buildCardPayloadForIpg() {
   if (pan.length === 16) {
     return { cardId: null, pan, bill, cardRegisteredType: 0 };
   }
-  if (selectedSavedCardForApi) {
+  if (selectedSavedCardForApi?.subscriberCardId != null) {
+    const rawType = Number(selectedSavedCardForApi.cardRegisteredType);
+    const cardRegisteredType = [0, 1, 2].includes(rawType) ? rawType : 0;
     return {
-      cardId: String(selectedSavedCardForApi.subscriberCardId),
+      cardId: selectedSavedCardForApi.subscriberCardId,
       pan: null,
       bill,
-      cardRegisteredType: selectedSavedCardForApi.cardRegisteredType ?? 1,
+      cardRegisteredType,
     };
   }
   return null;
@@ -1110,7 +1112,7 @@ function initializeTimer(durationSeconds = 900) {
         mode: 'toast',
         type: 'warning',
       });
-      void navigateToMerchantSite();
+      showTransactionExpiredScreen();
     },
   });
 
@@ -1173,10 +1175,10 @@ function initializeFormInputs() {
 
     const saveCardEl = document.getElementById('save-card-checkbox');
     if (saveCardEl) {
-      saveCardEl.checked = false;
+      saveCardEl.checked = true;
       const saveCardIcon = document.querySelector('.save-card-icon .app-icon');
       if (saveCardIcon) {
-        setAppIconFile(saveCardIcon, 'icn-square-check.svg');
+        setAppIconFile(saveCardIcon, 'icn-square-check-filled.svg');
       }
     }
 
@@ -2554,6 +2556,9 @@ function renderBillListSection(bills) {
           <div class="bill-list-item-meta">
             <div class="bill-list-item-title">${bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown')}</div>
             <div class="bill-list-item-id">${extractNumbers(bill.billId) || '-'}</div>
+            <span class="bill-list-item-status-badge ${bill.hasReceipt ? 'is-paid' : 'is-ready'}">
+              ${bill.hasReceipt ? i18n.t('bill.status.paid') : i18n.t('bill.status.ready')}
+            </span>
           </div>
         </div>
         <div class="bill-list-item-amount">${Number(bill.amount || 0).toLocaleString(amountLocale)} ${i18n.t('transaction.rial')}</div>
@@ -2630,9 +2635,17 @@ function setBillDynamicEntryModeUi(enabled) {
   const cvv2Container = document.getElementById('cvv2-input-container');
   const otpGroup = otpInput?.wrapper?.closest('.form-group');
   const expiryGroup = document.getElementById('expiry-date-container')?.closest('.form-group');
+  const cvv2Slot = cvv2Container?.closest('div');
+  const expiryRow = cvv2Slot?.closest('.form-row');
   if (cvv2Container) {
     cvv2Container.hidden = enabled;
     cvv2Container.style.display = enabled ? 'none' : '';
+  }
+  if (cvv2Slot) {
+    cvv2Slot.hidden = enabled;
+  }
+  if (expiryRow) {
+    expiryRow.classList.toggle('bill-dynamic-expiry-full', enabled);
   }
   if (otpGroup) otpGroup.hidden = enabled;
   // In dynamic PIN flow, expiry date must remain visible.
@@ -3359,6 +3372,7 @@ function showTransactionExpiredScreen() {
   }
 
   if (returnBtn) {
+    returnBtn.hidden = true;
     returnBtn.onclick = () => {
       void navigateToMerchantSite();
     };
@@ -3377,6 +3391,11 @@ function showTransactionExpiredScreen() {
     if (transactionExpiredRemainingSeconds <= 0) {
       clearTransactionExpiredReturnTimer();
       void navigateToMerchantSite();
+      setTimeout(() => {
+        if (returnBtn && txExpiredSection && !txExpiredSection.hidden) {
+          returnBtn.hidden = false;
+        }
+      }, 3000);
     }
   }, 1000);
 }
@@ -3783,7 +3802,9 @@ function attachFormEvents() {
         saveCardAfterPay: Boolean(saveCardEl?.checked),
         bill: null,
       };
-      if (shouldSendExpiryDateInPayRequest()) {
+      if (cardPart.cardId != null && !shouldSendExpiryDateInPayRequest()) {
+        payBody.expiryDate = null;
+      } else if (shouldSendExpiryDateInPayRequest()) {
         payBody.expiryDate = getExpiryDateForApi();
       }
 

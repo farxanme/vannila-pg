@@ -16,7 +16,7 @@ function buildMockBills() {
       payId: '1210017',
       amount: 12000,
       paymentReceipt: null,
-      hasReceipt: false,
+      hasReceipt: true,
     },
     {
       id: 17,
@@ -52,7 +52,7 @@ function buildMockBills() {
       payId: '1210050',
       amount: 12000,
       paymentReceipt: null,
-      hasReceipt: false,
+      hasReceipt: true,
     },
     {
       id: 21,

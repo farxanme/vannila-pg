@@ -36,7 +36,7 @@ export async function fetchCaptcha() {
 }
 
 /**
- * @param {string} captchaToken - Captcha key for CaptchaToken header
+ * @param {string} captchaToken - Captcha key for query string
  * @returns {Promise<Blob>}
  */
 export async function fetchCaptchaAudio(captchaToken) {
@@ -49,13 +49,13 @@ export async function fetchCaptchaAudio(captchaToken) {
   }
 
   const base = getCaptchaApiUrl();
-  const url = `${base}/captcha/play`;
+  const captchaKey = encodeURIComponent(String(captchaToken).trim());
+  const url = `${base}/captcha/voice?captchaKey=${captchaKey}`;
   const res = await fetch(url, {
     method: 'GET',
     credentials: 'omit',
     headers: {
-      Accept: 'audio/mpeg,*/*',
-      CaptchaToken: captchaToken,
+      Accept: '*/*',
     },
   });
 

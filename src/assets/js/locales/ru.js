@@ -201,6 +201,8 @@ export default {
   'bill.type.tax': 'Налоговый счет',
   'bill.type.traffic': 'Штраф за нарушение',
   'bill.type.unknown': 'Неизвестный тип счета',
+  'bill.status.paid': 'Оплачено',
+  'bill.status.ready': 'Готово к оплате',
   'transaction.descriptionExpand': 'Показать полностью',
   'transaction.descriptionCollapse': 'Свернуть',
   'transaction.type.balance': 'Запрос баланса',

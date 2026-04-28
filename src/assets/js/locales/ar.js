@@ -197,6 +197,8 @@ export default {
   'bill.type.tax': 'فاتورة الضريبة',
   'bill.type.traffic': 'مخالفة مرور',
   'bill.type.unknown': 'نوع فاتورة غير معروف',
+  'bill.status.paid': 'تم الدفع',
+  'bill.status.ready': 'جاهزة للدفع',
   'transaction.descriptionExpand': 'عرض الوصف كاملاً',
   'transaction.descriptionCollapse': 'عرض أقل',
   'transaction.type.balance': 'استعلام الرصيد',

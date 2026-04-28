@@ -362,20 +362,6 @@
   text-align: left;
 }
 
-.receipt-logos {
-  margin-top: var(--spacing-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-lg);
-}
-
-.receipt-logos img {
-  height: 34px;
-  width: auto;
-  object-fit: contain;
-}
-
 .receipt-save-image-mode .receipt-main-grid-columns {
   display: flex;
   flex-direction: column;
