@@ -233,7 +233,10 @@ export default {
     'شما می‌توانید به سایت پذیرنده بازگردید یا منتظر بازگشت خودکار بمانید.',
   'bill.flow.summarySectionTitle': 'خلاصه پرداخت قبض',
   'bill.flow.summaryPaid': 'تعداد قبض پرداخت شده:',
-  'bill.flow.summaryUnpaid': 'تعداد قبض پرداخت نشده:',
+  'bill.flow.summaryUnpaid': 'تعداد قبض پرداخت نشده/ناموفق:',
+  'bill.flow.summaryPaidAmount': 'جمع مبالغ پرداخت شده:',
+  'bill.flow.noticeSettlement':
+    'تسویه قبوض معمولا آنی است، اما گاهی به‌دلیل زیرساخت شرکت خدماتی تا ۴۸ ساعت تاخیر دارد. اگر پرداخت شما موفق بوده، نگران نباشید؛ قبض شما در هر صورت تسویه می‌شود.',
   'bill.flow.completeAndReturn': 'تکمیل فرآیند قبض و بازگشت به سایت پذیرنده',
   'transaction.descriptionExpand': 'نمایش کامل توضیحات',
   'transaction.descriptionCollapse': 'نمایش کمتر',

@@ -117,6 +117,8 @@ const otpCooldownUntilByCardKey = Object.create(null);
 
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
+/** Becomes true only after a bill pay attempt; while true + OTP cooldown active, pay button is disabled. */
+let billPayButtonLockedByOtpCooldown = false;
 let currentTransactionPrCode = null;
 /** When set, only saved cards (and typed PANs) whose digits 7–8 match `PanProductCodes` are allowed. */
 let panProductRestriction = null;
@@ -253,7 +255,10 @@ function getBillPaymentSummary() {
     : [];
   const paidCount = bills.filter((bill) => isBillPaidForList(bill)).length;
   const unpaidCount = Math.max(0, bills.length - paidCount);
-  return { paidCount, unpaidCount, totalCount: bills.length };
+  const paidAmount = bills
+    .filter((bill) => isBillPaidForList(bill))
+    .reduce((sum, bill) => sum + (Number(bill?.amount) || 0), 0);
+  return { paidCount, unpaidCount, totalCount: bills.length, paidAmount };
 }
 
 /**
@@ -646,6 +651,12 @@ function validateOtpFieldForPayment() {
   return otpInput.validate();
 }
 
+function isCurrentOtpCooldownActive() {
+  const key = getOtpCardStateKey();
+  const until = key != null ? otpCooldownUntilByCardKey[key] : null;
+  return until != null && Date.now() < until;
+}
+
 /**
  * Updates OTP request button: cooldown timer, disabled state, exhausted tries.
  */
@@ -666,6 +677,14 @@ function syncGetOtpButtonState() {
 
   const btn = document.getElementById('get-otp-button');
   if (!btn) return;
+  const syncBillPayButtonState = () => {
+    if (!inCooldown) {
+      billPayButtonLockedByOtpCooldown = false;
+    }
+    if (isBillTransactionView && !paySubmitInFlight) {
+      setPayButtonState('active');
+    }
+  };
 
   if (otpRequestInFlight) {
     btn.classList.add('loading');
@@ -673,6 +692,7 @@ function syncGetOtpButtonState() {
     btn.setAttribute('aria-busy', 'true');
     btn.textContent = i18n.t('common.processing');
     btn.removeAttribute('aria-label');
+    syncBillPayButtonState();
     return;
   }
   btn.classList.remove('loading');
@@ -682,6 +702,7 @@ function syncGetOtpButtonState() {
     btn.disabled = true;
     btn.textContent = i18n.t('form.getOtpExhausted');
     btn.setAttribute('aria-label', i18n.t('form.getOtpExhausted'));
+    syncBillPayButtonState();
     return;
   }
 
@@ -689,6 +710,7 @@ function syncGetOtpButtonState() {
     btn.disabled = true;
     btn.textContent = i18n.t('form.getOtpExhausted');
     btn.setAttribute('aria-label', i18n.t('form.getOtpExhausted'));
+    syncBillPayButtonState();
     return;
   }
 
@@ -697,12 +719,14 @@ function syncGetOtpButtonState() {
     const timeLabel = formatSecondsAsMmSs(remainingCooldownSec);
     btn.textContent = timeLabel;
     btn.setAttribute('aria-label', i18n.t('form.getOtpCountdownAria', { time: timeLabel }));
+    syncBillPayButtonState();
     return;
   }
 
   btn.disabled = false;
   btn.textContent = i18n.t('form.getOtp');
   btn.removeAttribute('aria-label');
+  syncBillPayButtonState();
 }
 
 function getExpiryDateForApi() {
@@ -3109,6 +3133,9 @@ function renderBillListSection(bills) {
     }
   } else {
     billSelectorInput.setLabel(i18n.t('bill.selector.title'));
+    billSelectorInput.setPlaceholder(i18n.t('bill.selector.title'));
+    billSelectorInput.setRightActionAriaLabel(i18n.t('bill.selector.title'));
+    billSelectorInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
 
   const dropdownItems = buildBillDropdownItems();
@@ -3323,7 +3350,10 @@ function setPayButtonState(state) {
     } else {
       payButton.textContent = i18n.t('form.pay.securePrefix');
     }
-    payButton.disabled = false;
+    payButton.disabled =
+      isBillTransactionView &&
+      billPayButtonLockedByOtpCooldown &&
+      isCurrentOtpCooldownActive();
   } else if (state === 'disabled') {
     payButton.textContent = i18n.t('form.pay.disabled');
     payButton.disabled = false;
@@ -4249,6 +4279,7 @@ function showBillFlowCompleteSection() {
   const billFlowCompleteSection = document.getElementById('bill-flow-complete-section');
   const paidCountValue = document.getElementById('bill-flow-paid-count-value');
   const unpaidCountValue = document.getElementById('bill-flow-unpaid-count-value');
+  const paidAmountValue = document.getElementById('bill-flow-paid-amount-value');
   const returnValueEl = document.getElementById('bill-flow-return-time-value');
   const returnBtn = document.getElementById('bill-flow-complete-return-button');
   const timerWrap = document.getElementById('bill-flow-return-timer');
@@ -4279,6 +4310,11 @@ function showBillFlowCompleteSection() {
 
   if (paidCountValue) paidCountValue.textContent = String(summary.paidCount);
   if (unpaidCountValue) unpaidCountValue.textContent = String(summary.unpaidCount);
+  if (paidAmountValue) {
+    paidAmountValue.textContent = formatCurrencyAmountLabel(summary.paidAmount, i18n.getLanguage(), (k) =>
+      i18n.t(k)
+    );
+  }
   if (returnBtn) {
     returnBtn.hidden = !getMerchantReturnUrl();
     returnBtn.onclick = () => {
@@ -4607,6 +4643,9 @@ function attachFormEvents() {
         type: 'error',
       });
     } finally {
+      if (isBillTransactionView && isCurrentOtpCooldownActive()) {
+        billPayButtonLockedByOtpCooldown = true;
+      }
       setPayButtonState('active');
       paySubmitInFlight = false;
     }
@@ -4677,6 +4716,9 @@ function revalidateVisibleFormErrorsAfterLanguageChange() {
   otpInput?.revalidateIfShowingError?.();
   mobileInput?.revalidateIfShowingError?.();
   emailInput?.revalidateIfShowingError?.();
+  if (isBillTransactionView) {
+    billSelectorInput?.revalidateIfShowingError?.();
+  }
   const groupErr = document.getElementById('expiry-date-group-error');
   if (
     groupErr &&
@@ -4793,6 +4835,12 @@ function updatePageContent() {
     emailInput.setPlaceholder(i18n.t('form.email.placeholder'));
     emailInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
+  if (isBillTransactionView && billSelectorInput) {
+    billSelectorInput.setLabel(i18n.t('bill.selector.title'));
+    billSelectorInput.setPlaceholder(i18n.t('bill.selector.title'));
+    billSelectorInput.setRightActionAriaLabel(i18n.t('bill.selector.title'));
+    billSelectorInput.setClearButtonAriaLabel(i18n.t('common.clear'));
+  }
 
   // Buttons are now updated via data-i18n above
 
@@ -4839,9 +4887,15 @@ function updatePageContent() {
     const summary = getBillPaymentSummary();
     const paidCountValue = document.getElementById('bill-flow-paid-count-value');
     const unpaidCountValue = document.getElementById('bill-flow-unpaid-count-value');
+    const paidAmountValue = document.getElementById('bill-flow-paid-amount-value');
     const returnValueEl = document.getElementById('bill-flow-return-time-value');
     if (paidCountValue) paidCountValue.textContent = String(summary.paidCount);
     if (unpaidCountValue) unpaidCountValue.textContent = String(summary.unpaidCount);
+    if (paidAmountValue) {
+      paidAmountValue.textContent = formatCurrencyAmountLabel(summary.paidAmount, i18n.getLanguage(), (k) =>
+        i18n.t(k)
+      );
+    }
     if (returnValueEl) {
       returnValueEl.textContent = formatSecondsAsMmSs(Math.max(0, billFlowRemainingSeconds));
     }

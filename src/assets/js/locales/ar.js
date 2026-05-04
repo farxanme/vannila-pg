@@ -232,7 +232,10 @@ export default {
   'bill.flow.completeDescription': 'يمكنك العودة إلى موقع التاجر الآن أو انتظار العودة التلقائية.',
   'bill.flow.summarySectionTitle': 'ملخص دفع الفواتير',
   'bill.flow.summaryPaid': 'عدد الفواتير المدفوعة:',
-  'bill.flow.summaryUnpaid': 'عدد الفواتير غير المدفوعة:',
+  'bill.flow.summaryUnpaid': 'عدد الفواتير غير المدفوعة/الفاشلة:',
+  'bill.flow.summaryPaidAmount': 'إجمالي المبالغ المدفوعة:',
+  'bill.flow.noticeSettlement':
+    'تسوية الفواتير تكون فورية غالبا، لكن قد تتاخر احيانا حتى 48 ساعة بسبب بنية شركة الخدمات. اذا نجحت عملية الدفع فلا داعي للقلق؛ ستتم تسوية الفاتورة.',
   'bill.flow.completeAndReturn': 'إنهاء دفع الفواتير والعودة إلى موقع التاجر',
   'transaction.descriptionExpand': 'عرض الوصف كاملاً',
   'transaction.descriptionCollapse': 'عرض أقل',

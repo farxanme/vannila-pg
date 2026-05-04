@@ -233,7 +233,10 @@ export default {
   'bill.flow.completeDescription': '您现在可以返回商户网站，或等待自动返回。',
   'bill.flow.summarySectionTitle': '账单付款摘要',
   'bill.flow.summaryPaid': '已支付账单数量：',
-  'bill.flow.summaryUnpaid': '未支付账单数量：',
+  'bill.flow.summaryUnpaid': '未支付/失败账单数量：',
+  'bill.flow.summaryPaidAmount': '已支付总金额：',
+  'bill.flow.noticeSettlement':
+    '账单通常会实时结算，但受服务公司基础设施影响，偶尔可能延迟至 48 小时。若您已成功支付，请放心，账单最终都会结算。',
   'bill.flow.completeAndReturn': '完成账单流程并返回商户网站',
   'transaction.descriptionExpand': '显示完整说明',
   'transaction.descriptionCollapse': '收起说明',

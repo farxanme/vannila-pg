@@ -236,7 +236,10 @@ export default {
     'You can return to the merchant website now or wait for automatic return.',
   'bill.flow.summarySectionTitle': 'Bill payment summary',
   'bill.flow.summaryPaid': 'Paid bills count:',
-  'bill.flow.summaryUnpaid': 'Unpaid bills count:',
+  'bill.flow.summaryUnpaid': 'Unpaid/failed bills count:',
+  'bill.flow.summaryPaidAmount': 'Total paid amount:',
+  'bill.flow.noticeSettlement':
+    'Bill settlement is usually instant, but in some cases it can be delayed up to 48 hours due to utility-provider infrastructure. If your payment was successful, your bill will still be settled.',
   'bill.flow.completeAndReturn': 'Complete bill flow and return to merchant website',
   'transaction.descriptionExpand': 'Show full description',
   'transaction.descriptionCollapse': 'Show less',

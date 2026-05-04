@@ -235,7 +235,10 @@ export default {
     'Simdi uye isyeri sitesine donebilir veya otomatik donusu bekleyebilirsiniz.',
   'bill.flow.summarySectionTitle': 'Fatura odeme ozeti',
   'bill.flow.summaryPaid': 'Odenen fatura sayisi:',
-  'bill.flow.summaryUnpaid': 'Odenmeyen fatura sayisi:',
+  'bill.flow.summaryUnpaid': 'Odenmeyen/basarisiz fatura sayisi:',
+  'bill.flow.summaryPaidAmount': 'Toplam odenen tutar:',
+  'bill.flow.noticeSettlement':
+    'Fatura tahsilati genellikle anliktir; ancak hizmet saglayici altyapisi nedeniyle bazi durumlarda 48 saate kadar gecikebilir. Odemeniz basariliysa endise etmeyin, faturaniz yine de tahsil edilir.',
   'bill.flow.completeAndReturn': 'Fatura surecini tamamla ve uye isyeri sitesine don',
   'transaction.descriptionExpand': 'Tam açıklamayı göster',
   'transaction.descriptionCollapse': 'Daha az göster',

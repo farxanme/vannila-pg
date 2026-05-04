@@ -537,7 +537,7 @@
                     <span data-i18n="receipt.autoReturnPrefix"></span>
                     <strong id="bill-flow-return-time-value"></strong>
                   </div>
-                  <p class="receipt-header-notice" data-i18n="receipt.finalizationNotice"></p>
+                  <p class="receipt-header-notice" data-i18n="bill.flow.noticeSettlement"></p>
                 </div>
 
                 <div class="transaction-divider"></div>
@@ -567,16 +567,20 @@
                             >0</span
                           >
                         </div>
+                        <div class="receipt-info-row">
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="bill.flow.summaryPaidAmount"
+                          ></span>
+                          <span class="receipt-info-row-value" id="bill-flow-paid-amount-value"
+                            >0</span
+                          >
+                        </div>
                       </div>
                     </div>
                   </div>
                 </section>
 
-                <div class="transaction-divider"></div>
-
-                <div class="receipt-notice" role="note">
-                  <p data-i18n="receipt.noticePolicy"></p>
-                </div>
               </div>
             </div>
           </section>
@@ -631,6 +635,12 @@
                 <div class="transaction-expired-content">
                   <div id="transaction-expired-empty-root" class="transaction-expired-empty"></div>
                   <div class="transaction-expired-actions">
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      id="transaction-expired-return-button"
+                      data-i18n="timer.returnToMerchant"
+                    ></button>
                     <div
                       class="receipt-return-timer transaction-expired-return-timer"
                       id="transaction-expired-return-timer"
@@ -639,12 +649,6 @@
                       <span data-i18n="receipt.autoReturnPrefix"></span>
                       <strong id="transaction-expired-return-time-value"></strong>
                     </div>
-                    <button
-                      type="button"
-                      class="btn btn-primary"
-                      id="transaction-expired-return-button"
-                      data-i18n="timer.returnToMerchant"
-                    ></button>
                   </div>
                 </div>
               </div>
