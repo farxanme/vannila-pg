@@ -121,6 +121,11 @@ export default {
   'cancelConfirm.confirmLeave': 'Leave payment',
   'form.giftCardNotice':
     'Some bank-issued gift cards do not require a one-time password (OTP). In that case, use the internet password for your gift card.',
+  'form.panProductRestriction.inlineNotice':
+    'For “{{productTitle}}” payments, only cards on this transaction’s allow-list can be used. Other cards cannot complete this payment.',
+  'form.panProductRestriction.invalidCard':
+    'This card is not allowed for “{{productTitle}}” on this transaction. Pick another saved card or enter a card number that matches the rule above.',
+  'form.panProductRestriction.fallbackProduct': 'this payment type',
   'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
 
   // Payment init (SSR session)

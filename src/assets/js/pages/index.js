@@ -15,6 +15,7 @@ import {
   validateMobile,
   validateEmail,
   validateExpiryDate,
+  isMaskedSavedCardPan,
 } from '../utils/validators.js';
 import {
   detectBank,
@@ -34,6 +35,11 @@ import { formatCurrencyAmountLabel, getNumberLocaleForLang } from '../utils/loca
 import { parseTimeSpanToSeconds, formatSecondsAsMmSs } from '../utils/timeFormat.js';
 import { resolveMerchantLogoUrl } from '../utils/merchantAssets.js';
 import { getTransactionTypeInfo } from '../utils/transactionType.js';
+import {
+  resolveActivePanProductRestriction,
+  getPanPrCodeFromDigitString,
+  isPanPrCodeInAllowedSet,
+} from '../utils/prCodesPanLimits.js';
 import { detectBillTypeKey } from '../utils/billDetector.js';
 import { dataStore } from '../services/dataStore.js';
 import { cardService } from '../services/cardService.js';
@@ -112,6 +118,8 @@ const otpCooldownUntilByCardKey = Object.create(null);
 let otpButtonCountdownIntervalId = null;
 let otpRequestInFlight = false;
 let currentTransactionPrCode = null;
+/** When set, only saved cards (and typed PANs) whose digits 7–8 match `PanProductCodes` are allowed. */
+let panProductRestriction = null;
 let currentTransactionPayload = null;
 let isBillTransactionView = false;
 let selectedBillForApi = null;
@@ -176,6 +184,54 @@ function syncOtpFieldTexts() {
     otpInput.options.requiredMessageKey = '';
     otpInput.options.requiredMessage = i18n.t(otpKeys.requiredKey);
   }
+}
+
+function isPanProductRestrictionActive() {
+  return Boolean(panProductRestriction?.allowedPanPrCodes?.size);
+}
+
+function getPanProductTitleForNotice() {
+  if (!panProductRestriction) return '';
+  const lang = i18n.getLanguage();
+  const { title, titleEn } = panProductRestriction;
+  if (lang === 'fa' || lang === 'ar') {
+    return title || titleEn || i18n.t('form.panProductRestriction.fallbackProduct');
+  }
+  return titleEn || title || i18n.t('form.panProductRestriction.fallbackProduct');
+}
+
+function resetPanProductInlineNoticeDom() {
+  const el = document.getElementById('pan-product-inline-notice');
+  if (!el) return;
+  errorHandler.cancelDomMessage(el);
+  el.hidden = true;
+  el.replaceChildren();
+  el.removeAttribute('role');
+  el.className = 'pan-product-inline-notice';
+}
+
+function syncPanProductInlineNotice() {
+  const el = document.getElementById('pan-product-inline-notice');
+  if (!el) return;
+  if (!isPanProductRestrictionActive()) {
+    resetPanProductInlineNoticeDom();
+    return;
+  }
+  el.hidden = false;
+  errorHandler.show({
+    message: i18n.t('form.panProductRestriction.inlineNotice', {
+      productTitle: getPanProductTitleForNotice(),
+    }),
+    mode: 'dom',
+    targetElement: el,
+    type: 'warning',
+    iconFile: 'icn-square-info.svg',
+    domClosable: false,
+    domDuration: 0,
+    domOnDismiss: () => {
+      el.hidden = true;
+    },
+  });
 }
 
 function getBillSelectionKey(bill) {
@@ -1583,7 +1639,28 @@ function initializeFormInputs() {
     required: true,
     requiredMessageKey: 'form.cardNumber.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
-    validator: validateCardNumber,
+    validator: (value) => {
+      const base = validateCardNumber(value);
+      if (!base.valid) return base;
+      if (!isPanProductRestrictionActive()) return base;
+      const raw = (value || '').replace(/\s/g, '');
+      if (isMaskedSavedCardPan(raw)) {
+        return base;
+      }
+      const digits = extractNumbers(value);
+      if (digits.length === 16) {
+        const pr = getPanPrCodeFromDigitString(digits);
+        if (!isPanPrCodeInAllowedSet(pr, panProductRestriction.allowedPanPrCodes)) {
+          return {
+            valid: false,
+            message: i18n.t('form.panProductRestriction.invalidCard', {
+              productTitle: getPanProductTitleForNotice(),
+            }),
+          };
+        }
+      }
+      return base;
+    },
     maxLength: 19, // 16 digits + 3 spaces
     rightAction: hasCardListUi
       ? {
@@ -2529,6 +2606,7 @@ function initializeFormInputs() {
   });
 
   setupPaymentHelpDrawer();
+  syncPanProductInlineNotice();
 }
 
 function updateBankLogo(bank) {
@@ -2701,6 +2779,10 @@ async function initializeTransactionInfo() {
       : txPayload?.appSettings?.prCodesPanLimits?.prCode;
   currentTransactionPrCode =
     typeof prCodeCandidate === 'number' && !Number.isNaN(prCodeCandidate) ? prCodeCandidate : null;
+  panProductRestriction = resolveActivePanProductRestriction(
+    currentTransactionPrCode,
+    txPayload?.appSettings?.prCodesPanLimits
+  );
   const transactionTypeInfo = getTransactionTypeInfo(currentTransactionPrCode, (k) => i18n.t(k));
   const paymentFacilitatorName =
     txPayload?.merchant?.paymentFacilitatorInfo?.merchantName ??
@@ -4797,5 +4879,6 @@ function updatePageContent() {
   // Ensure pay button label uses current language and amount
   setPayButtonState('active');
 
+  syncPanProductInlineNotice();
   revalidateVisibleFormErrorsAfterLanguageChange();
 }

@@ -11,7 +11,7 @@ import { getOtpLengthConfig } from '../config/env.js';
  * Saved-card masked PAN (no spaces): full 16 chars, middle hidden with # / • / *.
  * Examples: 621986######5273, 62198●●●●●●8080 (from API 62198*******8080 shown as •).
  */
-function isMaskedSavedCardPan(raw) {
+export function isMaskedSavedCardPan(raw) {
   if (!raw || raw.length !== 16) return false;
 
   // Legacy: 6 digits + 6 mask (# or •) + 4 digits

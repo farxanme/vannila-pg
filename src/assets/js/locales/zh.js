@@ -129,6 +129,11 @@ export default {
   'cancelConfirm.continuePay': '继续支付',
   'cancelConfirm.confirmLeave': '离开支付',
   'form.giftCardNotice': '部分银行发行的礼品卡无需短信动态验证码；此时请使用礼品卡的网银密码。',
+  'form.panProductRestriction.inlineNotice':
+    '对于「{{productTitle}}」付款，仅允许使用本交易白名单内的银行卡；其他卡无法完成本次付款。',
+  'form.panProductRestriction.invalidCard':
+    '此卡不允许用于本交易的「{{productTitle}}」付款。请选择其他已保存卡，或输入符合上方规则的卡号。',
+  'form.panProductRestriction.fallbackProduct': '此付款方式',
   'form.showReceiptToggle': '接收回执的邮箱或手机号（可选）',
   'form.pay.processing': '正在处理交易...',
   'form.pay.success': '支付成功完成',

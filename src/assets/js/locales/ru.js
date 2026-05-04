@@ -121,6 +121,11 @@ export default {
   'cancelConfirm.confirmLeave': 'Покинуть оплату',
   'form.giftCardNotice':
     'Для некоторых банковских подарочных карт не требуется одноразовый пароль (OTP). В этом случае используйте интернет-пароль этой подарочной карты.',
+  'form.panProductRestriction.inlineNotice':
+    'Для оплаты «{{productTitle}}» можно использовать только карты из списка разрешённых для этой транзакции. Другими картами оплату завершить нельзя.',
+  'form.panProductRestriction.invalidCard':
+    'Эта карта не разрешена для «{{productTitle}}» в этой транзакции. Выберите другую сохранённую карту или введите номер, соответствующий правилу выше.',
+  'form.panProductRestriction.fallbackProduct': 'этот тип оплаты',
   'form.showReceiptToggle': 'Электронная почта или телефон для квитанции (необязательно)',
 
   // Payment init (SSR session)

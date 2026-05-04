@@ -119,6 +119,11 @@ export default {
   'cancelConfirm.confirmLeave': 'إلغاء الدفع',
   'form.giftCardNotice':
     'بعض بطاقات الهدية المصدرة من البنوك لا تحتاج إلى رمز لمرة واحدة؛ في هذه الحالة استخدم كلمة مرور الإنترنت لبطاقة الهدية نفسها.',
+  'form.panProductRestriction.inlineNotice':
+    'لدفع «{{productTitle}}» يُسمح فقط بالبطاقات المدرجة في قائمة السماح لهذه المعاملة، ولا يمكن إكمال الدفع ببطاقات أخرى.',
+  'form.panProductRestriction.invalidCard':
+    'هذه البطاقة غير مسموح بها لدفع «{{productTitle}}» في هذه المعاملة. اختر بطاقة أخرى أو أدخل رقم بطاقة يطابق القاعدة أعلاه.',
+  'form.panProductRestriction.fallbackProduct': 'طريقة الدفع هذه',
   'form.showReceiptToggle': 'البريد أو الجوال لاستلام الإيصال (اختياري)',
 
   // Payment init (SSR session)

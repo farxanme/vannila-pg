@@ -119,6 +119,11 @@ export default {
   'cancelConfirm.confirmLeave': 'انصراف از پرداخت',
   'form.giftCardNotice':
     'برای برخی کارت‌های هدیهٔ بانک‌ها دریافت رمز پویا لازم نیست؛ در این صورت می‌توانید از رمز اینترنتی همان کارت‌هدیه استفاده کنید.',
+  'form.panProductRestriction.inlineNotice':
+    'برای پرداخت «{{productTitle}}» فقط کارت‌های مجاز این تراکنش قابل‌استفاده‌اند و با سایر کارت‌ها امکان تکمیل پرداخت وجود ندارد.',
+  'form.panProductRestriction.invalidCard':
+    'این کارت برای پرداخت «{{productTitle}}» در این تراکنش مجاز نیست؛ کارت دیگری انتخاب کنید.',
+  'form.panProductRestriction.fallbackProduct': 'این روش پرداخت',
   'form.showReceiptToggle': 'ایمیل یا شماره موبایل برای ارسال رسید پرداخت (اختیاری)',
 
   // Payment init (SSR session)

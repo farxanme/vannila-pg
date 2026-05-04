@@ -124,7 +124,12 @@ function buildMockGetTransactionResponse() {
       appSettings: {
         cardViewTimeOut: getMockCardViewTimeout(),
         receiptViewTimeOut: getMockReceiptViewTimeout(),
-        prCodesPanLimits: null,
+        prCodesPanLimits: {
+          prCode: 69,
+          title: 'اوراق گام',
+          titleEn: 'Gam papers',
+          PanProductCodes: ['69'],
+        },
         billsSettings: {
           maxCount: 10,
           staticPinMaxAmount: 1000000,

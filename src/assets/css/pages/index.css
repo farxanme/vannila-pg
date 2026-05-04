@@ -122,17 +122,20 @@ html.app-ready #app .main-content {
   }
 }
 
-.gift-card-inline-notice {
+.gift-card-inline-notice,
+.pan-product-inline-notice {
   margin-top: var(--spacing-xs);
 }
 
 /* Slightly compact inline notice under card field; keeps palette from .error-dom-info */
-.gift-card-inline-notice.error-dom-content {
+.gift-card-inline-notice.error-dom-content,
+.pan-product-inline-notice.error-dom-content {
   font-size: var(--font-size-xs);
   font-weight: 500;
 }
 
-.gift-card-inline-notice.error-dom-content .error-dom-message {
+.gift-card-inline-notice.error-dom-content .error-dom-message,
+.pan-product-inline-notice.error-dom-content .error-dom-message {
   font-size: var(--font-size-xs);
   font-weight: 500;
 }
@@ -311,7 +314,11 @@ html.app-ready #app .main-content {
   box-shadow: none;
 }
 
-[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper .input-container.error.focused {
+[dir='rtl']
+  .captcha-container
+  .captcha-input-cluster
+  .input-wrapper
+  .input-container.error.focused {
   border-color: var(--color-error-300);
   border-left: none;
   border-right: 1px solid var(--color-error-300);

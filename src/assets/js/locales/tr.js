@@ -120,6 +120,11 @@ export default {
   'cancelConfirm.confirmLeave': 'Ödemeyi iptal et',
   'form.giftCardNotice':
     'Bazı banka hediye kartlarında tek kullanımlık şifre (OTP) gerekmez; bu durumda hediye kartınızın internet şifresini kullanabilirsiniz.',
+  'form.panProductRestriction.inlineNotice':
+    '“{{productTitle}}” ödemelerinde yalnızca bu işlemin izin listesindeki kartlar kullanılabilir. Diğer kartlarla bu ödeme tamamlanamaz.',
+  'form.panProductRestriction.invalidCard':
+    'Bu kart bu işlemde “{{productTitle}}” için izinli değil. Başka bir kayıtlı kart seçin veya yukarıdaki kurala uyan bir kart numarası girin.',
+  'form.panProductRestriction.fallbackProduct': 'bu ödeme türü',
   'form.showReceiptToggle': 'Makbuz için e-posta veya cep (isteğe bağlı)',
 
   // Payment init (SSR session)

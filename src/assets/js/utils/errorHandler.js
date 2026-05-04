@@ -71,6 +71,7 @@ class ErrorHandler {
       type = 'error',
       iconFile = null,
       domOnDismiss = null,
+      domClosable = true,
     } = options;
 
     switch (mode) {
@@ -88,6 +89,7 @@ class ErrorHandler {
           this.changeDOM(targetElement, message, type, {
             iconFile,
             duration: domDuration,
+            domClosable: domClosable !== false,
             domOnDismiss: typeof domOnDismiss === 'function' ? domOnDismiss : null,
           });
         }
@@ -257,11 +259,11 @@ class ErrorHandler {
 
   /**
    * Change DOM content (inline alert; icon row, dismiss button, thin progress bar, auto-dismiss with hover pause).
-   * Preserves non–error-dom classes on the target (e.g. gift-card-inline-notice).
+   * Preserves non–error-dom classes on the target (e.g. gift-card-inline-notice, pan-product-inline-notice).
    * @param {HTMLElement} targetElement - Target element
    * @param {string} message - Error message
    * @param {string} type - 'error' | 'warning' | 'info' | 'success'
-   * @param {{ iconFile?: string | null, duration?: number, domOnDismiss?: (() => void) | null }} [domOptions]
+   * @param {{ iconFile?: string | null, duration?: number, domClosable?: boolean, domOnDismiss?: (() => void) | null }} [domOptions]
    */
   changeDOM(targetElement, message, type, domOptions = {}) {
     if (!targetElement) return;
@@ -301,17 +303,21 @@ class ErrorHandler {
     msgEl.className = 'error-dom-message';
     msgEl.textContent = message;
 
-    const closeBtn = document.createElement('button');
-    closeBtn.type = 'button';
-    closeBtn.className = 'error-dom-dismiss';
-    closeBtn.innerHTML = appIconHtml('icn-x.svg', 'error-dom-dismiss-icon');
-    closeBtn.setAttribute('aria-label', i18n.t('common.close'));
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
-    });
-
-    mainRow.append(iconWrap, msgEl, closeBtn);
+    const showDismissButton = domOptions?.domClosable !== false;
+    if (showDismissButton) {
+      const closeBtn = document.createElement('button');
+      closeBtn.type = 'button';
+      closeBtn.className = 'error-dom-dismiss';
+      closeBtn.innerHTML = appIconHtml('icn-x.svg', 'error-dom-dismiss-icon');
+      closeBtn.setAttribute('aria-label', i18n.t('common.close'));
+      closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+      });
+      mainRow.append(iconWrap, msgEl, closeBtn);
+    } else {
+      mainRow.append(iconWrap, msgEl);
+    }
 
     const track = document.createElement('div');
     track.className = 'error-dom-progress-track';
