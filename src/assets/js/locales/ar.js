@@ -17,8 +17,26 @@ export default {
   'network.offline.description': 'بعد عودة الاتصال، ستستمر هذه الصفحة من نفس الحالة السابقة.',
 
   // Redirect
-  'redirect.loading': 'جاري التحويل...',
   'redirect.loadingTitle': 'جاري التحويل إلى موقع التاجر',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': 'مساعدة',
+  'helpDrawer.tablistAriaLabel': 'مواضيع المساعدة',
+  'helpDrawer.tabSecurity': 'نصائح أمنية',
+  'helpDrawer.tabOtp': 'دليل كلمة المرور لمرة واحدة',
+  'helpDrawer.tabPayment': 'دليل الدفع',
+  'helpDrawer.securityBody':
+    'لا تشارك كلمة مرور البطاقة أو CVV2 أو الرموز لمرة واحدة مع أي شخص، بما في ذلك الدعم الهاتفي.\n\n' +
+    'تجنب الدفع على شبكات Wi-Fi عامة أو أجهزة مشتركة. تحقق من عنوان الصفحة واسم التاجر.\n\n' +
+    'أغلق المتصفح عند الانتهاء، خاصة على أجهزة الكمبيوتر المشتركة.',
+  'helpDrawer.otpBody':
+    'اطلب كلمة المرور الديناميكية فقط عندما تكون جاهزاً لتأكيد الدفع.\n\n' +
+    'أدخل الرمز قبل انتهاء صلاحيته. إذا انتهت، اطلب رمزاً جديداً ولا تعد استخدام الرموز القديمة.\n\n' +
+    'إذا وصلت عدة رموز، استخدم الأحدث ولا تعطه لأحد.',
+  'helpDrawer.paymentBody':
+    'أدخل رقم البطاقة وتاريخ الانتهاء وCVV2 بدقة. تحقق من المبلغ واسم التاجر قبل الدفع.\n\n' +
+    'احتفظ بالإيصال بعد نجاح الدفع حتى استلام السلعة أو الخدمة.\n\n' +
+    'إذا بدا شيء غير طبيعي، ألغِ العملية وتواصل مع البنك أو التاجر عبر القنوات الرسمية.',
 
   // Header
   'header.title': 'بوابة الدفع',
@@ -26,8 +44,12 @@ export default {
   // Footer
   'footer.supportPrefix': 'مركز خدمة العملاء على مدار الساعة:',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\nجميع الحقوق المادية والمعنوية محفوظة لصالح سامان للدفع الإلكتروني.',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': 'جميع الحقوق المادية والمعنوية محفوظة لصالح ',
+  'footer.copyrightBrandLink': 'سامان للدفع الإلكتروني',
+  'footer.copyrightLineSecondAfter': '.',
+  'footer.copyrightBrandLinkAriaLabel':
+    'موقع سامان للدفع الإلكتروني، sep.ir — يفتح في علامة تبويب جديدة',
 
   // Form
   'form.cardNumber': 'رقم البطاقة',
@@ -72,12 +94,13 @@ export default {
   'form.pay.securePrefix': 'دفع آمن',
   'form.pay.secureWithAmount': 'دفع آمن ({{amount}} {{currency}})',
   'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
-  'form.pay.processing': 'جارٍ الاتصال بالبنك...',
+  'form.pay.processing': 'جارٍ معالجة المعاملة...',
   'form.pay.success': 'تم الدفع بنجاح',
   'form.cancel': 'إلغاء',
   'form.title': 'أدخل بيانات بطاقتك',
   'form.captcha.placeholder': 'أدخل الرمز',
   'form.captcha.required': 'رمز الأمان مطلوب',
+  'form.captcha.invalidLength': 'يجب أن يتكون رمز الأمان من {{count}} أرقام',
   'form.validation.error': 'يرجى ملء جميع الحقول بشكل صحيح',
   'form.showCards': 'عرض البطاقات',
   'form.virtualPinPad': 'لوحة PIN الافتراضية',
@@ -118,12 +141,13 @@ export default {
   'cardList.addNew': 'إضافة بطاقة جديدة',
   'cardList.manage': 'إدارة البطاقات',
   'cardList.empty': 'لا توجد بطاقة محفوظة للعرض',
+  'cardList.removeNotAllowed': 'لا يمكن إزالة هذه البطاقة.',
+  'cardList.removeSuccess': 'تمت إزالة البطاقة بنجاح.',
 
   // Receipt
   'receipt.success': 'تم الخصم بنجاح',
   'receipt.failed': 'فشل الخصم',
   'receipt.merchant': 'التاجر',
-  'receipt.terminal': 'الطرفية',
   'receipt.share': 'مشاركة',
   'receipt.save': 'حفظ في المعرض',
   'receipt.paymentSuccessDesc': 'تم خصم المبلغ من البطاقة بنجاح.',
@@ -197,6 +221,13 @@ export default {
   'bill.selector.required': 'اختيار الفاتورة مطلوب',
   'bill.hint.payableCount': 'جاهزة للدفع: {{count}}',
   'bill.hint.paidCount': 'مدفوعة: {{count}}',
+  'bill.flow.skipRemaining': 'تخطي دفع بقية الفواتير',
+  'bill.flow.completeTitle': 'اكتملت عملية دفع الفواتير',
+  'bill.flow.completeDescription': 'يمكنك العودة إلى موقع التاجر الآن أو انتظار العودة التلقائية.',
+  'bill.flow.summarySectionTitle': 'ملخص دفع الفواتير',
+  'bill.flow.summaryPaid': 'عدد الفواتير المدفوعة:',
+  'bill.flow.summaryUnpaid': 'عدد الفواتير غير المدفوعة:',
+  'bill.flow.completeAndReturn': 'إنهاء دفع الفواتير والعودة إلى موقع التاجر',
   'transaction.descriptionExpand': 'عرض الوصف كاملاً',
   'transaction.descriptionCollapse': 'عرض أقل',
   'transaction.type.balance': 'استعلام الرصيد',

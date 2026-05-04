@@ -17,8 +17,26 @@ export default {
   'network.offline.description': 'Baglanti geri geldiginde bu sayfa kaldiginiz yerden devam eder.',
 
   // Redirect
-  'redirect.loading': 'Yönlendiriliyor...',
   'redirect.loadingTitle': 'Satici sitesine yonlendiriliyor',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': 'Yardim',
+  'helpDrawer.tablistAriaLabel': 'Yardim konulari',
+  'helpDrawer.tabSecurity': 'Guvenlik ipuclari',
+  'helpDrawer.tabOtp': 'Dinamik sifre (OTP)',
+  'helpDrawer.tabPayment': 'Odeme rehberi',
+  'helpDrawer.securityBody':
+    'Kart sifrenizi, CVV2 ve tek kullanimlik kodlari kimseyle paylasmayin; telefonla arayan destek dahil.\n\n' +
+    'Halka acik Wi-Fi ve paylasilan cihazlarda odeme yapmayin. Sayfa adresi ve satici adini kontrol edin.\n\n' +
+    'Isiniz bitince tarayiciyi kapatin; ozellikle paylasilan bilgisayarlarda.',
+  'helpDrawer.otpBody':
+    'Dinamik sifreyi yalnizca odemeyi onaylamaya hazir oldugunuzda isteyin.\n\n' +
+    'Kodu suresi dolmadan girin. Suresi dolduysa yeni kod alin; eski kodlari kullanmayin.\n\n' +
+    'Birden fazla kod geldiyse en sonuncusunu kullanin ve kimseye soylemeyin.',
+  'helpDrawer.paymentBody':
+    'Kart numarasi, son kullanma ve CVV2 bilgilerini dikkatle girin. Tutari ve saticiyi odemeden once dogrulayin.\n\n' +
+    'Basarili odemeden sonra dekontu urun veya hizmet teslimine kadar saklayin.\n\n' +
+    'Bir sey yanlis gorunuyorsa islemi iptal edin; resmi kanallardan banka veya saticiya danisin.',
 
   // Header
   'header.title': 'Ödeme Ağ Geçidi',
@@ -26,8 +44,12 @@ export default {
   // Footer
   'footer.supportPrefix': '7/24 musteri iletisim merkezi:',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\nTum maddi ve manevi haklar Saman Electronic Payment icin saklidir.',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': 'Tum maddi ve manevi haklar ',
+  'footer.copyrightBrandLink': 'Saman Electronic Payment',
+  'footer.copyrightLineSecondAfter': ' icin saklidir.',
+  'footer.copyrightBrandLinkAriaLabel':
+    'Saman Electronic Payment web sitesi, sep.ir — yeni sekmede acilir',
 
   // Form
   'form.cardNumber': 'Kart Numarası',
@@ -72,12 +94,13 @@ export default {
   'form.pay.securePrefix': 'Güvenli ödeme',
   'form.pay.secureWithAmount': 'Güvenli ödeme ({{amount}} {{currency}})',
   'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
-  'form.pay.processing': 'Banka ile bağlantı kuruluyor...',
+  'form.pay.processing': 'İşlem işleniyor...',
   'form.pay.success': 'Ödeme başarıyla tamamlandı',
   'form.cancel': 'İptal',
   'form.title': 'Kart bilgilerinizi girin',
   'form.captcha.placeholder': 'Kodu girin',
   'form.captcha.required': 'Guvenlik kodu gereklidir',
+  'form.captcha.invalidLength': 'Guvenlik kodu {{count}} haneli olmalidir',
   'form.validation.error': 'Lütfen tüm alanları doğru şekilde doldurun',
   'form.showCards': 'Kartları göster',
   'form.virtualPinPad': 'Sanal PIN pad',
@@ -120,12 +143,13 @@ export default {
   'cardList.addNew': 'Yeni Kart Ekle',
   'cardList.manage': 'Kartları Yönet',
   'cardList.empty': 'Gösterilecek kayıtlı kart yok',
+  'cardList.removeNotAllowed': 'Bu kart kaldırılamaz.',
+  'cardList.removeSuccess': 'Kart başarıyla kaldırıldı.',
 
   // Receipt
   'receipt.success': 'Bakiye Düşümü Başarılı',
   'receipt.failed': 'Bakiye Düşümü Başarısız',
   'receipt.merchant': 'Uye Isyeri',
-  'receipt.terminal': 'Terminal',
   'receipt.share': 'Paylaş',
   'receipt.save': 'Galeriye Kaydet',
   'receipt.paymentSuccessDesc': 'Karttan tutar başarıyla düşüldü.',
@@ -199,6 +223,14 @@ export default {
   'bill.selector.required': 'Fatura secimi zorunludur',
   'bill.hint.payableCount': 'Odeme icin hazir: {{count}}',
   'bill.hint.paidCount': 'Odendi: {{count}}',
+  'bill.flow.skipRemaining': 'Kalan faturalari atla',
+  'bill.flow.completeTitle': 'Fatura odeme sureci tamamlandi',
+  'bill.flow.completeDescription':
+    'Simdi uye isyeri sitesine donebilir veya otomatik donusu bekleyebilirsiniz.',
+  'bill.flow.summarySectionTitle': 'Fatura odeme ozeti',
+  'bill.flow.summaryPaid': 'Odenen fatura sayisi:',
+  'bill.flow.summaryUnpaid': 'Odenmeyen fatura sayisi:',
+  'bill.flow.completeAndReturn': 'Fatura surecini tamamla ve uye isyeri sitesine don',
   'transaction.descriptionExpand': 'Tam açıklamayı göster',
   'transaction.descriptionCollapse': 'Daha az göster',
   'transaction.type.balance': 'Bakiye Sorgulama',

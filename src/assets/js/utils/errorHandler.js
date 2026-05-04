@@ -3,10 +3,32 @@
  * Supports 3 modes: Toast, Page Element, DOM Change
  */
 import { appIconHtml } from './icons.js';
+import { i18n } from './i18n.js';
+
+/**
+ * Monochrome icon file for toast type (mask + theme color in CSS).
+ * @param {string} type
+ * @returns {string}
+ */
+function getToastIconFileForType(type) {
+  switch (type) {
+    case 'success':
+      return 'icn-square-check.svg';
+    case 'warning':
+      return 'icn-square-minus.svg';
+    case 'info':
+      return 'icn-square-info.svg';
+    case 'error':
+    default:
+      return 'icn-x.svg';
+  }
+}
 
 class ErrorHandler {
   constructor() {
     this.toastContainer = null;
+    /** @type {WeakMap<HTMLElement, { timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean }>} */
+    this.domMessageLifecycle = new WeakMap();
     this.initToastContainer();
   }
 
@@ -33,8 +55,11 @@ class ErrorHandler {
    * @param {string} options.mode - Display mode: 'toast', 'element', 'dom'
    * @param {string} options.elementId - Element ID for 'element' mode
    * @param {HTMLElement} options.targetElement - Target element for 'dom' mode
-   * @param {number} options.duration - Duration in ms (for toast)
-   * @param {string} options.type - Error type: 'error', 'warning', 'info'
+   * @param {number} options.duration - Duration in ms (toast auto-dismiss; for dom, used when `domDuration` omitted)
+   * @param {number} [options.domDuration] - Dom-only: ms until auto-dismiss (0 = no timer or progress bar; if omitted, uses `duration` when positive, otherwise 8000)
+   * @param {string} options.type - Toast/inline type: 'error', 'warning', 'info', 'success'
+   * @param {string} [options.iconFile] - Optional icon filename under `/assets/images/icons/` (SVG mask). Overrides default icon for `toast` and `dom`.
+   * @param {() => void} [options.domOnDismiss] - Called after dom message is cleared (auto, close button, or cancelDomMessage).
    */
   show(options) {
     const {
@@ -44,11 +69,13 @@ class ErrorHandler {
       targetElement = null,
       duration = 5000,
       type = 'error',
+      iconFile = null,
+      domOnDismiss = null,
     } = options;
 
     switch (mode) {
       case 'toast':
-        this.showToast(message, duration, type);
+        this.showToast(message, duration, type, iconFile);
         break;
       case 'element':
         if (elementId) {
@@ -57,7 +84,12 @@ class ErrorHandler {
         break;
       case 'dom':
         if (targetElement) {
-          this.changeDOM(targetElement, message, type);
+          const domDuration = options.domDuration ?? (duration > 0 ? duration : 8000);
+          this.changeDOM(targetElement, message, type, {
+            iconFile,
+            duration: domDuration,
+            domOnDismiss: typeof domOnDismiss === 'function' ? domOnDismiss : null,
+          });
         }
         break;
       default:
@@ -66,20 +98,50 @@ class ErrorHandler {
   }
 
   /**
+   * @param {string | null | undefined} iconFileOverride - SVG filename in icons dir, or null for type default
+   */
+  resolveToastIconFile(type, iconFileOverride) {
+    if (typeof iconFileOverride === 'string' && iconFileOverride.trim() !== '') {
+      return iconFileOverride.trim();
+    }
+    return getToastIconFileForType(type);
+  }
+
+  /**
    * Show toast notification
    * @param {string} message - Error message
    * @param {number} duration - Duration in ms
    * @param {string} type - Error type
+   * @param {string | null | undefined} iconFileOverride - optional custom lead icon (SVG filename)
    */
-  showToast(message, duration, type) {
+  showToast(message, duration, type, iconFileOverride) {
+    const normalizedType = ['error', 'warning', 'info', 'success'].includes(type) ? type : 'error';
     const toast = document.createElement('div');
-    toast.className = `error-toast error-toast-${type}`;
+    toast.className = `error-toast error-toast-${normalizedType}`;
     toast.setAttribute('role', 'alert');
-    toast.textContent = message;
 
-    // Add close button
+    const inner = document.createElement('div');
+    inner.className = 'error-toast-inner';
+
+    const iconWrap = document.createElement('span');
+    iconWrap.className = 'error-toast-icon-wrap';
+    iconWrap.setAttribute('aria-hidden', 'true');
+    iconWrap.innerHTML = appIconHtml(
+      this.resolveToastIconFile(normalizedType, iconFileOverride),
+      'error-toast-lead-icon'
+    );
+
+    const msgEl = document.createElement('span');
+    msgEl.className = 'error-toast-message';
+    msgEl.textContent = message;
+
+    inner.appendChild(iconWrap);
+    inner.appendChild(msgEl);
+    toast.appendChild(inner);
+
     const closeBtn = document.createElement('button');
     closeBtn.className = 'error-toast-close';
+    closeBtn.type = 'button';
     closeBtn.innerHTML = appIconHtml('icn-x.svg');
     closeBtn.setAttribute('aria-label', 'Close');
     closeBtn.onclick = () => this.removeToast(toast);
@@ -143,17 +205,177 @@ class ErrorHandler {
   }
 
   /**
-   * Change DOM content
+   * Stop dom message timer / listeners without removing content (use before replacing same target).
+   * @param {HTMLElement} targetElement
+   */
+  cancelDomMessage(targetElement) {
+    if (!targetElement) return;
+    const state = this.domMessageLifecycle.get(targetElement);
+    if (!state) return;
+    if (state.timeoutId != null) {
+      window.clearTimeout(state.timeoutId);
+      state.timeoutId = null;
+    }
+    if (typeof state.onEnter === 'function') {
+      targetElement.removeEventListener('mouseenter', state.onEnter);
+    }
+    if (typeof state.onLeave === 'function') {
+      targetElement.removeEventListener('mouseleave', state.onLeave);
+    }
+    this.domMessageLifecycle.delete(targetElement);
+  }
+
+  /**
+   * @param {HTMLElement} el
+   */
+  stripErrorDomSurfaceClasses(el) {
+    if (!el) return;
+    el.classList.remove(
+      'error-dom-content',
+      'error-dom-error',
+      'error-dom-warning',
+      'error-dom-info',
+      'error-dom-success'
+    );
+  }
+
+  /**
+   * Clear dom inline message UI and optional callback.
+   * @param {HTMLElement} targetElement
+   * @param {{ domOnDismiss?: (() => void) | null }} [opts]
+   */
+  finishDomMessage(targetElement, opts = {}) {
+    if (!targetElement) return;
+    this.cancelDomMessage(targetElement);
+    this.stripErrorDomSurfaceClasses(targetElement);
+    targetElement.replaceChildren();
+    targetElement.removeAttribute('role');
+    if (typeof opts.domOnDismiss === 'function') {
+      opts.domOnDismiss();
+    }
+  }
+
+  /**
+   * Change DOM content (inline alert; icon row, dismiss button, thin progress bar, auto-dismiss with hover pause).
+   * Preserves non–error-dom classes on the target (e.g. gift-card-inline-notice).
    * @param {HTMLElement} targetElement - Target element
    * @param {string} message - Error message
-   * @param {string} type - Error type
+   * @param {string} type - 'error' | 'warning' | 'info' | 'success'
+   * @param {{ iconFile?: string | null, duration?: number, domOnDismiss?: (() => void) | null }} [domOptions]
    */
-  changeDOM(targetElement, message, type) {
+  changeDOM(targetElement, message, type, domOptions = {}) {
     if (!targetElement) return;
 
-    targetElement.className = `error-dom-content error-dom-${type}`;
-    targetElement.textContent = message;
+    this.cancelDomMessage(targetElement);
+
+    const normalizedType = ['error', 'warning', 'info', 'success'].includes(type) ? type : 'error';
+    const variantClasses = ['error', 'warning', 'info', 'success'].map((t) => `error-dom-${t}`);
+
+    targetElement.classList.add('error-dom-content');
+    targetElement.classList.remove(...variantClasses);
+    targetElement.classList.add(`error-dom-${normalizedType}`);
     targetElement.setAttribute('role', 'alert');
+
+    const durationMs =
+      typeof domOptions.duration === 'number' && domOptions.duration >= 0
+        ? domOptions.duration
+        : 8000;
+    const useTimer = durationMs > 0;
+    const onDismiss =
+      typeof domOptions.domOnDismiss === 'function' ? domOptions.domOnDismiss : null;
+
+    const iconFile = this.resolveToastIconFile(normalizedType, domOptions?.iconFile);
+
+    const inner = document.createElement('div');
+    inner.className = 'error-dom-inner';
+
+    const mainRow = document.createElement('div');
+    mainRow.className = 'error-dom-main-row';
+
+    const iconWrap = document.createElement('span');
+    iconWrap.className = 'error-dom-icon-wrap';
+    iconWrap.setAttribute('aria-hidden', 'true');
+    iconWrap.innerHTML = appIconHtml(iconFile, 'error-dom-lead-icon');
+
+    const msgEl = document.createElement('span');
+    msgEl.className = 'error-dom-message';
+    msgEl.textContent = message;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'error-dom-dismiss';
+    closeBtn.innerHTML = appIconHtml('icn-x.svg', 'error-dom-dismiss-icon');
+    closeBtn.setAttribute('aria-label', i18n.t('common.close'));
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+    });
+
+    mainRow.append(iconWrap, msgEl, closeBtn);
+
+    const track = document.createElement('div');
+    track.className = 'error-dom-progress-track';
+    track.setAttribute('aria-hidden', 'true');
+    const fill = document.createElement('div');
+    fill.className = 'error-dom-progress-fill';
+    if (useTimer) {
+      fill.style.setProperty('--error-dom-progress-ms', `${durationMs}ms`);
+    } else {
+      track.hidden = true;
+    }
+    track.appendChild(fill);
+
+    inner.append(mainRow, track);
+    targetElement.replaceChildren(inner);
+
+    if (!useTimer) {
+      return;
+    }
+
+    let deadline = Date.now() + durationMs;
+
+    /** @type {{ timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean }} */
+    const state = {
+      timeoutId: null,
+      onEnter: () => {},
+      onLeave: () => {},
+      useTimer: true,
+    };
+
+    const clearTimer = () => {
+      if (state.timeoutId != null) {
+        window.clearTimeout(state.timeoutId);
+        state.timeoutId = null;
+      }
+    };
+
+    const scheduleDismiss = (ms) => {
+      clearTimer();
+      const delay = Math.max(0, Math.ceil(ms));
+      if (delay === 0) {
+        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+        return;
+      }
+      state.timeoutId = window.setTimeout(() => {
+        state.timeoutId = null;
+        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+      }, delay);
+    };
+
+    state.onEnter = () => {
+      clearTimer();
+    };
+
+    state.onLeave = () => {
+      const remaining = Math.max(0, deadline - Date.now());
+      deadline = Date.now() + remaining;
+      scheduleDismiss(remaining);
+    };
+
+    this.domMessageLifecycle.set(targetElement, state);
+    targetElement.addEventListener('mouseenter', state.onEnter);
+    targetElement.addEventListener('mouseleave', state.onLeave);
+    scheduleDismiss(durationMs);
   }
 
   /**

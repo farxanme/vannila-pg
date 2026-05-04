@@ -67,10 +67,10 @@
         <div class="container">
           <!-- Checkout flow (two-column grid) -->
           <section id="payment-flow-section" class="payment-flow-section">
-            <div class="card payment-main-card">
+            <div class="payment-main-card">
               <div class="grid grid-2-col">
                 <!-- Large Section (2/3) -->
-                <div class="card-large">
+                <div class="card card-large">
                   <div class="card-header">
                     <h2 class="card-title" data-i18n="form.title"></h2>
                     <button
@@ -152,6 +152,13 @@
                         <button
                           type="button"
                           class="btn btn-primary btn-bordered"
+                          id="bill-skip-button"
+                          data-i18n="bill.flow.skipRemaining"
+                          hidden
+                        ></button>
+                        <button
+                          type="button"
+                          class="btn btn-primary btn-bordered"
                           id="cancel-button"
                           data-i18n="form.cancel"
                         ></button>
@@ -193,7 +200,7 @@
                 </div>
 
                 <!-- Small Section (1/3) -->
-                <div class="card-small">
+                <div class="card card-small">
                   <div class="card-header" id="timer-header">
                     <h2 class="card-title" data-i18n="timer.title"></h2>
                     <div id="timer-container" class="timer">
@@ -486,6 +493,89 @@
             </div>
           </section>
 
+          <!-- Bill flow completion screen (summary only; same shell as payment receipt) -->
+          <section
+            id="bill-flow-complete-section"
+            class="init-error-section payment-receipt-section"
+            hidden
+            aria-labelledby="bill-flow-complete-title"
+          >
+            <div class="init-error-container receipt-container">
+              <div class="card init-error-card" id="bill-flow-complete-card">
+                <div class="receipt-header">
+                  <span
+                    class="receipt-status-icon app-icon"
+                    id="bill-flow-complete-status-icon"
+                    aria-hidden="true"
+                  ></span>
+                  <h1
+                    class="receipt-title"
+                    id="bill-flow-complete-title"
+                    data-i18n="bill.flow.completeTitle"
+                  ></h1>
+                  <p
+                    class="receipt-subtitle"
+                    id="bill-flow-complete-subtitle"
+                    data-i18n="bill.flow.completeDescription"
+                  ></p>
+                  <div class="receipt-header-actions">
+                    <button
+                      type="button"
+                      class="btn btn-primary receipt-complete-button"
+                      id="bill-flow-complete-return-button"
+                    >
+                      <span data-i18n="bill.flow.completeAndReturn"></span>
+                    </button>
+                  </div>
+                  <div class="receipt-return-timer" id="bill-flow-return-timer" hidden>
+                    <span class="timer-progress" aria-hidden="true"></span>
+                    <span data-i18n="receipt.autoReturnPrefix"></span>
+                    <strong id="bill-flow-return-time-value"></strong>
+                  </div>
+                  <p class="receipt-header-notice" data-i18n="receipt.finalizationNotice"></p>
+                </div>
+
+                <div class="transaction-divider"></div>
+
+                <section class="receipt-main-grid">
+                  <div class="receipt-main-grid-header">
+                    <h2 data-i18n="bill.flow.summarySectionTitle"></h2>
+                  </div>
+                  <div class="receipt-main-grid-columns" data-columns="1">
+                    <div class="receipt-info-column">
+                      <div class="receipt-info-rows">
+                        <div class="receipt-info-row">
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="bill.flow.summaryPaid"
+                          ></span>
+                          <span class="receipt-info-row-value" id="bill-flow-paid-count-value"
+                            >0</span
+                          >
+                        </div>
+                        <div class="receipt-info-row">
+                          <span
+                            class="receipt-info-row-label"
+                            data-i18n="bill.flow.summaryUnpaid"
+                          ></span>
+                          <span class="receipt-info-row-value" id="bill-flow-unpaid-count-value"
+                            >0</span
+                          >
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </section>
+
+                <div class="transaction-divider"></div>
+
+                <div class="receipt-notice" role="note">
+                  <p data-i18n="receipt.noticePolicy"></p>
+                </div>
+              </div>
+            </div>
+          </section>
+
           <!-- Init error: single main column -->
           <section
             id="payment-init-error-section"
@@ -534,18 +624,23 @@
             <div class="init-error-container">
               <div class="card transaction-expired-card">
                 <div class="transaction-expired-content">
-                  <h2 id="transaction-expired-title" data-i18n="timer.transactionExpiredTitle"></h2>
-                  <p data-i18n="timer.transactionExpiredDescription"></p>
-                  <p class="transaction-expired-countdown-text">
-                    <span data-i18n="receipt.autoReturnPrefix"></span>
-                    <strong id="transaction-expired-return-time-value"></strong>
-                  </p>
-                  <button
-                    type="button"
-                    class="btn btn-primary"
-                    id="transaction-expired-return-button"
-                    data-i18n="timer.returnToMerchant"
-                  ></button>
+                  <div id="transaction-expired-empty-root" class="transaction-expired-empty"></div>
+                  <div class="transaction-expired-actions">
+                    <div
+                      class="receipt-return-timer transaction-expired-return-timer"
+                      id="transaction-expired-return-timer"
+                    >
+                      <span class="timer-progress" aria-hidden="true"></span>
+                      <span data-i18n="receipt.autoReturnPrefix"></span>
+                      <strong id="transaction-expired-return-time-value"></strong>
+                    </div>
+                    <button
+                      type="button"
+                      class="btn btn-primary"
+                      id="transaction-expired-return-button"
+                      data-i18n="timer.returnToMerchant"
+                    ></button>
+                  </div>
                 </div>
               </div>
             </div>

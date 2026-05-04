@@ -22,8 +22,26 @@ export default {
   'network.offline.description': '网络恢复后，本页面将从中断处继续。',
 
   // Redirect
-  'redirect.loading': '正在跳转...',
   'redirect.loadingTitle': '正在跳转到商户网站',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': '帮助',
+  'helpDrawer.tablistAriaLabel': '帮助主题',
+  'helpDrawer.tabSecurity': '安全提示',
+  'helpDrawer.tabOtp': '动态密码（OTP）',
+  'helpDrawer.tabPayment': '支付说明',
+  'helpDrawer.securityBody':
+    '切勿向任何人透露银行卡密码、CVV2 或一次性验证码，包括自称客服的来电。\n\n' +
+    '避免在公共 Wi-Fi 或他人设备上支付；请核对页面地址与商户名称。\n\n' +
+    '使用完毕请关闭浏览器，尤其在公共电脑上。',
+  'helpDrawer.otpBody':
+    '仅在准备最终确认支付时再获取动态密码。\n\n' +
+    '请在有效期内输入验证码；若已过期请重新获取，勿重复使用旧码。\n\n' +
+    '若收到多条验证码，请使用最新一条，且勿告知他人。',
+  'helpDrawer.paymentBody':
+    '请仔细填写卡号、有效期与 CVV2；支付前核对金额与商户名称。\n\n' +
+    '支付成功后请保留收据，直至收到商品或服务。\n\n' +
+    '如发现异常，请取消支付并通过银行或商户官方渠道咨询。',
 
   // Header
   'header.title': '网络支付网关',
@@ -31,8 +49,12 @@ export default {
   // Footer
   'footer.supportPrefix': '7x24 客户支持中心：',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\n所有资料与知识产权均归 Saman Electronic Payment 所有。',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': '所有资料与知识产权均归 ',
+  'footer.copyrightBrandLink': 'Saman Electronic Payment',
+  'footer.copyrightLineSecondAfter': ' 所有。',
+  'footer.copyrightBrandLinkAriaLabel':
+    'Saman Electronic Payment 官方网站，sep.ir — 在新标签页打开',
 
   // Accessibility
   'accessibility.selectLanguage': '选择语言',
@@ -93,6 +115,7 @@ export default {
   'form.getOtpCountdownAria': '请等待 {{time}} 后再请求动态密码',
   'form.captcha.placeholder': '输入验证码',
   'form.captcha.required': '安全验证码为必填项',
+  'form.captcha.invalidLength': '安全验证码必须为 {{count}} 位数字',
   'form.validation.error': '请正确填写所有字段',
   'form.showCards': '显示银行卡',
   'form.virtualPinPad': '虚拟密码键盘',
@@ -107,7 +130,7 @@ export default {
   'cancelConfirm.confirmLeave': '离开支付',
   'form.giftCardNotice': '这是礼品卡',
   'form.showReceiptToggle': '接收回执的邮箱或手机号（可选）',
-  'form.pay.processing': '正在连接银行...',
+  'form.pay.processing': '正在处理交易...',
   'form.pay.success': '支付成功完成',
 
   // Payment init (SSR session)
@@ -121,12 +144,13 @@ export default {
   'cardList.addNew': '添加新银行卡',
   'cardList.manage': '管理银行卡',
   'cardList.empty': '暂无可显示的已保存银行卡',
+  'cardList.removeNotAllowed': '无法移除此银行卡。',
+  'cardList.removeSuccess': '银行卡已移除。',
 
   // Receipt
   'receipt.success': '扣款成功',
   'receipt.failed': '扣款失败',
   'receipt.merchant': '商户',
-  'receipt.terminal': '终端',
   'receipt.share': '分享',
   'receipt.save': '保存到相册',
   'receipt.paymentSuccessDesc': '已成功从银行卡完成扣款。',
@@ -199,6 +223,13 @@ export default {
   'bill.selector.required': '必须选择账单',
   'bill.hint.payableCount': '可支付: {{count}}',
   'bill.hint.paidCount': '已支付: {{count}}',
+  'bill.flow.skipRemaining': '跳过剩余账单支付',
+  'bill.flow.completeTitle': '账单支付流程已完成',
+  'bill.flow.completeDescription': '您现在可以返回商户网站，或等待自动返回。',
+  'bill.flow.summarySectionTitle': '账单付款摘要',
+  'bill.flow.summaryPaid': '已支付账单数量：',
+  'bill.flow.summaryUnpaid': '未支付账单数量：',
+  'bill.flow.completeAndReturn': '完成账单流程并返回商户网站',
   'transaction.descriptionExpand': '显示完整说明',
   'transaction.descriptionCollapse': '收起说明',
   'transaction.type.balance': '余额查询',

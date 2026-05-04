@@ -1,11 +1,14 @@
 /**
  * Shared Footer Component
  */
+import { i18n } from '../utils/i18n.js';
+
+const sepSiteUrl = 'https://sep.ir';
+
 export class Footer {
   constructor(options = {}) {
     this.options = {
       logo: options.logo || null,
-      copyright: options.copyright || '',
       supportPrefix: options.supportPrefix || '',
       supportPhone: options.supportPhone || '',
       ...options,
@@ -66,13 +69,11 @@ export class Footer {
       container.appendChild(support);
     }
 
-    // Copyright
-    if (this.options.copyright) {
-      const copyright = document.createElement('div');
-      copyright.className = 'footer-copyright';
-      copyright.textContent = this.options.copyright;
-      container.appendChild(copyright);
-    }
+    // Copyright (second line includes brand link to sep.ir, new tab)
+    const copyright = document.createElement('div');
+    copyright.className = 'footer-copyright';
+    this.fillCopyrightFromI18n(copyright);
+    container.appendChild(copyright);
 
     footer.appendChild(container);
     this.element = footer;
@@ -80,13 +81,41 @@ export class Footer {
   }
 
   /**
-   * Update copyright text
-   * @param {string} text - New copyright text
+   * Renders copyright lines from i18n (brand name links to sep.ir in a new tab).
+   * @param {HTMLElement} container
    */
-  updateCopyright(text) {
+  fillCopyrightFromI18n(container) {
+    if (!container) return;
+    container.replaceChildren();
+
+    const line1 = document.createElement('div');
+    line1.className = 'footer-copyright-line footer-copyright-line-first';
+    line1.textContent = i18n.t('footer.copyrightLineFirst');
+
+    const line2 = document.createElement('div');
+    line2.className = 'footer-copyright-line footer-copyright-line-second';
+    line2.append(document.createTextNode(i18n.t('footer.copyrightLineSecondBefore')));
+
+    const brandLink = document.createElement('a');
+    brandLink.className = 'footer-copyright-brand-link';
+    brandLink.href = sepSiteUrl;
+    brandLink.target = '_blank';
+    brandLink.rel = 'noopener noreferrer';
+    brandLink.textContent = i18n.t('footer.copyrightBrandLink');
+    brandLink.setAttribute('aria-label', i18n.t('footer.copyrightBrandLinkAriaLabel'));
+    line2.appendChild(brandLink);
+    line2.append(document.createTextNode(i18n.t('footer.copyrightLineSecondAfter')));
+
+    container.append(line1, line2);
+  }
+
+  /**
+   * Refresh copyright block after language change.
+   */
+  updateCopyright() {
     const copyrightElement = this.element?.querySelector('.footer-copyright');
     if (copyrightElement) {
-      copyrightElement.textContent = text;
+      this.fillCopyrightFromI18n(copyrightElement);
     }
   }
 

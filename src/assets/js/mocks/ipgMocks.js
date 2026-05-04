@@ -16,7 +16,7 @@ function buildMockBills() {
       payId: '1210017',
       amount: 12000,
       paymentReceipt: null,
-      hasReceipt: true,
+      hasReceipt: false,
     },
     {
       id: 17,
@@ -252,6 +252,13 @@ export const mockReceiptRedirectParamsResponse = {
 };
 
 export const mockCancelTransactionResponse = {
+  data: {},
+  statusCode: 2000,
+  statusTitle: 'Success',
+  validationErrors: [],
+};
+
+export const mockDeActiveUserCardResponse = {
   data: {},
   statusCode: 2000,
   statusTitle: 'Success',

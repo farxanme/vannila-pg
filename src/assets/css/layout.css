@@ -570,12 +570,27 @@
 }
 
 .footer-copyright {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   font-size: var(--font-size-xs);
   color: var(--color-footer-copyright);
   font-family: var(--font-family-vazirmatn);
   text-align: center;
-  white-space: pre-line;
-  line-height: 1.8;
+}
+
+.footer-copyright-line {
+  max-width: 100%;
+}
+
+.footer-copyright-brand-link {
+  color: var(--color-footer-copyright);
+  font-weight: 600;
+  text-underline-offset: 2px;
+}
+
+.footer-copyright-brand-link:hover {
+  color: var(--color-footer-contact);
 }
 
 .footer-support {
@@ -709,13 +724,39 @@
 }
 
 .form-actions {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--spacing-md);
+  align-items: stretch;
 }
 
 .form-actions .btn {
   width: 100%;
+}
+
+.form-actions #pay-button {
+  grid-column: 1 / -1;
+}
+
+.form-actions #bill-skip-button,
+.form-actions #cancel-button {
+  grid-column: span 1;
+}
+
+.form-actions #bill-skip-button[hidden] {
+  display: none !important;
+}
+
+.form-actions:has(#bill-skip-button[hidden]) #cancel-button {
+  grid-column: 1 / -1;
+}
+
+[dir='rtl'] .form-actions {
+  direction: rtl;
+}
+
+[dir='ltr'] .form-actions {
+  direction: ltr;
 }
 
 /* Badge */

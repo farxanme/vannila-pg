@@ -17,8 +17,26 @@ export default {
   'network.offline.description': 'پس از اتصال مجدد اینترنت، ادامه همین صفحه نمایش داده می‌شود.',
 
   // Redirect
-  'redirect.loading': 'در حال انتقال...',
   'redirect.loadingTitle': 'در حال انتقال به سایت پذیرنده',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': 'راهنما',
+  'helpDrawer.tablistAriaLabel': 'موضوعات راهنما',
+  'helpDrawer.tabSecurity': 'نکات امنیتی',
+  'helpDrawer.tabOtp': 'راهنمای استفاده از رمز پویا',
+  'helpDrawer.tabPayment': 'راهنمای پرداخت',
+  'helpDrawer.securityBody':
+    'رمز کارت، CVV2 و رمز یک‌بارمصرف را با هیچ‌کس، حتی پشتیبانی تلفنی، به اشتراک نگذارید.\n\n' +
+    'از پرداخت در شبکه‌های عمومی، وای‌فای باز و دستگاه‌های مشترک خودداری کنید. آدرس صفحه و نام پذیرنده را با خرید خود مقایسه کنید.\n\n' +
+    'پس از اتمام کار، مخصوصاً در رایانه مشترک، مرورگر را ببندید یا خارج شوید.',
+  'helpDrawer.otpBody':
+    'رمز پویا را فقط زمانی درخواست کنید که آماده تأیید نهایی پرداخت هستید.\n\n' +
+    'کد را پیش از اتمام اعتبار در فیلد مربوطه وارد کنید. در صورت انقضا، کد جدید بگیرید و از کدهای قبلی استفاده نکنید.\n\n' +
+    'اگر چند کد دریافت کردید، آخرین کد معتبر را وارد کنید و آن را در اختیار دیگران قرار ندهید.',
+  'helpDrawer.paymentBody':
+    'شماره کارت، تاریخ انقضا و CVV2 را با دقت وارد کنید. مبلغ و نام پذیرنده را قبل از پرداخت بررسی کنید.\n\n' +
+    'پس از پرداخت موفق، رسید را تا تحویل کالا یا خدمت نگه دارید.\n\n' +
+    'در صورت مشاهدهٔ هر مورد غیرعادی، از ادامهٔ پرداخت خودداری کنید و از کانال‌های رسمی بانک یا پذیرنده پیگیری کنید.',
 
   // Header
   'header.title': 'درگاه پرداخت اینترنتی سِپ',
@@ -26,8 +44,12 @@ export default {
   // Footer
   'footer.supportPrefix': 'مرکز شبانه روزی ارتباط با مشتریان:',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\nتمام حقوق مادی و معنوی برای پرداخت الکترونیک سامان محفوظ است.',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': 'تمام حقوق مادی و معنوی برای ',
+  'footer.copyrightBrandLink': 'پرداخت الکترونیک سامان',
+  'footer.copyrightLineSecondAfter': ' محفوظ است.',
+  'footer.copyrightBrandLinkAriaLabel':
+    'وب‌سایت پرداخت الکترونیک سامان، sep.ir — باز شدن در زبانهٔ جدید',
 
   // Form
   'form.cardNumber': 'شماره کارت',
@@ -54,11 +76,10 @@ export default {
   'form.otp.placeholder': 'رمز پویا',
   'form.otp.required': 'رمز پویا الزامی است',
   'form.otp.invalidLengthRange': 'رمز پویا باید بین {{min}} تا {{max}} رقم باشد',
-  'form.otp.gift': 'رمز پویا / رمز اینترنتی',
-  'form.otp.gift.placeholder': 'رمز پویا / رمز اینترنتی',
-  'form.otp.gift.required': 'رمز پویا / رمز اینترنتی الزامی است',
-  'form.otp.gift.invalidLengthRange':
-    'رمز پویا / رمز اینترنتی باید بین {{min}} تا {{max}} رقم باشد',
+  'form.otp.gift': 'رمز پویا/رمز اینترنتی',
+  'form.otp.gift.placeholder': 'رمز پویا/رمز اینترنتی',
+  'form.otp.gift.required': 'رمز پویا/رمز اینترنتی الزامی است',
+  'form.otp.gift.invalidLengthRange': 'رمز پویا/رمز اینترنتی باید بین {{min}} تا {{max}} رقم باشد',
   'form.mobile': 'شماره موبایل',
   'form.mobile.placeholder': '09123456789',
   'form.mobile.required': 'شماره موبایل الزامی است',
@@ -72,12 +93,13 @@ export default {
   'form.pay.securePrefix': 'پرداخت امن',
   'form.pay.secureWithAmount': 'پرداخت امن ({{amount}} {{currency}})',
   'form.pay.disabled': 'لطفا اطلاعات را کامل وارد کنید',
-  'form.pay.processing': 'در حال اتصال به بانک...',
+  'form.pay.processing': 'در حال پردازش تراکنش...',
   'form.pay.success': 'پرداخت با موفقیت ثبت شد',
   'form.cancel': 'انصراف',
   'form.title': 'اطلاعات کارت خود را وارد کنید',
   'form.captcha.placeholder': 'کد را وارد کنید',
   'form.captcha.required': 'کد امنیتی الزامی است',
+  'form.captcha.invalidLength': 'کد امنیتی باید {{count}} رقمی باشد',
   'form.validation.error': 'لطفا تمام فیلدها را به درستی پر کنید',
   'form.showCards': 'نمایش کارت‌ها',
   'form.virtualPinPad': 'صفحه کلید مجازی',
@@ -119,12 +141,13 @@ export default {
   'cardList.addNew': 'افزودن کارت جدید',
   'cardList.manage': 'مدیریت کارت‌ها',
   'cardList.empty': 'کارتی جهت نمایش وجود ندارد',
+  'cardList.removeNotAllowed': 'امکان حذف این کارت وجود ندارد.',
+  'cardList.removeSuccess': 'کارت با موفقیت حذف شد.',
 
   // Receipt
   'receipt.success': 'برداشت موفق',
   'receipt.failed': 'برداشت ناموفق',
   'receipt.merchant': 'پذیرنده',
-  'receipt.terminal': 'ترمینال',
   'receipt.share': 'اشتراک‌گذاری',
   'receipt.save': 'ذخیره در گالری',
   'receipt.paymentSuccessDesc': 'برداشت از کارت با موفقیت انجام شد.',
@@ -198,6 +221,14 @@ export default {
   'bill.selector.required': 'انتخاب قبض الزامی است',
   'bill.hint.payableCount': 'آماده پرداخت: {{count}}',
   'bill.hint.paidCount': 'پرداخت شده: {{count}}',
+  'bill.flow.skipRemaining': 'انصراف از قبوض باقی‌مانده',
+  'bill.flow.completeTitle': 'فرآیند پرداخت قبض شما تکمیل شد',
+  'bill.flow.completeDescription':
+    'شما می‌توانید به سایت پذیرنده بازگردید یا منتظر بازگشت خودکار بمانید.',
+  'bill.flow.summarySectionTitle': 'خلاصه پرداخت قبض',
+  'bill.flow.summaryPaid': 'تعداد قبض پرداخت شده:',
+  'bill.flow.summaryUnpaid': 'تعداد قبض پرداخت نشده:',
+  'bill.flow.completeAndReturn': 'تکمیل فرآیند قبض و بازگشت به سایت پذیرنده',
   'transaction.descriptionExpand': 'نمایش کامل توضیحات',
   'transaction.descriptionCollapse': 'نمایش کمتر',
   'transaction.type.balance': 'مانده گیری',
@@ -233,7 +264,7 @@ export default {
   'timer.title': 'زمان باقی‌مانده',
   'timer.expired': 'زمان به پایان رسید',
   'timer.transactionExpiredTitle': 'زمان انجام تراکنش به پایان رسید',
-  'timer.transactionExpiredDescription': 'شما تا یک دقیقه دیگر به سایت پذیرنده منتقل می‌شوید.',
+  'timer.transactionExpiredDescription': 'شما تا چند لحظه دیگر به سایت پذیرنده منتقل می‌شوید.',
   'timer.returnToMerchant': 'انتقال به سایت پذیرنده',
 
   // Errors

@@ -126,8 +126,13 @@ html.app-ready #app .main-content {
   margin-top: var(--spacing-xs);
 }
 
-.gift-card-inline-notice.error-dom-content.error-dom-info {
-  color: var(--color-warning-700);
+/* Slightly compact inline notice under card field; keeps palette from .error-dom-info */
+.gift-card-inline-notice.error-dom-content {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.gift-card-inline-notice.error-dom-content .error-dom-message {
   font-size: var(--font-size-xs);
   font-weight: 500;
 }
@@ -146,6 +151,20 @@ html.app-ready #app .main-content {
   display: flex;
   gap: var(--spacing-md);
   align-items: stretch;
+}
+
+.otp-request-inline-notice {
+  margin-top: var(--spacing-xs);
+}
+
+.otp-request-inline-notice.error-dom-content {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.otp-request-inline-notice.error-dom-content .error-dom-message {
+  font-size: var(--font-size-xs);
+  font-weight: 500;
 }
 
 .otp-input-container .otp-input-row .input-wrapper {
@@ -536,6 +555,33 @@ html.app-ready #app .main-content {
   padding-bottom: 0;
 }
 
+.transaction-expired-empty .empty-state {
+  max-width: min(100%, 480px);
+  margin: 0 auto;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.transaction-expired-empty .empty-state-image.app-icon {
+  width: 120px;
+  height: 120px;
+  max-width: 120px;
+  --app-icon-size: 120px;
+  opacity: 0.9;
+}
+
+.transaction-expired-empty .empty-state-description {
+  margin-bottom: var(--spacing-md);
+}
+
+.transaction-expired-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-md);
+  width: 100%;
+}
+
 .redirect-loading-card,
 .transaction-expired-card,
 .network-offline-card {
@@ -566,9 +612,8 @@ html.app-ready #app .main-content {
   margin-top: var(--spacing-xs);
 }
 
-.transaction-expired-countdown-text {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+.transaction-expired-content .transaction-expired-return-timer {
+  margin-top: var(--spacing-xs);
 }
 
 #bill-list-content .transaction-info-item {
@@ -600,7 +645,7 @@ html.app-ready #app .main-content {
   background: var(--color-bg-white);
 }
 
-.bill-selector-group .dropdown-item:hover .bill-dropdown-item,
+.bill-selector-group .dropdown-item:not(.disabled):hover .bill-dropdown-item,
 .bill-selector-group .bill-dropdown-item.active {
   border-color: var(--color-primary);
   background: var(--color-primary-50);
@@ -609,6 +654,25 @@ html.app-ready #app .main-content {
 .bill-selector-group .dropdown-item.disabled .bill-dropdown-item {
   background: var(--color-bg-light);
   border-color: var(--color-stroke);
+  opacity: 0.92;
+}
+
+.bill-selector-group .dropdown-item.disabled:hover .bill-dropdown-item {
+  border-color: var(--color-stroke);
+  background: var(--color-bg-light);
+}
+
+.bill-selector-group .dropdown-item.disabled {
+  cursor: not-allowed;
+}
+
+.bill-selector-group .dropdown-item.disabled .bill-list-item-title,
+.bill-selector-group .dropdown-item.disabled .bill-list-item-id {
+  color: var(--color-text-muted);
+}
+
+.bill-selector-group .dropdown-item.disabled .bill-list-item-amount {
+  color: var(--color-text-secondary);
 }
 
 .bill-dropdown-receipt-button {
@@ -665,6 +729,15 @@ html.app-ready #app .main-content {
 
 .card-list-sheet-list .card-list-sheet-item:last-child .bill-dropdown-item {
   margin-bottom: 0;
+}
+
+.card-list-sheet-item.disabled .bill-list-item-title,
+.card-list-sheet-item.disabled .bill-list-item-id {
+  color: var(--color-text-muted);
+}
+
+.card-list-sheet-item.disabled .bill-list-item-amount {
+  color: var(--color-text-secondary);
 }
 
 .bill-list-item-main {

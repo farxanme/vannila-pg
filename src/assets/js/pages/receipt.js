@@ -34,7 +34,6 @@ async function initializePage() {
     logo: '/assets/images/logo.svg',
     supportPrefix: i18n.t('footer.supportPrefix'),
     supportPhone: i18n.t('footer.supportPhone'),
-    copyright: i18n.t('footer.copyright'),
   });
 
   // Load receipt data from URL params or storage
@@ -62,7 +61,7 @@ function updateReceiptLanguage() {
     header.updateTitle(i18n.t('header.title'));
   }
   if (footer) {
-    footer.updateCopyright(i18n.t('footer.copyright'));
+    footer.updateCopyright();
     footer.updateSupportPrefix(i18n.t('footer.supportPrefix'));
     footer.updateSupportPhone(i18n.t('footer.supportPhone'));
   }

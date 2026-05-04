@@ -11,6 +11,7 @@ import {
   mockPayTransactionResponse,
   mockReceiptRedirectParamsResponse,
   mockCancelTransactionResponse,
+  mockDeActiveUserCardResponse,
   mockDelay,
 } from '../mocks/ipgMocks.js';
 
@@ -213,5 +214,22 @@ export async function cancelTransaction() {
   return ipgFetch('/transaction/cancel', {
     method: 'POST',
     body: JSON.stringify(session),
+  });
+}
+
+/**
+ * POST /user/cards/de-active — remove saved card for session (cardRegisteredType must be 1).
+ * @param {{ cardId: number, cardRegisteredType: number }} cardFields
+ */
+export async function deActiveUserCard(cardFields) {
+  if (useIpgMock()) {
+    await mockDelay();
+    return mockDeActiveUserCardResponse;
+  }
+  const session = requireSessionBody();
+  const payload = { ...session, ...cardFields };
+  return ipgFetch('/user/cards/de-active', {
+    method: 'POST',
+    body: JSON.stringify(payload),
   });
 }

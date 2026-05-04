@@ -57,6 +57,7 @@ class CardService {
         apiCard.cardId != null && String(apiCard.cardId).trim() !== ''
           ? String(apiCard.cardId)
           : paddedPan;
+      const registeredType = Number(apiCard.cardRegisteredType);
       return {
         number: numberFromId,
         securePan: masked,
@@ -66,7 +67,7 @@ class CardService {
         isGiftCard: Boolean(apiCard.isGiftCard),
         hasValidExpiredDate: apiCard.expireDate != null,
         selected: Boolean(apiCard.selected),
-        canDeActive: true,
+        canDeActive: registeredType === 1,
         isLimited: Boolean(apiCard.isLimited),
         pinned: false,
         cardRegisteredType: apiCard.cardRegisteredType,
@@ -78,6 +79,7 @@ class CardService {
       const secure = String(apiCard.SecurePan);
       const cardNumber = secure.replace(/[^0-9]/g, '');
       const bank = detectBankFromMaskedPan(secure) || detectBank(cardNumber);
+      const legacyRegType = apiCard.cardRegisteredType ?? apiCard.CardRegisteredType;
       return {
         number: cardNumber,
         securePan: secure,
@@ -90,6 +92,7 @@ class CardService {
         canDeActive: apiCard.CanDeActive,
         isLimited: apiCard.IsLimited,
         pinned: false,
+        cardRegisteredType: legacyRegType,
       };
     }
 

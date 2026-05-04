@@ -242,6 +242,8 @@ export class BottomSheet {
     this.isOpen = false;
     this.backdrop.classList.remove('show');
     this.sheetElement.classList.remove('show');
+    this.backdrop.style.opacity = '';
+    this.sheetElement.style.transform = '';
     document.body.style.overflow = '';
 
     setTimeout(() => {

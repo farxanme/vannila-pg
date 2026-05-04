@@ -18,8 +18,26 @@ export default {
     'Once your connection is restored, this page will continue from where you left off.',
 
   // Redirect
-  'redirect.loading': 'Redirecting...',
   'redirect.loadingTitle': 'Redirecting to merchant website',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': 'Help',
+  'helpDrawer.tablistAriaLabel': 'Help topics',
+  'helpDrawer.tabSecurity': 'Security tips',
+  'helpDrawer.tabOtp': 'Dynamic password (OTP)',
+  'helpDrawer.tabPayment': 'Payment guide',
+  'helpDrawer.securityBody':
+    'Never share your card password, CVV2, or one-time codes with anyone, including phone support.\n\n' +
+    'Avoid paying on public Wi-Fi or shared devices. Always check that the page address and merchant name match your purchase.\n\n' +
+    'Log out or close the browser when you are done, especially on shared computers.',
+  'helpDrawer.otpBody':
+    'Request the dynamic password only when you are ready to confirm the payment.\n\n' +
+    'Enter the code in the OTP field before it expires. If it expires, request a new code and do not reuse an old one.\n\n' +
+    'If several codes were sent, use the latest one. Do not tell the code to anyone else.',
+  'helpDrawer.paymentBody':
+    'Enter your card number, expiry, and CVV2 carefully. Confirm the payable amount and merchant name before paying.\n\n' +
+    'After a successful payment, keep the receipt until the goods or service is delivered.\n\n' +
+    'If something looks wrong, cancel and contact your bank or the merchant through official channels.',
 
   // Header
   'header.title': 'Payment Gateway',
@@ -27,8 +45,12 @@ export default {
   // Footer
   'footer.supportPrefix': '24/7 customer support center:',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\nAll material and intellectual rights are reserved for Saman Electronic Payment.',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': 'All material and intellectual rights are reserved for ',
+  'footer.copyrightBrandLink': 'Saman Electronic Payment',
+  'footer.copyrightLineSecondAfter': '.',
+  'footer.copyrightBrandLinkAriaLabel':
+    'Saman Electronic Payment website, sep.ir — opens in a new tab',
 
   // Form
   'form.cardNumber': 'Card Number',
@@ -73,12 +95,13 @@ export default {
   'form.pay.securePrefix': 'Secure payment',
   'form.pay.secureWithAmount': 'Secure payment ({{amount}} {{currency}})',
   'form.pay.disabled': 'Please complete all information',
-  'form.pay.processing': 'Connecting to bank...',
+  'form.pay.processing': 'Processing transaction...',
   'form.pay.success': 'Payment completed successfully',
   'form.cancel': 'Cancel',
   'form.title': 'Enter your card details',
   'form.captcha.placeholder': 'Enter code',
   'form.captcha.required': 'Security code is required',
+  'form.captcha.invalidLength': 'Security code must be {{count}} digits',
   'form.validation.error': 'Please fill all fields correctly',
   'form.showCards': 'Show cards',
   'form.virtualPinPad': 'Virtual PIN pad',
@@ -121,12 +144,13 @@ export default {
   'cardList.addNew': 'Add New Card',
   'cardList.manage': 'Manage Cards',
   'cardList.empty': 'No saved card to display',
+  'cardList.removeNotAllowed': 'This card cannot be removed.',
+  'cardList.removeSuccess': 'Card removed successfully.',
 
   // Receipt
   'receipt.success': 'Debit Successful',
   'receipt.failed': 'Debit Failed',
   'receipt.merchant': 'Merchant',
-  'receipt.terminal': 'Terminal',
   'receipt.share': 'Share',
   'receipt.save': 'Save to Gallery',
   'receipt.paymentSuccessDesc': 'Card debit completed successfully.',
@@ -200,6 +224,14 @@ export default {
   'bill.selector.required': 'Selecting a bill is required',
   'bill.hint.payableCount': 'Ready to pay: {{count}}',
   'bill.hint.paidCount': 'Paid: {{count}}',
+  'bill.flow.skipRemaining': 'Skip remaining bills',
+  'bill.flow.completeTitle': 'Your bill payment flow is complete',
+  'bill.flow.completeDescription':
+    'You can return to the merchant website now or wait for automatic return.',
+  'bill.flow.summarySectionTitle': 'Bill payment summary',
+  'bill.flow.summaryPaid': 'Paid bills count:',
+  'bill.flow.summaryUnpaid': 'Unpaid bills count:',
+  'bill.flow.completeAndReturn': 'Complete bill flow and return to merchant website',
   'transaction.descriptionExpand': 'Show full description',
   'transaction.descriptionCollapse': 'Show less',
   'transaction.type.balance': 'Balance Inquiry',

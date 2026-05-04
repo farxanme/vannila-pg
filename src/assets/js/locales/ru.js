@@ -18,8 +18,26 @@ export default {
     'После восстановления подключения эта страница продолжит работу с прежнего состояния.',
 
   // Redirect
-  'redirect.loading': 'Перенаправление...',
   'redirect.loadingTitle': 'Перенаправление на сайт получателя',
+
+  // Help drawer (payment form)
+  'helpDrawer.title': 'Справка',
+  'helpDrawer.tablistAriaLabel': 'Разделы справки',
+  'helpDrawer.tabSecurity': 'Советы по безопасности',
+  'helpDrawer.tabOtp': 'Одноразовый пароль (OTP)',
+  'helpDrawer.tabPayment': 'Оплата',
+  'helpDrawer.securityBody':
+    'Не сообщайте никому пароль карты, CVV2 и одноразовые коды, включая «поддержку» по телефону.\n\n' +
+    'Избегайте оплаты в общественных Wi-Fi и на чужих устройствах. Сверяйте адрес страницы и имя продавца.\n\n' +
+    'По завершении закройте браузер, особенно на общих компьютерах.',
+  'helpDrawer.otpBody':
+    'Запрашивайте динамический пароль только когда готовы подтвердить оплату.\n\n' +
+    'Введите код до истечения срока. Если срок истёк, запросите новый и не используйте старые коды.\n\n' +
+    'Если пришло несколько кодов, используйте последний и никому его не называйте.',
+  'helpDrawer.paymentBody':
+    'Вводите номер карты, срок и CVV2 внимательно. Проверьте сумму и продавца перед оплатой.\n\n' +
+    'После успешной оплаты сохраните чек до получения товара или услуги.\n\n' +
+    'При подозрении на ошибку отмените оплату и обратитесь в банк или к продавцу официально.',
 
   // Header
   'header.title': 'Платежный шлюз',
@@ -27,8 +45,12 @@ export default {
   // Footer
   'footer.supportPrefix': 'Круглосуточный центр поддержки клиентов:',
   'footer.supportPhone': '021-84080',
-  'footer.copyright':
-    '© 2020 - 2025 (SEP) Saman Electronic Payment\nВсе материальные и интеллектуальные права принадлежат Saman Electronic Payment.',
+  'footer.copyrightLineFirst': '© 2020 - 2025 (SEP) Saman Electronic Payment',
+  'footer.copyrightLineSecondBefore': 'Все материальные и интеллектуальные права принадлежат ',
+  'footer.copyrightBrandLink': 'Saman Electronic Payment',
+  'footer.copyrightLineSecondAfter': '.',
+  'footer.copyrightBrandLinkAriaLabel':
+    'Официальный сайт Saman Electronic Payment, sep.ir — открывается в новой вкладке',
 
   // Form
   'form.cardNumber': 'Номер карты',
@@ -73,12 +95,13 @@ export default {
   'form.pay.securePrefix': 'Безопасная оплата',
   'form.pay.secureWithAmount': 'Безопасная оплата ({{amount}} {{currency}})',
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
-  'form.pay.processing': 'Подключение к банку...',
+  'form.pay.processing': 'Обработка транзакции...',
   'form.pay.success': 'Платёж успешно выполнен',
   'form.cancel': 'Отмена',
   'form.title': 'Введите данные карты',
   'form.captcha.placeholder': 'Введите код',
   'form.captcha.required': 'Код безопасности обязателен',
+  'form.captcha.invalidLength': 'Код безопасности должен содержать {{count}} цифр',
   'form.validation.error': 'Пожалуйста, заполните все поля правильно',
   'form.showCards': 'Показать карты',
   'form.virtualPinPad': 'Виртуальная клавиатура PIN',
@@ -121,12 +144,13 @@ export default {
   'cardList.addNew': 'Добавить новую карту',
   'cardList.manage': 'Управление картами',
   'cardList.empty': 'Нет сохранённой карты для отображения',
+  'cardList.removeNotAllowed': 'Эту карту нельзя удалить.',
+  'cardList.removeSuccess': 'Карта успешно удалена.',
 
   // Receipt
   'receipt.success': 'Списание выполнено',
   'receipt.failed': 'Списание не выполнено',
   'receipt.merchant': 'Торговец',
-  'receipt.terminal': 'Терминал',
   'receipt.share': 'Поделиться',
   'receipt.save': 'Сохранить в галерею',
   'receipt.paymentSuccessDesc': 'Списание с карты выполнено успешно.',
@@ -200,6 +224,14 @@ export default {
   'bill.selector.required': 'Выбор счета обязателен',
   'bill.hint.payableCount': 'Готово к оплате: {{count}}',
   'bill.hint.paidCount': 'Оплачено: {{count}}',
+  'bill.flow.skipRemaining': 'Пропустить оплату оставшихся счетов',
+  'bill.flow.completeTitle': 'Процесс оплаты счетов завершен',
+  'bill.flow.completeDescription':
+    'Вы можете вернуться на сайт получателя сейчас или дождаться автоперехода.',
+  'bill.flow.summarySectionTitle': 'Сводка по оплате счетов',
+  'bill.flow.summaryPaid': 'Количество оплаченных счетов:',
+  'bill.flow.summaryUnpaid': 'Количество неоплаченных счетов:',
+  'bill.flow.completeAndReturn': 'Завершить процесс счетов и вернуться на сайт получателя',
   'transaction.descriptionExpand': 'Показать полностью',
   'transaction.descriptionCollapse': 'Свернуть',
   'transaction.type.balance': 'Запрос баланса',
