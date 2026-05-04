@@ -223,6 +223,21 @@ html.app-ready #app .main-content {
   min-width: 0;
   align-items: flex-start;
   gap: 0;
+  border-radius: var(--radius-md);
+  transition: box-shadow var(--transition-base);
+}
+
+/* Single ring around the whole cluster (avoids split / clipped rings on the captcha field + image) */
+.captcha-container
+  .captcha-input-cluster:is(
+    :has(.input-container.focused),
+    :has(.captcha-image-reload:focus-visible)
+  ):not(:has(.input-container.error)) {
+  box-shadow: var(--shadow-input-focus);
+}
+
+.captcha-container .captcha-input-cluster:has(.input-container.error) {
+  box-shadow: var(--shadow-input-error-ring);
 }
 
 /* Captcha audio button spacing (logical: same gap in LTR and RTL) */
@@ -263,58 +278,92 @@ html.app-ready #app .main-content {
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
-/* Focus / error must win over base captcha borders (higher specificity than components.css) */
+/* Focus / error: border sync only — cluster carries the focus/error ring */
 .captcha-container .captcha-input-cluster .input-wrapper .input-container.focused {
-  border-color: var(--color-primary-300);
+  border-color: var(--color-primary);
   border-right: none;
-  box-shadow: var(--shadow-input-focus);
+  box-shadow: none;
 }
 
 .captcha-container .captcha-input-cluster .input-wrapper .input-container.error {
   border-color: var(--color-error-300);
   border-right: none;
-  box-shadow: var(--shadow-input-error);
+  box-shadow: none;
+}
+
+.captcha-container .captcha-input-cluster .input-wrapper .input-container.error.focused {
+  border-color: var(--color-error-300);
+  border-right: none;
+  box-shadow: none;
 }
 
 [dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper .input-container.focused {
-  border-color: var(--color-primary-300);
+  border-color: var(--color-primary);
   border-left: none;
-  border-right: 1px solid var(--color-primary-300);
-  box-shadow: var(--shadow-input-focus);
+  border-right: 1px solid var(--color-primary);
+  box-shadow: none;
 }
 
 [dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper .input-container.error {
   border-color: var(--color-error-300);
   border-left: none;
   border-right: 1px solid var(--color-error-300);
-  box-shadow: var(--shadow-input-error);
+  box-shadow: none;
 }
 
-/* Captcha image attached after input - borders match input container */
-.captcha-container .captcha-image {
+[dir='rtl'] .captcha-container .captcha-input-cluster .input-wrapper .input-container.error.focused {
+  border-color: var(--color-error-300);
+  border-left: none;
+  border-right: 1px solid var(--color-error-300);
+  box-shadow: none;
+}
+
+/* Captcha image: <button> wraps <img> so reload is a real control (tooltip + keyboard + SR) */
+.captcha-container .captcha-image-reload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
   border-top: 1px solid var(--color-stroke);
   border-bottom: 1px solid var(--color-stroke);
   border-right: 1px solid var(--color-stroke);
   border-left: none;
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
   height: 48px;
   width: 140px;
   min-width: 140px;
-  object-fit: contain;
-  background: var(--color-bg-white);
   flex-shrink: 0;
-  display: block;
   box-sizing: border-box;
+  cursor: pointer;
+  background: var(--color-bg-white);
+  color: inherit;
+  font: inherit;
+  line-height: 0;
+  appearance: none;
   transition:
     border-color var(--transition-base),
     box-shadow var(--transition-base);
 }
 
-/* RTL: Captcha image on left side */
-[dir='rtl'] .captcha-container .captcha-image {
+.captcha-container .captcha-image-reload:focus-visible {
+  outline: none;
+  box-shadow: none;
+  z-index: 2;
+}
+
+.captcha-container .captcha-image-reload .captcha-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  max-height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+  border: none;
+  border-radius: 0;
+}
+
+[dir='rtl'] .captcha-container .captcha-image-reload {
   border-right: none;
   border-left: 1px solid var(--color-stroke);
   border-radius: var(--radius-md) 0 0 var(--radius-md);
@@ -328,7 +377,9 @@ html.app-ready #app .main-content {
   border-color: var(--color-gray-200);
 }
 
-.captcha-container .captcha-input-cluster:not(:has(.input-container.error)):hover .captcha-image {
+.captcha-container
+  .captcha-input-cluster:not(:has(.input-container.error)):hover
+  .captcha-image-reload {
   border-top-color: var(--color-gray-200);
   border-bottom-color: var(--color-gray-200);
   border-right-color: var(--color-gray-200);
@@ -337,57 +388,52 @@ html.app-ready #app .main-content {
 [dir='rtl']
   .captcha-container
   .captcha-input-cluster:not(:has(.input-container.error)):hover
-  .captcha-image {
+  .captcha-image-reload {
   border-left-color: var(--color-gray-200);
   border-right-color: transparent;
 }
 
-/* Update captcha image border when input is focused */
 .captcha-container
   .captcha-input-cluster
   .input-wrapper:has(.input-container.focused)
-  ~ .captcha-image {
-  border-top-color: var(--color-primary-300);
-  border-bottom-color: var(--color-primary-300);
-  border-right-color: var(--color-primary-300);
-  box-shadow: var(--shadow-input-focus);
+  ~ .captcha-image-reload {
+  border-top-color: var(--color-primary);
+  border-bottom-color: var(--color-primary);
+  border-right-color: var(--color-primary);
+  box-shadow: none;
 }
 
-/* RTL: Update left border instead of right */
 [dir='rtl']
   .captcha-container
   .captcha-input-cluster
   .input-wrapper:has(.input-container.focused)
-  ~ .captcha-image {
-  border-left-color: var(--color-primary-300);
+  ~ .captcha-image-reload {
+  border-left-color: var(--color-primary);
   border-right-color: transparent;
-  box-shadow: var(--shadow-input-focus);
+  box-shadow: none;
 }
 
-/* Update captcha image border when input has error */
 .captcha-container
   .captcha-input-cluster
   .input-wrapper:has(.input-container.error)
-  ~ .captcha-image {
+  ~ .captcha-image-reload {
   border-top-color: var(--color-error-300);
   border-bottom-color: var(--color-error-300);
   border-right-color: var(--color-error-300);
-  box-shadow: var(--shadow-input-error);
+  box-shadow: none;
 }
 
-/* RTL: Update left border instead of right */
 [dir='rtl']
   .captcha-container
   .captcha-input-cluster
   .input-wrapper:has(.input-container.error)
-  ~ .captcha-image {
+  ~ .captcha-image-reload {
   border-left-color: var(--color-error-300);
   border-right-color: transparent;
-  box-shadow: var(--shadow-input-error);
+  box-shadow: none;
 }
 
-/* When image is clicked, add visual feedback */
-.captcha-container .captcha-image:active {
+.captcha-container .captcha-image-reload:active {
   opacity: 0.7;
 }
 

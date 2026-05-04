@@ -117,7 +117,8 @@ export default {
   'cancelConfirm.imageAlt': 'توضيح إلغاء الدفع',
   'cancelConfirm.continuePay': 'متابعة الدفع',
   'cancelConfirm.confirmLeave': 'إلغاء الدفع',
-  'form.giftCardNotice': 'هذه بطاقة هدية',
+  'form.giftCardNotice':
+    'بعض بطاقات الهدية المصدرة من البنوك لا تحتاج إلى رمز لمرة واحدة؛ في هذه الحالة استخدم كلمة مرور الإنترنت لبطاقة الهدية نفسها.',
   'form.showReceiptToggle': 'البريد أو الجوال لاستلام الإيصال (اختياري)',
 
   // Payment init (SSR session)

@@ -118,7 +118,8 @@ export default {
   'cancelConfirm.imageAlt': 'Ödemeden çıkış görseli',
   'cancelConfirm.continuePay': 'Ödemeye devam et',
   'cancelConfirm.confirmLeave': 'Ödemeyi iptal et',
-  'form.giftCardNotice': 'Bu bir hediye kartıdır',
+  'form.giftCardNotice':
+    'Bazı banka hediye kartlarında tek kullanımlık şifre (OTP) gerekmez; bu durumda hediye kartınızın internet şifresini kullanabilirsiniz.',
   'form.showReceiptToggle': 'Makbuz için e-posta veya cep (isteğe bağlı)',
 
   // Payment init (SSR session)

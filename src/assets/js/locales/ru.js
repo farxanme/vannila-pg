@@ -119,7 +119,8 @@ export default {
   'cancelConfirm.imageAlt': 'Иллюстрация: отмена оплаты',
   'cancelConfirm.continuePay': 'Продолжить оплату',
   'cancelConfirm.confirmLeave': 'Покинуть оплату',
-  'form.giftCardNotice': 'Это подарочная карта',
+  'form.giftCardNotice':
+    'Для некоторых банковских подарочных карт не требуется одноразовый пароль (OTP). В этом случае используйте интернет-пароль этой подарочной карты.',
   'form.showReceiptToggle': 'Электронная почта или телефон для квитанции (необязательно)',
 
   // Payment init (SSR session)

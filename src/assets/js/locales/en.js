@@ -119,7 +119,8 @@ export default {
   'cancelConfirm.imageAlt': 'Illustration for leaving payment',
   'cancelConfirm.continuePay': 'Continue payment',
   'cancelConfirm.confirmLeave': 'Leave payment',
-  'form.giftCardNotice': 'This is a gift card',
+  'form.giftCardNotice':
+    'Some bank-issued gift cards do not require a one-time password (OTP). In that case, use the internet password for your gift card.',
   'form.showReceiptToggle': 'Email or mobile to receive receipt (optional)',
 
   // Payment init (SSR session)

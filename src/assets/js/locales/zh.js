@@ -128,7 +128,7 @@ export default {
   'cancelConfirm.imageAlt': '离开支付流程插图',
   'cancelConfirm.continuePay': '继续支付',
   'cancelConfirm.confirmLeave': '离开支付',
-  'form.giftCardNotice': '这是礼品卡',
+  'form.giftCardNotice': '部分银行发行的礼品卡无需短信动态验证码；此时请使用礼品卡的网银密码。',
   'form.showReceiptToggle': '接收回执的邮箱或手机号（可选）',
   'form.pay.processing': '正在处理交易...',
   'form.pay.success': '支付成功完成',

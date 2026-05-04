@@ -117,7 +117,8 @@ export default {
   'cancelConfirm.imageAlt': 'راهنمای انصراف از پرداخت',
   'cancelConfirm.continuePay': 'ادامه پرداخت',
   'cancelConfirm.confirmLeave': 'انصراف از پرداخت',
-  'form.giftCardNotice': 'این کارت هدیه است',
+  'form.giftCardNotice':
+    'برای برخی کارت‌های هدیهٔ بانک‌ها دریافت رمز پویا لازم نیست؛ در این صورت می‌توانید از رمز اینترنتی همان کارت‌هدیه استفاده کنید.',
   'form.showReceiptToggle': 'ایمیل یا شماره موبایل برای ارسال رسید پرداخت (اختیاری)',
 
   // Payment init (SSR session)

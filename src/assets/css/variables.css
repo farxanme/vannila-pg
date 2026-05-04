@@ -143,8 +143,14 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-default: var(--shadow);
 
-  --shadow-input-focus: 0 0 9px 0 rgba(73, 128, 224, 0.35);
-  --shadow-input-error: 0 0 9px 0 rgba(255, 54, 81, 0.35);
+  /* Tailwind-like focus ring: ring-2 + ring-primary-light/50 (see .input-container.focused) */
+  --focus-ring-width: 2px;
+  --focus-ring-color: rgb(125 167 235 / 0.5);
+  --shadow-input-focus: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  /* Error ring (Tailwind-like): ring-2 + error tint */
+  --shadow-input-error-ring: 0 0 0 var(--focus-ring-width) rgb(255 54 81 / 0.38);
+  /** @deprecated use --shadow-input-error-ring; kept for non-input surfaces if referenced */
+  --shadow-input-error: var(--shadow-input-error-ring);
 
   /* Transitions */
   --transition-base: 0.2s ease;
@@ -172,6 +178,10 @@
   --color-controller: #2a2a2a;
   --color-gray-100: #2a2a2a;
   --color-primary-50: rgba(73, 128, 224, 0.12);
+  --focus-ring-color: rgb(125 167 235 / 0.55);
+  --shadow-input-focus: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
+  --shadow-input-error-ring: 0 0 0 var(--focus-ring-width) rgb(255 128 142 / 0.45);
+  --shadow-input-error: var(--shadow-input-error-ring);
   --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.35);
   --shadow-colored: 0 20px 27px 0 rgba(0, 0, 0, 0.35);
 }

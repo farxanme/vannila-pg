@@ -40,13 +40,20 @@
 }
 
 .input-container.focused {
-  border-color: var(--color-primary-300);
+  outline: none;
+  border-color: var(--color-primary);
   box-shadow: var(--shadow-input-focus);
 }
 
 .input-container.error {
   border-color: var(--color-error-300);
-  box-shadow: var(--shadow-input-error);
+  box-shadow: var(--shadow-input-error-ring);
+}
+
+.input-container.error.focused {
+  outline: none;
+  border-color: var(--color-error-300);
+  box-shadow: var(--shadow-input-error-ring);
 }
 
 .input-container.disabled {
@@ -63,13 +70,20 @@
 }
 
 .input-container.bordered.focused {
+  outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.12);
+  box-shadow: var(--shadow-input-focus);
 }
 
 .input-container.bordered.error {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 2px rgba(220, 53, 69, 0.12);
+  box-shadow: var(--shadow-input-error-ring);
+}
+
+.input-container.bordered.error.focused {
+  outline: none;
+  border-color: var(--color-danger);
+  box-shadow: var(--shadow-input-error-ring);
 }
 
 .input-container.bordered.disabled {
@@ -89,6 +103,11 @@
   direction: ltr;
   height: 100%;
   border: none;
+  outline: none;
+}
+
+/* Focus ring lives on .input-container; avoid stacking with global :focus-visible outline */
+.input-field:focus-visible {
   outline: none;
 }
 
@@ -357,11 +376,9 @@
 .header-sheet-settings-menu {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 0;
 }
 
-.bottom-sheet .header-sheet-lang-menu .lang-dropdown-item,
-.bottom-sheet .header-sheet-settings-menu .settings-theme-option,
 .bottom-sheet .card-list-sheet-item .dropdown-card-item,
 .bottom-sheet .card-list-sheet-item .bill-dropdown-item {
   border: 1px solid var(--color-stroke);
@@ -374,17 +391,12 @@
     background var(--transition-base);
 }
 
-.bottom-sheet .header-sheet-lang-menu .lang-dropdown-item:hover,
-.bottom-sheet .header-sheet-settings-menu .settings-theme-option:hover,
 .bottom-sheet .card-list-sheet-item:not(.disabled):hover .dropdown-card-item,
 .bottom-sheet .card-list-sheet-item:not(.disabled):hover .bill-dropdown-item {
   border-color: var(--color-primary);
   box-shadow: var(--shadow-sm);
 }
 
-.bottom-sheet .header-sheet-lang-menu .lang-dropdown-item.active,
-.bottom-sheet .header-sheet-lang-menu .lang-dropdown-item[aria-checked='true'],
-.bottom-sheet .header-sheet-settings-menu .settings-theme-option[aria-checked='true'],
 .bottom-sheet .card-list-sheet-item .bill-dropdown-item.active {
   border-color: var(--color-primary);
   background: var(--color-primary-50);

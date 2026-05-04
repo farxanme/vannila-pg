@@ -27,7 +27,7 @@ function getToastIconFileForType(type) {
 class ErrorHandler {
   constructor() {
     this.toastContainer = null;
-    /** @type {WeakMap<HTMLElement, { timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean }>} */
+    /** @type {WeakMap<HTMLElement, { timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean, pauseAt: number | null }>} */
     this.domMessageLifecycle = new WeakMap();
     this.initToastContainer();
   }
@@ -332,15 +332,17 @@ class ErrorHandler {
       return;
     }
 
-    let deadline = Date.now() + durationMs;
+    /** Absolute time when the message should auto-dismiss (extended while hover pauses the bar). */
+    let dismissAt = Date.now() + durationMs;
 
-    /** @type {{ timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean }} */
+    /** @type {{ timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean, pauseAt: number | null }} */
     const state = {
       timeoutId: null,
       onEnter: () => {},
       onLeave: () => {},
       useTimer: true,
       dismissDeferred: false,
+      pauseAt: null,
     };
 
     const clearTimer = () => {
@@ -375,17 +377,27 @@ class ErrorHandler {
     state.onEnter = () => {
       clearTimer();
       state.dismissDeferred = false;
+      // Align JS with CSS: hover pauses the keyframe; time spent hovered must not shrink remaining duration.
+      state.pauseAt = Date.now();
     };
 
     state.onLeave = () => {
       if (state.dismissDeferred) {
         state.dismissDeferred = false;
         clearTimer();
+        state.pauseAt = null;
         this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
         return;
       }
-      const remaining = Math.max(0, deadline - Date.now());
-      deadline = Date.now() + remaining;
+      const now = Date.now();
+      let remaining;
+      if (state.pauseAt != null) {
+        remaining = Math.max(0, dismissAt - state.pauseAt);
+        state.pauseAt = null;
+      } else {
+        remaining = Math.max(0, dismissAt - now);
+      }
+      dismissAt = now + remaining;
       scheduleDismiss(remaining);
     };
 

@@ -426,6 +426,16 @@ async function loadCaptchaImage(captchaImageEl) {
   }
 }
 
+/** Clears the captcha error row under the cluster (used with `omitInnerError` on captcha Input). */
+function clearCaptchaExternalErrorRow() {
+  const el = document.getElementById('captcha-error');
+  if (el) {
+    el.textContent = '';
+    el.style.visibility = 'hidden';
+  }
+  captchaInput?.element?.setAttribute('aria-invalid', 'false');
+}
+
 /**
  * Card fields for OTP / pay (IPG expects pan or cardId).
  * @returns {{ cardId: string | null, pan: string | null, bill: object | null, cardRegisteredType: number } | null}
@@ -1356,6 +1366,7 @@ function initializeFormInputs() {
     expiryDateInput?.clearValidation?.();
     captchaInput?.setValue('');
     captchaInput?.clearValidation?.();
+    clearCaptchaExternalErrorRow();
     otpInput?.setValue('');
     otpInput?.clearValidation?.();
     mobileInput?.setValue('');
@@ -1839,14 +1850,6 @@ function initializeFormInputs() {
 
   function handleGiftCardNotificationFromPan(pan) {
     const isGift = isGiftCardFromPan(pan);
-    if (isGift && !isCurrentGiftCard) {
-      errorHandler.show({
-        message: i18n.t('form.giftCardNotice'),
-        mode: 'toast',
-        type: 'info',
-        iconFile: 'icn-shopping-bag.svg',
-      });
-    }
     isCurrentGiftCard = isGift;
     const inlineNotice = document.getElementById('gift-card-inline-notice');
     if (inlineNotice) {
@@ -1877,14 +1880,6 @@ function initializeFormInputs() {
   function handleGiftCardNotification(pan, forceGiftCard = null) {
     if (typeof forceGiftCard === 'boolean') {
       const isGift = forceGiftCard;
-      if (isGift && !isCurrentGiftCard) {
-        errorHandler.show({
-          message: i18n.t('form.giftCardNotice'),
-          mode: 'toast',
-          type: 'info',
-          iconFile: 'icn-shopping-bag.svg',
-        });
-      }
       isCurrentGiftCard = isGift;
       const inlineNotice = document.getElementById('gift-card-inline-notice');
       if (inlineNotice) {
@@ -2187,6 +2182,19 @@ function initializeFormInputs() {
   captchaCluster.className = 'captcha-input-cluster';
   captchaRow.appendChild(captchaCluster);
 
+  const captchaError = document.createElement('div');
+  captchaError.id = 'captcha-error';
+  captchaError.className = 'input-error';
+  captchaError.setAttribute('role', 'alert');
+  captchaError.setAttribute('aria-live', 'polite');
+  captchaError.style.visibility = 'hidden';
+
+  const captchaImage = document.createElement('img');
+  captchaImageElement = captchaImage;
+  captchaImage.className = 'captcha-image';
+  captchaImage.alt = i18n.t('form.captchaImageAlt');
+  captchaImage.setAttribute('draggable', 'false');
+
   // Create input without label, with reload action inside (first in row)
   captchaInput = new Input(captchaCluster, {
     id: 'captcha',
@@ -2200,6 +2208,18 @@ function initializeFormInputs() {
     clearButtonAriaLabel: i18n.t('common.clear'),
     maxLength: captchaCodeLength,
     inputMode: 'numeric',
+    omitInnerError: true,
+    onValidation: (isValid, message) => {
+      if (isValid) {
+        captchaError.textContent = '';
+        captchaError.style.visibility = 'hidden';
+        captchaInput.element.setAttribute('aria-invalid', 'false');
+      } else {
+        captchaError.textContent = message;
+        captchaError.style.visibility = 'visible';
+        captchaInput.element.setAttribute('aria-invalid', 'true');
+      }
+    },
     validator: (value) => {
       const digitsOnly = extractNumbers(value);
       if (!digitsOnly || digitsOnly.length === 0) {
@@ -2226,7 +2246,7 @@ function initializeFormInputs() {
       icon: appIconHtml('icn-refresh.svg'),
       label: i18n.t('form.reloadCaptcha'),
       onClick: () => {
-        loadCaptchaImage(captchaImage);
+        void loadCaptchaImage(captchaImage);
       },
     },
   });
@@ -2240,17 +2260,18 @@ function initializeFormInputs() {
     }
   }
 
-  // Create captcha image (will be attached after input visually)
-  const captchaImage = document.createElement('img');
-  captchaImageElement = captchaImage;
-  captchaImage.className = 'captcha-image';
-  captchaImage.alt = i18n.t('form.captchaImageAlt');
-  captchaImage.onclick = () => {
-    loadCaptchaImage(captchaImage);
-  };
-
-  // Append image after input wrapper (visually attached to the same cluster)
-  captchaCluster.appendChild(captchaImage);
+  // Reload on image: real <button> for a11y (same action as refresh icon in the field)
+  const captchaImageReload = document.createElement('button');
+  captchaImageReload.type = 'button';
+  captchaImageReload.className = 'captcha-image-reload';
+  captchaImageReload.setAttribute('aria-label', i18n.t('form.reloadCaptcha'));
+  captchaImageReload.title = i18n.t('form.reloadCaptcha');
+  captchaImageReload.addEventListener('click', (e) => {
+    e.preventDefault();
+    void loadCaptchaImage(captchaImage);
+  });
+  captchaImageReload.appendChild(captchaImage);
+  captchaCluster.appendChild(captchaImageReload);
 
   // Create audio button (outside input, like OTP button)
   captchaAudioButton = document.createElement('button');
@@ -2291,6 +2312,8 @@ function initializeFormInputs() {
 
   captchaRow.appendChild(captchaAudioButton);
   captchaContainer.appendChild(captchaRow);
+  captchaContainer.appendChild(captchaError);
+  captchaInput.element.setAttribute('aria-describedby', 'captcha-error');
 
   loadCaptchaImage(captchaImage).catch(() => {});
 
@@ -4237,6 +4260,7 @@ function showBillFlowCompleteSection() {
 async function resetCaptchaAndOtpAfterBillPayment() {
   captchaInput?.setValue('');
   captchaInput?.clearValidation?.();
+  clearCaptchaExternalErrorRow();
   otpInput?.setValue('');
   otpInput?.clearValidation?.();
   if (otpPinPad) {
@@ -4664,6 +4688,12 @@ function updatePageContent() {
   }
   const captchaImg = document.querySelector('.captcha-image');
   if (captchaImg) captchaImg.setAttribute('alt', i18n.t('form.captchaImageAlt'));
+  const captchaReloadWrap = document.querySelector('.captcha-image-reload');
+  if (captchaReloadWrap) {
+    const reloadLabel = i18n.t('form.reloadCaptcha');
+    captchaReloadWrap.setAttribute('aria-label', reloadLabel);
+    captchaReloadWrap.title = reloadLabel;
+  }
   const captchaAudioBtn = document.querySelector('.captcha-audio-btn');
   if (captchaAudioBtn) captchaAudioBtn.setAttribute('aria-label', i18n.t('form.captchaAudio'));
   if (otpInput) {
