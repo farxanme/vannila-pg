@@ -263,17 +263,13 @@ function ensureOfflineErrorScreen() {
       title: i18n.t('network.offline.title'),
       description: i18n.t('network.offline.description'),
       ariaLabel: i18n.t('network.offline.title'),
+      headingId: 'payment-offline-title',
     });
   } else {
     paymentOfflineErrorScreen.updateTexts({
       title: i18n.t('network.offline.title'),
       description: i18n.t('network.offline.description'),
     });
-  }
-
-  const headingEl = offlineRoot.querySelector('.empty-state-title');
-  if (headingEl) {
-    headingEl.id = 'payment-offline-title';
   }
 
   return paymentOfflineErrorScreen;
@@ -683,16 +679,8 @@ function initTransactionExpiredEmptyState() {
     image: '/assets/images/icons/icn-calendar.svg',
     title: titleText,
     description: i18n.t('timer.transactionExpiredDescription'),
+    titleId: 'transaction-expired-title',
   });
-
-  const titleEl = root.querySelector('.empty-state-title');
-  if (titleEl) {
-    titleEl.id = 'transaction-expired-title';
-  }
-  const imgDecor = root.querySelector('.empty-state-image');
-  if (imgDecor) {
-    imgDecor.setAttribute('aria-label', titleText);
-  }
 }
 
 function syncTransactionExpiredEmptyStateI18n() {
@@ -704,10 +692,6 @@ function syncTransactionExpiredEmptyStateI18n() {
     title: titleText,
     description: i18n.t('timer.transactionExpiredDescription'),
   });
-  const imgDecor = document.querySelector('#transaction-expired-empty-root .empty-state-image');
-  if (imgDecor) {
-    imgDecor.setAttribute('aria-label', titleText);
-  }
 }
 
 function stopAndHideMainTimer() {
@@ -1576,6 +1560,8 @@ function initializeFormInputs() {
   const cardNumberLabel = hasCardListUi
     ? i18n.t('form.cardNumber.selectCard')
     : i18n.t('form.cardNumber');
+  /** After "add new card", the next focus should not reopen the mobile sheet (or desktop dropdown). */
+  let skipMobileCardListOpenOnNextCardInputFocus = false;
   cardNumberInput = new Input(cardNumberContainer, {
     id: 'card-number',
     name: 'cardNumber',
@@ -1627,6 +1613,10 @@ function initializeFormInputs() {
     },
     onFocus: () => {
       if (!hasCardListUi || !isMobileCardListViewport()) return;
+      if (skipMobileCardListOpenOnNextCardInputFocus) {
+        skipMobileCardListOpenOnNextCardInputFocus = false;
+        return;
+      }
       cardNumberInput?.blur?.();
       void toggleCardList();
     },
@@ -1681,6 +1671,10 @@ function initializeFormInputs() {
                 if (cardListSheetRef) {
                   cardListSheetRef.destroy();
                   cardListSheetRef = null;
+                }
+                skipMobileCardListOpenOnNextCardInputFocus = true;
+                if (cardDropdown) {
+                  cardDropdown.skipNextFocusOpen = true;
                 }
                 cardNumberInput.focus();
               },
@@ -4376,15 +4370,18 @@ function attachFormEvents() {
         fieldRef: otpInput,
       },
     ];
-    const isValid = validationOrder.every((entry) => {
+    let firstInvalidFieldRef = null;
+    for (const entry of validationOrder) {
       const ok = entry.validate();
       if (!ok) {
-        focusFieldAfterOtpValidationFailure(entry.fieldRef);
+        firstInvalidFieldRef = entry.fieldRef;
+        break;
       }
-      return ok;
-    });
+    }
+    const isValid = firstInvalidFieldRef == null;
 
     if (!isValid) {
+      focusFieldAfterOtpValidationFailure(firstInvalidFieldRef);
       setPayButtonState('disabled');
       errorHandler.show({
         message: i18n.t('form.validation.error'),

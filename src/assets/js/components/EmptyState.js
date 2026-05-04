@@ -9,10 +9,27 @@ export class EmptyState {
       title: options.title || '',
       description: options.description || '',
       buttons: options.buttons || [],
+      titleId: null,
       ...options,
     };
 
     this.init();
+  }
+
+  /**
+   * Keep decorative image accessible name aligned with the visible title text.
+   */
+  syncDecorativeImageAccessibleName() {
+    if (!this.element) return;
+    const titleEl = this.element.querySelector('.empty-state-title');
+    const label = (titleEl?.textContent || this.options.title || '').trim() || 'Empty state';
+    const img = this.element.querySelector('.empty-state-image');
+    if (!img) return;
+    if (img.tagName === 'SPAN' && img.getAttribute('role') === 'img') {
+      img.setAttribute('aria-label', label);
+    } else if (img.tagName === 'IMG') {
+      img.alt = label;
+    }
   }
 
   /**
@@ -54,6 +71,9 @@ export class EmptyState {
     if (this.options.title) {
       const title = document.createElement('h3');
       title.className = 'empty-state-title';
+      if (this.options.titleId) {
+        title.id = this.options.titleId;
+      }
       title.textContent = this.options.title;
       emptyState.appendChild(title);
     }
@@ -98,6 +118,7 @@ export class EmptyState {
 
     this.element = emptyState;
     this.container.appendChild(emptyState);
+    this.syncDecorativeImageAccessibleName();
   }
 
   /**
@@ -110,6 +131,7 @@ export class EmptyState {
       if (titleEl) {
         titleEl.textContent = options.title;
       }
+      this.syncDecorativeImageAccessibleName();
     }
 
     if (options.description !== undefined) {

@@ -1,4 +1,5 @@
 import { i18n } from '../utils/i18n.js';
+import { appIconHtml } from '../utils/icons.js';
 
 /**
  * Bottom Sheet Component (Mobile only with swipe down to close)
@@ -57,23 +58,40 @@ export class BottomSheet {
     sheet.className = 'bottom-sheet';
     sheet.setAttribute('role', 'dialog');
     sheet.setAttribute('aria-modal', 'true');
-    sheet.setAttribute('aria-labelledby', 'bottom-sheet-title');
 
     // Handle bar (for swipe indication)
     const handleBar = document.createElement('div');
     handleBar.className = 'bottom-sheet-handle';
     sheet.appendChild(handleBar);
 
-    // Title
-    this.titleElement = null;
+    // Header row: title (optional) + close (same control style as drawer / modal)
+    const header = document.createElement('div');
+    header.className = 'bottom-sheet-header';
+
+    const titleEl = document.createElement('div');
+    titleEl.className = 'bottom-sheet-title';
     if (this.options.title) {
-      const title = document.createElement('div');
-      title.id = 'bottom-sheet-title';
-      title.className = 'bottom-sheet-title';
-      title.textContent = this.options.title;
-      sheet.appendChild(title);
-      this.titleElement = title;
+      titleEl.id = 'bottom-sheet-title';
+      titleEl.textContent = this.options.title;
+      sheet.setAttribute('aria-labelledby', 'bottom-sheet-title');
+    } else {
+      titleEl.setAttribute('aria-hidden', 'true');
     }
+    this.titleElement = titleEl;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'bottom-sheet-close';
+    closeBtn.innerHTML = appIconHtml('icn-x.svg', 'bottom-sheet-close-icon');
+    closeBtn.setAttribute('aria-label', i18n.t('common.close'));
+    closeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.close();
+    });
+
+    header.appendChild(titleEl);
+    header.appendChild(closeBtn);
+    sheet.appendChild(header);
 
     // Content
     const content = document.createElement('div');
@@ -261,6 +279,16 @@ export class BottomSheet {
     this.options.title = title;
     if (this.titleElement) {
       this.titleElement.textContent = title;
+      const hasTitle = Boolean(String(title || '').trim());
+      if (hasTitle) {
+        this.titleElement.id = 'bottom-sheet-title';
+        this.titleElement.removeAttribute('aria-hidden');
+        this.sheetElement?.setAttribute('aria-labelledby', 'bottom-sheet-title');
+      } else {
+        this.titleElement.removeAttribute('id');
+        this.titleElement.setAttribute('aria-hidden', 'true');
+        this.sheetElement?.removeAttribute('aria-labelledby');
+      }
     }
   }
 

@@ -488,11 +488,25 @@
   cursor: grab;
 }
 
-.bottom-sheet-title {
-  padding: var(--spacing-md);
+.bottom-sheet-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--color-stroke);
+}
+
+.bottom-sheet-header .bottom-sheet-title {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
   font-size: var(--font-size-base);
   font-weight: 600;
-  text-align: center;
+  text-align: start;
+  color: var(--color-text-primary);
 }
 
 .bottom-sheet-content {
@@ -605,7 +619,10 @@
   min-width: 0;
 }
 
-.drawer-close {
+/* Dialog surface close (drawer header, modal corner, bottom sheet header) */
+.drawer-close,
+.modal-close,
+.bottom-sheet-close {
   flex-shrink: 0;
   width: 40px;
   height: 40px;
@@ -620,12 +637,16 @@
   padding: 0;
 }
 
-.drawer-close:hover {
+.drawer-close:hover,
+.modal-close:hover,
+.bottom-sheet-close:hover {
   background: var(--color-bg-light);
   color: var(--color-text-primary);
 }
 
-.drawer-close .app-icon {
+.drawer-close .app-icon,
+.modal-close .app-icon,
+.bottom-sheet-close .app-icon {
   --app-icon-size: 20px;
   width: 20px;
   height: 20px;
@@ -755,30 +776,7 @@
 .modal-close {
   position: absolute;
   top: var(--spacing-md);
-  right: var(--spacing-md);
-  width: var(--size-icon-lg);
-  height: var(--size-icon-lg);
-  border: none;
-  background: transparent;
-  font-size: var(--font-size-xl);
-  line-height: 1;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-sm);
-}
-
-.modal-close:hover {
-  background: var(--color-bg-light);
-  color: var(--color-text-primary);
-}
-
-.modal-close .modal-close-icon {
-  --app-icon-size: 20px;
-  display: block;
-  pointer-events: none;
+  inset-inline-end: var(--spacing-md);
 }
 
 .modal-title {
@@ -786,7 +784,7 @@
   font-weight: 600;
   margin-bottom: var(--spacing-lg);
   text-align: center;
-  padding-inline: calc(var(--size-icon-lg) + var(--spacing-md));
+  padding-inline: calc(40px + var(--spacing-md));
 }
 
 .modal-description {

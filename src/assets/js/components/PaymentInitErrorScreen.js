@@ -1,5 +1,6 @@
 /**
- * Payment session error in the dedicated main section (receipt-like layout), not the checkout grid.
+ * Full-width error / notice block: wraps {@link EmptyState} in `.payment-init-error` (role alert).
+ * Used for payment init failure, offline, and any caller that passes the same option shape.
  */
 import { EmptyState } from './EmptyState.js';
 
@@ -12,6 +13,7 @@ export class PaymentInitErrorScreen {
       buttons: Array.isArray(options.buttons) ? options.buttons : [],
       ariaLabel: options.ariaLabel || options.title || 'Error',
       container: options.container ?? null,
+      headingId: 'payment-init-error-heading',
       ...options,
     };
 
@@ -39,12 +41,8 @@ export class PaymentInitErrorScreen {
       title: this.options.title,
       description: this.options.description,
       buttons: this.options.buttons,
+      titleId: this.options.headingId,
     });
-
-    const headingEl = root.querySelector('.empty-state-title');
-    if (headingEl) {
-      headingEl.id = 'payment-init-error-heading';
-    }
   }
 
   /**

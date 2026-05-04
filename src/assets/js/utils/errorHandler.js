@@ -27,7 +27,7 @@ function getToastIconFileForType(type) {
 class ErrorHandler {
   constructor() {
     this.toastContainer = null;
-    /** @type {WeakMap<HTMLElement, { timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean }>} */
+    /** @type {WeakMap<HTMLElement, { timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean }>} */
     this.domMessageLifecycle = new WeakMap();
     this.initToastContainer();
   }
@@ -334,12 +334,13 @@ class ErrorHandler {
 
     let deadline = Date.now() + durationMs;
 
-    /** @type {{ timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean }} */
+    /** @type {{ timeoutId: ReturnType<typeof setTimeout> | null, onEnter: () => void, onLeave: () => void, useTimer: boolean, dismissDeferred: boolean }} */
     const state = {
       timeoutId: null,
       onEnter: () => {},
       onLeave: () => {},
       useTimer: true,
+      dismissDeferred: false,
     };
 
     const clearTimer = () => {
@@ -349,24 +350,40 @@ class ErrorHandler {
       }
     };
 
+    const finalizeOrDefer = () => {
+      if (targetElement.matches(':hover')) {
+        state.dismissDeferred = true;
+        return;
+      }
+      state.dismissDeferred = false;
+      this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+    };
+
     const scheduleDismiss = (ms) => {
       clearTimer();
       const delay = Math.max(0, Math.ceil(ms));
       if (delay === 0) {
-        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+        finalizeOrDefer();
         return;
       }
       state.timeoutId = window.setTimeout(() => {
         state.timeoutId = null;
-        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+        finalizeOrDefer();
       }, delay);
     };
 
     state.onEnter = () => {
       clearTimer();
+      state.dismissDeferred = false;
     };
 
     state.onLeave = () => {
+      if (state.dismissDeferred) {
+        state.dismissDeferred = false;
+        clearTimer();
+        this.finishDomMessage(targetElement, { domOnDismiss: onDismiss });
+        return;
+      }
       const remaining = Math.max(0, deadline - Date.now());
       deadline = Date.now() + remaining;
       scheduleDismiss(remaining);
@@ -376,6 +393,16 @@ class ErrorHandler {
     targetElement.addEventListener('mouseenter', state.onEnter);
     targetElement.addEventListener('mouseleave', state.onLeave);
     scheduleDismiss(durationMs);
+
+    // If the pointer is already over the surface when it mounts, `mouseenter` does not fire
+    // while CSS :hover still pauses the progress bar — keep JS in sync so we do not dismiss mid-hover.
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => {
+        if (targetElement.matches(':hover')) {
+          state.onEnter();
+        }
+      });
+    });
   }
 
   /**
