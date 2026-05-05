@@ -200,6 +200,11 @@ html.app-ready .app-root .main-content {
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Captcha Input Container Styles */
@@ -452,11 +457,25 @@ html.app-ready .app-root .main-content {
   height: 48px;
   min-height: 48px;
   display: flex;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
   align-self: flex-start;
   color: var(--color-primary);
   --color-icon: currentColor;
+  white-space: nowrap;
+  text-align: center;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.captcha-container .captcha-input-row .captcha-audio-btn .captcha-audio-btn-label {
+  display: block;
+  min-width: 0;
+  flex: 1 1 auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .captcha-container .captcha-input-row .captcha-audio-btn .btn-icon {

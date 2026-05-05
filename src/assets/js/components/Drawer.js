@@ -3,6 +3,7 @@
  */
 import { i18n } from '../utils/i18n.js';
 import { appIconHtml } from '../utils/icons.js';
+import { isPlausiblePhone, normalizePhoneForTel } from '../utils/phoneUtils.js';
 
 /**
  * @param {string} text
@@ -41,7 +42,7 @@ function appendDecoratedText(parent, text) {
   const value = String(text || '');
   if (!value) return;
   const tokenRegex =
-    /(https?:\/\/[^\s]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:\+?[0-9۰-۹][0-9۰-۹\- ]{6,}[0-9۰-۹])|CVV2)/g;
+    /(https?:\/\/[^\s]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:\+?[0-9۰-۹][0-9۰-۹\- ]{6,}[0-9۰-۹])|cvv2)/gi;
   let lastIndex = 0;
   let match = tokenRegex.exec(value);
   while (match) {
@@ -66,25 +67,24 @@ function appendDecoratedText(parent, text) {
       const link = document.createElement('a');
       link.className = 'drawer-tab-inline-link';
       link.href = `mailto:${token}`;
+      link.dir = 'ltr';
       link.textContent = token;
       parent.appendChild(link);
     } else if (/^(?:\+?[0-9۰-۹][0-9۰-۹\- ]{6,}[0-9۰-۹])$/.test(token)) {
       const link = document.createElement('a');
       link.className = 'drawer-tab-inline-link';
-      const normalized = token
-        .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-        .replace(/[^\d+]/g, '');
-      const digitCount = normalized.replace(/\D/g, '').length;
-      if (digitCount < 8 || digitCount > 14) {
+      const normalized = normalizePhoneForTel(token);
+      if (!isPlausiblePhone(normalized)) {
         parent.appendChild(document.createTextNode(token));
         lastIndex = index + token.length;
         match = tokenRegex.exec(value);
         continue;
       }
       link.href = `tel:${normalized}`;
+      link.dir = 'ltr';
       link.textContent = token;
       parent.appendChild(link);
-    } else if (token === 'CVV2') {
+    } else if (token.toUpperCase() === 'CVV2') {
       const cvv2 = document.createElement('span');
       cvv2.className = 'drawer-tab-cvv2-token';
       cvv2.textContent = token;
@@ -100,18 +100,31 @@ function appendDecoratedText(parent, text) {
   }
 }
 
+function splitInlineHeading(text) {
+  const raw = String(text || '').trim();
+  if (!raw) return null;
+  const match = raw.match(/^([^:\n]{2,40}):\s+(.+)$/);
+  if (!match) return null;
+  const headingPart = match[1].trim();
+  // Avoid treating URL schemes (e.g. https:) or path-like tokens as headings.
+  if (/https?$/i.test(headingPart) || headingPart.includes('/') || headingPart.includes('.')) {
+    return null;
+  }
+  return { heading: `${headingPart}:`, body: match[2].trim() };
+}
+
 function createParagraph(text) {
   const p = document.createElement('p');
   p.className = 'drawer-tab-paragraph';
-  const headingMatch = String(text || '').match(/^([^:\n]{2,80}:)\s*(.*)$/);
+  const headingMatch = splitInlineHeading(text);
   if (headingMatch) {
     const heading = document.createElement('span');
     heading.className = 'drawer-tab-inline-heading';
-    appendDecoratedText(heading, headingMatch[1]);
+    appendDecoratedText(heading, headingMatch.heading);
     p.appendChild(heading);
-    if (headingMatch[2]) {
+    if (headingMatch.body) {
       p.appendChild(document.createTextNode(' '));
-      appendDecoratedText(p, headingMatch[2]);
+      appendDecoratedText(p, headingMatch.body);
     }
   } else {
     appendDecoratedText(p, text);
@@ -135,15 +148,15 @@ function createList(lines, type) {
     const li = document.createElement('li');
     li.className = 'drawer-tab-list-item';
     const bodyText = stripListMarker(line, type);
-    const headingMatch = bodyText.match(/^([^:\n]{2,80}:)\s*(.*)$/);
+    const headingMatch = splitInlineHeading(bodyText);
     if (headingMatch) {
       const heading = document.createElement('span');
       heading.className = 'drawer-tab-inline-heading';
-      appendDecoratedText(heading, headingMatch[1]);
+      appendDecoratedText(heading, headingMatch.heading);
       li.appendChild(heading);
-      if (headingMatch[2]) {
+      if (headingMatch.body) {
         li.appendChild(document.createTextNode(' '));
-        appendDecoratedText(li, headingMatch[2]);
+        appendDecoratedText(li, headingMatch.body);
       }
     } else {
       appendDecoratedText(li, bodyText);

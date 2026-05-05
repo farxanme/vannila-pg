@@ -97,7 +97,7 @@ export function getDefaultLockCardNumberDuringOtpCooldown() {
  * Default: 00:10:00.
  */
 export function getMockCardViewTimeout() {
-  return normalizeTimeSpan(import.meta.env.VITE_MOCK_CARD_VIEW_TIMEOUT, '00:01:00');
+  return normalizeTimeSpan(import.meta.env.VITE_MOCK_CARD_VIEW_TIMEOUT, '00:05:00');
 }
 
 /**
@@ -105,7 +105,7 @@ export function getMockCardViewTimeout() {
  * Default: 00:01:00.
  */
 export function getMockReceiptViewTimeout() {
-  return normalizeTimeSpan(import.meta.env.VITE_MOCK_RECEIPT_VIEW_TIMEOUT, '00:03:00');
+  return normalizeTimeSpan(import.meta.env.VITE_MOCK_RECEIPT_VIEW_TIMEOUT, '00:01:00');
 }
 
 /**

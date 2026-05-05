@@ -26,17 +26,34 @@ export default {
   'helpDrawer.tabOtp': 'Dinamik sifre (OTP)',
   'helpDrawer.tabPayment': 'Odeme rehberi',
   'helpDrawer.securityBody':
-    'Kart sifrenizi, CVV2 ve tek kullanimlik kodlari kimseyle paylasmayin; telefonla arayan destek dahil.\n\n' +
-    'Halka acik Wi-Fi ve paylasilan cihazlarda odeme yapmayin. Sayfa adresi ve satici adini kontrol edin.\n\n' +
-    'Isiniz bitince tarayiciyi kapatin; ozellikle paylasilan bilgisayarlarda.',
+    'SEP odeme gecidi guvenli SSL protokolu ile sunulur ve adresi https://sep.shaparak.ir ile baslar. Herhangi bir bilgi girmeden once tarayicidaki adresi bu adresle karsilastirin. Herhangi bir uyumsuzlukta odemeye devam etmeyin.\n\n' +
+    'Kart sifresi, CVV2 ve tek kullanimlik sifreyi kimseyle paylasmayin; telefon destegi dahil.\n\n' +
+    'Genel aglarda, acik Wi-Fi ortamlarda ve paylasilan cihazlarda odeme yapmaktan kacinin.\n\n' +
+    'Satici adini ve odeme tutarini kontrol edin; sadece emin oldugunuzda devam edin.\n\n' +
+    'Bilgi sizmasi riskini azaltmak icin mumkun oldugunca guvenli/sanal klavye kullanin.\n\n' +
+    'Isiniz bittiginde, ozellikle paylasilan bilgisayarlarda, hesaptan cikis yapin ve tarayiciyi kapatin.\n\n' +
+    'Daha fazla bilgi, supheli magazalari bildirme veya internet satici durumu icin 021-84080 numarasini arayin ya da epay@sep.ir adresine e-posta gonderin.',
   'helpDrawer.otpBody':
-    'Dinamik sifreyi yalnizca odemeyi onaylamaya hazir oldugunuzda isteyin.\n\n' +
-    'Kodu suresi dolmadan girin. Suresi dolduysa yeni kod alin; eski kodlari kullanmayin.\n\n' +
-    'Birden fazla kod geldiyse en sonuncusunu kullanin ve kimseye soylemeyin.',
+    'Dinamik sifre, kart internet sifresi yerine kullanilan tek kullanimlik bir koddur.\n\n' +
+    'Dinamik sifreyi yalnizca odemeyi son kez onaylamaya hazir oldugunuzda isteyin. Kodu suresi dolmadan girin; sure dolarsa yeni kod alin ve eski kodlari kullanmayin.\n\n' +
+    'Birden fazla kod geldiyse sadece en son gecerli kodu girin ve baskalariyla paylasmayin.\n\n' +
+    'Adim 1: Kartinizi veren bankanin talimatina gore dinamik sifreyi aktif edin.\n\n' +
+    'Adim 2: Dinamik sifreyi bankanin bildirdigi yontemlerden biriyle alin:\n' +
+    '1- Banka uygulamasi, internet bankaciligi veya mobil bankacilik.\n' +
+    '2- Bankanizin USSD kodu.\n' +
+    '3- Odeme gecidindeki "OTP Al" dugmesi.\n\n' +
+    'Adim 3: Kodu aldiktan sonra "Ikinci Sifre/OTP" alanina girin, sonra diger bilgileri tamamlayip odemeyi bitirin.',
   'helpDrawer.paymentBody':
-    'Kart numarasi, son kullanma ve CVV2 bilgilerini dikkatle girin. Tutari ve saticiyi odemeden once dogrulayin.\n\n' +
-    'Basarili odemeden sonra dekontu urun veya hizmet teslimine kadar saklayin.\n\n' +
-    'Bir sey yanlis gorunuyorsa islemi iptal edin; resmi kanallardan banka veya saticiya danisin.',
+    'Odeme icin asagidaki bilgileri dikkatle girin:\n' +
+    '1- Kart numarasi: Kart uzerinde 4x4 formatinda yazilan 16 hanedir.\n' +
+    '2- CVV2: Kartin on veya arka yuzunde bulunan 3 ya da 4 haneli guvenlik kodudur.\n' +
+    '3- Son kullanma tarihi: Kart numarasinin yanindaki ay ve yil bilgisidir.\n' +
+    '4- Dinamik sifre: Ikinci sifre veya internet sifresi olarak da gorunebilir; bankadan veya bankanin ATM' +
+    'lerinden alinip degistirilebilir.\n' +
+    '5- Guvenlik kodu (captcha): Odeme sayfasindaki gorselde yer alan sayisal koddur ve ilgili alana girilmelidir.\n\n' +
+    'Odemeyi tamamlamadan once tutari ve satici adini kontrol edin.\n\n' +
+    'Odeme basarili olduktan sonra, urun veya hizmet teslim edilene kadar dekontu saklayin.\n\n' +
+    'Herhangi bir anormallik gorurseniz odemeyi durdurun ve banka veya satici ile resmi kanallardan iletisime gecin.',
 
   // Header
   'header.title': 'Ödeme Ağ Geçidi',
@@ -229,6 +246,7 @@ export default {
   'bill.status.ready': 'Odeme icin hazir',
   'bill.action.viewReceipt': 'Dekontu gor',
   'bill.selector.title': 'Fatura sec',
+  'bill.selector.subtitle': 'Asagidaki faturalardan birini secin',
   'bill.selector.required': 'Fatura secimi zorunludur',
   'bill.hint.payableCount': 'Odeme icin hazir: {{count}}',
   'bill.hint.paidCount': 'Odendi: {{count}}',

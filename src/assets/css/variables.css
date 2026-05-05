@@ -84,6 +84,23 @@
 
   --color-info: var(--color-info-default);
 
+  /* Alert palette (toast + dom message) */
+  --color-alert-success-border: #00ab84;
+  --color-alert-success-bg: #e5f7f4;
+  --color-alert-success-text: #007f62;
+
+  --color-alert-error-border: #fe3259;
+  --color-alert-error-bg: #fff0f2;
+  --color-alert-error-text: #e4002b;
+
+  --color-alert-info-border: #83b0ef;
+  --color-alert-info-bg: #edf4fc;
+  --color-alert-info-text: #307fe2;
+
+  --color-alert-warning-border: #d8be52;
+  --color-alert-warning-bg: #fff8dc;
+  --color-alert-warning-text: #856f0a;
+
   /* Surfaces */
   --color-controller: var(--color-gray-2);
 

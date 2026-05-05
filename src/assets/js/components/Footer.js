@@ -2,17 +2,9 @@
  * Shared Footer Component
  */
 import { i18n } from '../utils/i18n.js';
+import { normalizePhoneForTel } from '../utils/phoneUtils.js';
 
 const sepSiteUrl = 'https://sep.ir';
-
-function normalizePhoneHref(phone) {
-  const raw = String(phone || '').trim();
-  if (!raw) return '';
-  const latin = raw
-    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-    .replace(/[^\d+]/g, '');
-  return latin || raw;
-}
 
 export class Footer {
   constructor(options = {}) {
@@ -81,7 +73,7 @@ export class Footer {
         support.append(' ');
         const phoneLink = document.createElement('a');
         phoneLink.className = 'footer-support-link';
-        phoneLink.href = `tel:${normalizePhoneHref(this.options.supportPhone)}`;
+        phoneLink.href = `tel:${normalizePhoneForTel(this.options.supportPhone)}`;
         phoneLink.textContent = this.options.supportPhone;
         phoneLink.dir = 'ltr';
         support.appendChild(phoneLink);
@@ -158,7 +150,7 @@ export class Footer {
     const phoneLink = this.element?.querySelector('.footer-support-link');
     if (phoneLink) {
       phoneLink.textContent = phone;
-      phoneLink.setAttribute('href', `tel:${normalizePhoneHref(phone)}`);
+      phoneLink.setAttribute('href', `tel:${normalizePhoneForTel(phone)}`);
     }
   }
 

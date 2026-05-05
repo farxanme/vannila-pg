@@ -3437,6 +3437,7 @@ function renderBillListSection(bills) {
     content.appendChild(ul);
     const sheet = new BottomSheet({
       title: i18n.t('bill.selector.title'),
+      subtitle: i18n.t('bill.selector.subtitle'),
       content,
       scrollable: true,
       onClose: () => {

@@ -27,17 +27,33 @@ export default {
   'helpDrawer.tabOtp': 'Dynamic password (OTP)',
   'helpDrawer.tabPayment': 'Payment guide',
   'helpDrawer.securityBody':
-    'Never share your card password, CVV2, or one-time codes with anyone, including phone support.\n\n' +
-    'Avoid paying on public Wi-Fi or shared devices. Always check that the page address and merchant name match your purchase.\n\n' +
-    'Log out or close the browser when you are done, especially on shared computers.',
+    'SEP online payment gateway is provided over secure SSL and starts with https://sep.shaparak.ir. Before entering any card details, compare the address shown in your browser with this address. If there is any mismatch, do not continue the payment.\n\n' +
+    'Never share your card password, CVV2, or one-time password with anyone, including phone support.\n\n' +
+    'Avoid paying on public networks, open Wi-Fi, or shared devices.\n\n' +
+    'Verify the merchant name and payable amount, and continue only if everything matches your purchase.\n\n' +
+    'To reduce the risk of information disclosure, use the secure/virtual keyboard whenever possible.\n\n' +
+    'When finished, especially on shared computers, sign out and close the browser.\n\n' +
+    'For more information, reporting suspicious stores, or checking internet-merchant status, call 021-84080 or email epay@sep.ir.',
   'helpDrawer.otpBody':
-    'Request the dynamic password only when you are ready to confirm the payment.\n\n' +
-    'Enter the code in the OTP field before it expires. If it expires, request a new code and do not reuse an old one.\n\n' +
-    'If several codes were sent, use the latest one. Do not tell the code to anyone else.',
+    'A dynamic password is a one-time code used instead of your card internet password.\n\n' +
+    'Request the dynamic password only when you are ready for final payment confirmation. Enter the code before it expires; if it expires, request a new code and do not reuse older ones.\n\n' +
+    'If you receive multiple codes, enter only the latest valid code and never share it with others.\n\n' +
+    'Step 1: Activate dynamic password according to your card issuer bank instructions.\n\n' +
+    'Step 2: Receive dynamic password using one of the bank-provided methods:\n' +
+    '1- Bank app, internet banking, or mobile banking.\n' +
+    '2- Your issuer bank USSD code.\n' +
+    '3- The "Get OTP" button on the payment gateway.\n\n' +
+    'Step 3: After receiving the code, enter it in the "Second Password/OTP" field, then complete the rest of the information and finalize payment.',
   'helpDrawer.paymentBody':
-    'Enter your card number, expiry, and CVV2 carefully. Confirm the payable amount and merchant name before paying.\n\n' +
-    'After a successful payment, keep the receipt until the goods or service is delivered.\n\n' +
-    'If something looks wrong, cancel and contact your bank or the merchant through official channels.',
+    'To complete payment, enter the following information carefully:\n' +
+    '1- Card number: 16 digits, printed on the card in four 4-digit groups.\n' +
+    '2- CVV2: A 3- or 4-digit security code printed on the front or back of the card.\n' +
+    '3- Expiry date: Includes expiry month and year, printed near the card number.\n' +
+    '4- Dynamic password: May also appear as second password or internet password, and can be obtained/changed via the issuer bank or its ATMs.\n' +
+    '5- Security code (captcha): A numeric code shown in the payment page image, which must be entered in the related field.\n\n' +
+    'Before finalizing payment, verify the payable amount and merchant name.\n\n' +
+    'After a successful payment, keep the receipt until goods or service delivery.\n\n' +
+    'If you notice anything unusual, stop the payment and follow up through official bank or merchant channels.',
 
   // Header
   'header.title': 'Payment Gateway',
@@ -230,6 +246,7 @@ export default {
   'bill.status.ready': 'Ready to pay',
   'bill.action.viewReceipt': 'View receipt',
   'bill.selector.title': 'Select bill',
+  'bill.selector.subtitle': 'Select one of the bills below',
   'bill.selector.required': 'Selecting a bill is required',
   'bill.hint.payableCount': 'Ready to pay: {{count}}',
   'bill.hint.paidCount': 'Paid: {{count}}',
