@@ -514,6 +514,10 @@
     font-size: var(--font-size-base);
   }
 
+  .header.header-toolbar-title-active .header-title {
+    display: none;
+  }
+
   .header-inner {
     margin-top: 10px;
     height: 80px;
@@ -579,6 +583,7 @@
 
 .footer-copyright-brand-link {
   color: var(--color-text-tertiary);
+  transition: color var(--transition-base);
 }
 
 .footer-copyright-brand-link:hover {
@@ -595,6 +600,7 @@
   color: var(--color-text-accent);
   text-decoration: none;
   font-weight: 600;
+  transition: color var(--transition-base);
 }
 
 .footer-support-link:hover {
@@ -922,8 +928,8 @@
 
 /* Bank Logo */
 .bank-logo {
-  width: 40px;
-  height: 40px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
 }
 

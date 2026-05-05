@@ -30,6 +30,7 @@ function buildModalLeadVisual(options) {
 // Apply i18n keys onto modal options (mutates options).
 function resolveModalOptionStrings(options) {
   if (options.titleKey) options.title = i18n.t(options.titleKey);
+  if (options.subtitleKey) options.subtitle = i18n.t(options.subtitleKey);
   if (options.descriptionKey) options.description = i18n.t(options.descriptionKey);
   if (options.imageAltKey) options.imageAlt = i18n.t(options.imageAltKey);
   if (options.closeButtonAriaLabelKey) {
@@ -44,10 +45,12 @@ export class Modal {
   constructor(options = {}) {
     this.options = {
       titleKey: options.titleKey || '',
+      subtitleKey: options.subtitleKey || '',
       descriptionKey: options.descriptionKey || '',
       imageAltKey: options.imageAltKey || '',
       closeButtonAriaLabelKey: options.closeButtonAriaLabelKey || '',
       title: options.title || '',
+      subtitle: options.subtitle || '',
       description: options.description || '',
       content: options.content || '',
       image: options.image || null,
@@ -136,6 +139,7 @@ export class Modal {
   initBottomSheet() {
     this.modalInstance = new BottomSheet({
       title: this.options.title,
+      subtitle: this.options.subtitle,
       content: this.createMobileContent(),
       buttons: this.normalizeButtonsForSheet(),
       buttonsStacked: this.options.buttonsStacked,
@@ -225,6 +229,16 @@ export class Modal {
       content.appendChild(title);
     }
 
+    if (this.options.subtitle) {
+      const subtitle = document.createElement('p');
+      subtitle.className = 'modal-subtitle';
+      subtitle.textContent = this.options.subtitle;
+      if (this.options.subtitleKey) {
+        subtitle.setAttribute('data-i18n', this.options.subtitleKey);
+      }
+      content.appendChild(subtitle);
+    }
+
     if (this.options.image) {
       const lead = buildModalLeadVisual(this.options);
       this.modalImageRef = lead;
@@ -309,6 +323,9 @@ export class Modal {
     if (this.isMobile && this.modalInstance) {
       if (this.options.titleKey) {
         this.modalInstance.updateTitle(i18n.t(this.options.titleKey));
+      }
+      if (this.options.subtitleKey) {
+        this.modalInstance.updateSubtitle(i18n.t(this.options.subtitleKey));
       }
       const sheet = this.modalInstance.sheetElement;
       if (sheet) {

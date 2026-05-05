@@ -8,6 +8,7 @@ export class BottomSheet {
   constructor(options = {}) {
     this.options = {
       title: options.title || '',
+      subtitle: options.subtitle || '',
       content: options.content || '',
       buttons: options.buttons || [],
       scrollable: options.scrollable !== false,
@@ -79,6 +80,17 @@ export class BottomSheet {
     }
     this.titleElement = titleEl;
 
+    const subtitleEl = document.createElement('p');
+    subtitleEl.className = 'bottom-sheet-subtitle';
+    if (this.options.subtitle) {
+      subtitleEl.id = 'bottom-sheet-subtitle';
+      subtitleEl.textContent = this.options.subtitle;
+      sheet.setAttribute('aria-describedby', 'bottom-sheet-subtitle');
+    } else {
+      subtitleEl.setAttribute('aria-hidden', 'true');
+    }
+    this.subtitleElement = subtitleEl;
+
     const closeBtn = document.createElement('button');
     closeBtn.type = 'button';
     closeBtn.className = 'bottom-sheet-close';
@@ -90,6 +102,7 @@ export class BottomSheet {
     });
 
     header.appendChild(titleEl);
+    header.appendChild(subtitleEl);
     header.appendChild(closeBtn);
     sheet.appendChild(header);
 
@@ -288,6 +301,27 @@ export class BottomSheet {
         this.titleElement.removeAttribute('id');
         this.titleElement.setAttribute('aria-hidden', 'true');
         this.sheetElement?.removeAttribute('aria-labelledby');
+      }
+    }
+  }
+
+  /**
+   * Update subtitle text (optional).
+   * @param {string} subtitle - New subtitle text
+   */
+  updateSubtitle(subtitle) {
+    this.options.subtitle = subtitle;
+    if (this.subtitleElement) {
+      this.subtitleElement.textContent = subtitle;
+      const hasSubtitle = Boolean(String(subtitle || '').trim());
+      if (hasSubtitle) {
+        this.subtitleElement.id = 'bottom-sheet-subtitle';
+        this.subtitleElement.removeAttribute('aria-hidden');
+        this.sheetElement?.setAttribute('aria-describedby', 'bottom-sheet-subtitle');
+      } else {
+        this.subtitleElement.removeAttribute('id');
+        this.subtitleElement.setAttribute('aria-hidden', 'true');
+        this.sheetElement?.removeAttribute('aria-describedby');
       }
     }
   }

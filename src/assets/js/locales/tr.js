@@ -149,6 +149,8 @@ export default {
   // Card List
   'cardList.addNew': 'Yeni Kart Ekle',
   'cardList.manage': 'Kartları Yönet',
+  'cardList.sheetTitle': 'Banka karti sec',
+  'cardList.sheetSubtitle': 'Son zamanlarda asagidaki banka kartlarini kullandiniz',
   'cardList.empty': 'Gösterilecek kayıtlı kart yok',
   'cardList.removeNotAllowed': 'Bu kart kaldırılamaz.',
   'cardList.removeSuccess': 'Kart başarıyla kaldırıldı.',

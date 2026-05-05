@@ -149,6 +149,8 @@ export default {
   // Card List
   'cardList.addNew': '添加新银行卡',
   'cardList.manage': '管理银行卡',
+  'cardList.sheetTitle': '选择银行卡',
+  'cardList.sheetSubtitle': '您最近使用了以下银行卡',
   'cardList.empty': '暂无可显示的已保存银行卡',
   'cardList.removeNotAllowed': '无法移除此银行卡。',
   'cardList.removeSuccess': '银行卡已移除。',

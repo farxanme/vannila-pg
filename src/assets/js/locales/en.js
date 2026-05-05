@@ -150,6 +150,8 @@ export default {
   // Card List
   'cardList.addNew': 'Add New Card',
   'cardList.manage': 'Manage Cards',
+  'cardList.sheetTitle': 'Select Bank Card',
+  'cardList.sheetSubtitle': 'You recently used the following bank cards',
   'cardList.empty': 'No saved card to display',
   'cardList.removeNotAllowed': 'This card cannot be removed.',
   'cardList.removeSuccess': 'Card removed successfully.',

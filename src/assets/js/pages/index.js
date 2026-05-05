@@ -183,7 +183,7 @@ function syncOtpFieldTexts() {
     otpLabelElement.textContent = i18n.t(otpKeys.labelKey);
   }
   if (otpInput) {
-    otpInput.setPlaceholder(i18n.t(otpKeys.placeholderKey));
+    otpInput.setPlaceholder('');
     otpInput.options.requiredMessageKey = '';
     otpInput.options.requiredMessage = i18n.t(otpKeys.requiredKey);
   }
@@ -451,6 +451,13 @@ function setHeaderTitleDefault() {
   headerTitleEl.textContent = i18n.t('header.title');
 }
 
+function syncHeaderTitleVisibility(activeSectionId) {
+  const headerEl = header?.element;
+  if (!headerEl) return;
+  const showToolbarTitleOnly = activeSectionId !== 'payment-flow-section';
+  headerEl.classList.toggle('header-toolbar-title-active', showToolbarTitleOnly);
+}
+
 function setActivePrimarySection(activeSectionId, options = {}) {
   const includeOffline = options.includeOffline === true;
   const sectionIds = [
@@ -471,9 +478,16 @@ function setActivePrimarySection(activeSectionId, options = {}) {
     section.hidden = sectionId !== activeSectionId;
   });
 
+  // When leaving the payment flow (timeout/offline/error/redirect/receipt),
+  // close any open mobile/overlay surfaces to prevent stale stacked sheets.
+  if (activeSectionId !== 'payment-flow-section') {
+    closeActiveSheetSurfaces();
+  }
+
   if (activeSectionId !== 'payment-flow-section') {
     setHeaderTitleDefault();
   }
+  syncHeaderTitleVisibility(activeSectionId);
 }
 
 /**
@@ -2106,7 +2120,8 @@ function initializeFormInputs() {
     }
 
     const sheet = new BottomSheet({
-      title: i18n.t('form.cardNumber.selectCard'),
+      title: i18n.t('cardList.sheetTitle'),
+      subtitle: i18n.t('cardList.sheetSubtitle'),
       content,
       scrollable: true,
       onClose: () => {
@@ -2535,7 +2550,7 @@ function initializeFormInputs() {
     type: 'text',
     autocomplete: 'off',
     label: '',
-    placeholder: i18n.t('form.captcha.placeholder'),
+    placeholder: '',
     required: true,
     requiredMessageKey: 'form.captcha.required',
     clearButtonAriaLabel: i18n.t('common.clear'),
@@ -2672,7 +2687,7 @@ function initializeFormInputs() {
     type: 'password',
     autocomplete: 'off',
     label: '',
-    placeholder: i18n.t(getOtpFieldTranslationKeys().placeholderKey),
+    placeholder: '',
     required: false,
     clearButtonAriaLabel: i18n.t('common.clear'),
     validator: (value) => {
@@ -3275,7 +3290,9 @@ function renderBillListSection(bills) {
     enrichedBills.map((bill) => {
       const isSelected = getBillKey(bill) === getBillKey(selectedBillForApi);
       const billPaid = isBillPaidForList(bill);
-      const billTypeLabel = bill.billTypeKey ? i18n.t(bill.billTypeKey) : i18n.t('bill.type.unknown');
+      const billTypeLabel = bill.billTypeKey
+        ? i18n.t(bill.billTypeKey)
+        : i18n.t('bill.type.unknown');
       const billProviderLogo = getBillProviderLogo(bill.billTypeKey);
       return {
         value: getBillKey(bill),
@@ -5041,7 +5058,7 @@ function updatePageContent() {
     expiryYearInput.setClearButtonAriaLabel(i18n.t('common.clear'));
   }
   if (captchaInput) {
-    captchaInput.setPlaceholder(i18n.t('form.captcha.placeholder'));
+    captchaInput.setPlaceholder('');
     captchaInput.setRightActionAriaLabel(i18n.t('form.reloadCaptcha'));
     captchaInput.setClearButtonAriaLabel(i18n.t('common.clear'));
     if (captchaLabelElement) {

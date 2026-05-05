@@ -19,12 +19,176 @@ function buildBodyParagraphs(text) {
     return wrap;
   }
   parts.forEach((chunk) => {
-    const p = document.createElement('p');
-    p.className = 'drawer-tab-paragraph';
-    p.textContent = chunk;
-    wrap.appendChild(p);
+    appendChunkContent(wrap, chunk);
   });
   return wrap;
+}
+
+function getListLineType(line) {
+  if (/^\d+[-.)]\s+/.test(line)) return 'ordered';
+  if (/^[-*•]\s+/.test(line)) return 'unordered';
+  return null;
+}
+
+function stripListMarker(line, type) {
+  if (type === 'ordered') {
+    return line.replace(/^\d+[-.)]\s+/, '').trim();
+  }
+  return line.replace(/^[-*•]\s+/, '').trim();
+}
+
+function appendDecoratedText(parent, text) {
+  const value = String(text || '');
+  if (!value) return;
+  const tokenRegex =
+    /(https?:\/\/[^\s]+|[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}|(?:\+?[0-9۰-۹][0-9۰-۹\- ]{6,}[0-9۰-۹])|CVV2)/g;
+  let lastIndex = 0;
+  let match = tokenRegex.exec(value);
+  while (match) {
+    const index = match.index;
+    if (index > lastIndex) {
+      parent.appendChild(document.createTextNode(value.slice(lastIndex, index)));
+    }
+    const token = match[0];
+    if (/^https?:\/\//.test(token)) {
+      const link = document.createElement('a');
+      link.className = 'drawer-tab-inline-link';
+      if (/^https:\/\/sep\.shaparak\.ir/i.test(token)) {
+        link.classList.add('drawer-tab-critical-url');
+      }
+      link.href = token;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.dir = 'ltr';
+      link.textContent = token;
+      parent.appendChild(link);
+    } else if (token.includes('@')) {
+      const link = document.createElement('a');
+      link.className = 'drawer-tab-inline-link';
+      link.href = `mailto:${token}`;
+      link.textContent = token;
+      parent.appendChild(link);
+    } else if (/^(?:\+?[0-9۰-۹][0-9۰-۹\- ]{6,}[0-9۰-۹])$/.test(token)) {
+      const link = document.createElement('a');
+      link.className = 'drawer-tab-inline-link';
+      const normalized = token
+        .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+        .replace(/[^\d+]/g, '');
+      const digitCount = normalized.replace(/\D/g, '').length;
+      if (digitCount < 8 || digitCount > 14) {
+        parent.appendChild(document.createTextNode(token));
+        lastIndex = index + token.length;
+        match = tokenRegex.exec(value);
+        continue;
+      }
+      link.href = `tel:${normalized}`;
+      link.textContent = token;
+      parent.appendChild(link);
+    } else if (token === 'CVV2') {
+      const cvv2 = document.createElement('span');
+      cvv2.className = 'drawer-tab-cvv2-token';
+      cvv2.textContent = token;
+      parent.appendChild(cvv2);
+    } else {
+      parent.appendChild(document.createTextNode(token));
+    }
+    lastIndex = index + token.length;
+    match = tokenRegex.exec(value);
+  }
+  if (lastIndex < value.length) {
+    parent.appendChild(document.createTextNode(value.slice(lastIndex)));
+  }
+}
+
+function createParagraph(text) {
+  const p = document.createElement('p');
+  p.className = 'drawer-tab-paragraph';
+  const headingMatch = String(text || '').match(/^([^:\n]{2,80}:)\s*(.*)$/);
+  if (headingMatch) {
+    const heading = document.createElement('span');
+    heading.className = 'drawer-tab-inline-heading';
+    appendDecoratedText(heading, headingMatch[1]);
+    p.appendChild(heading);
+    if (headingMatch[2]) {
+      p.appendChild(document.createTextNode(' '));
+      appendDecoratedText(p, headingMatch[2]);
+    }
+  } else {
+    appendDecoratedText(p, text);
+  }
+  return p;
+}
+
+function createList(lines, type) {
+  const list = document.createElement(type === 'ordered' ? 'ol' : 'ul');
+  list.className = `drawer-tab-list drawer-tab-list-${type}`;
+  if (type === 'ordered') {
+    const first = lines[0]?.match(/^(\d+)[-.)]\s+/);
+    if (first?.[1]) {
+      const start = Number(first[1]);
+      if (Number.isFinite(start) && start > 1) {
+        list.start = start;
+      }
+    }
+  }
+  lines.forEach((line) => {
+    const li = document.createElement('li');
+    li.className = 'drawer-tab-list-item';
+    const bodyText = stripListMarker(line, type);
+    const headingMatch = bodyText.match(/^([^:\n]{2,80}:)\s*(.*)$/);
+    if (headingMatch) {
+      const heading = document.createElement('span');
+      heading.className = 'drawer-tab-inline-heading';
+      appendDecoratedText(heading, headingMatch[1]);
+      li.appendChild(heading);
+      if (headingMatch[2]) {
+        li.appendChild(document.createTextNode(' '));
+        appendDecoratedText(li, headingMatch[2]);
+      }
+    } else {
+      appendDecoratedText(li, bodyText);
+    }
+    list.appendChild(li);
+  });
+  return list;
+}
+
+function appendChunkContent(wrap, chunk) {
+  const lines = String(chunk || '')
+    .split('\n')
+    .map((line) => line.trim())
+    .filter(Boolean);
+  if (lines.length === 0) return;
+
+  const firstListIndex = lines.findIndex((line) => Boolean(getListLineType(line)));
+  if (firstListIndex === -1) {
+    wrap.appendChild(createParagraph(chunk));
+    return;
+  }
+
+  const leadText = lines.slice(0, firstListIndex).join(' ').trim();
+  if (leadText) {
+    wrap.appendChild(createParagraph(leadText));
+  }
+
+  let i = firstListIndex;
+  while (i < lines.length) {
+    const lineType = getListLineType(lines[i]);
+    if (!lineType) {
+      const tail = lines.slice(i).join(' ').trim();
+      if (tail) {
+        wrap.appendChild(createParagraph(tail));
+      }
+      break;
+    }
+
+    const listLines = [];
+    while (i < lines.length && getListLineType(lines[i]) === lineType) {
+      listLines.push(lines[i]);
+      i += 1;
+    }
+    wrap.appendChild(createList(listLines, lineType));
+  }
 }
 
 export class Drawer {

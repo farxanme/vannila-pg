@@ -147,6 +147,8 @@ export default {
   // Card List
   'cardList.addNew': 'إضافة بطاقة جديدة',
   'cardList.manage': 'إدارة البطاقات',
+  'cardList.sheetTitle': 'اختيار البطاقة البنكية',
+  'cardList.sheetSubtitle': 'لقد استخدمت مؤخراً البطاقات البنكية التالية',
   'cardList.empty': 'لا توجد بطاقة محفوظة للعرض',
   'cardList.removeNotAllowed': 'لا يمكن إزالة هذه البطاقة.',
   'cardList.removeSuccess': 'تمت إزالة البطاقة بنجاح.',

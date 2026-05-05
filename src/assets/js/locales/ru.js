@@ -150,6 +150,8 @@ export default {
   // Card List
   'cardList.addNew': 'Добавить новую карту',
   'cardList.manage': 'Управление картами',
+  'cardList.sheetTitle': 'Выбор банковской карты',
+  'cardList.sheetSubtitle': 'Вы недавно использовали следующие банковские карты',
   'cardList.empty': 'Нет сохранённой карты для отображения',
   'cardList.removeNotAllowed': 'Эту карту нельзя удалить.',
   'cardList.removeSuccess': 'Карта успешно удалена.',
