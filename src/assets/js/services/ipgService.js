@@ -5,17 +5,26 @@ import { getIpgBaseUrl, useIpgMock } from '../config/env.js';
 import { getSessionQueryParams, getSessionJsonBody } from './paymentInitData.js';
 import {
   mockGetTransactionResponse,
+  mockGetTransactionFailedResponse,
   mockGetUserCardsResponse,
+  mockGetUserCardsFailedResponse,
   mockGetBankBinsResponse,
   mockSendOtpResponse,
+  mockSendOtpFailedResponse,
   mockPayTransactionResponse,
+  mockPayTransactionFailedCanRetryResponse,
+  mockPayTransactionFailedNoRetryResponse,
   mockReceiptRedirectParamsResponse,
+  mockReceiptRedirectParamsFailedResponse,
   mockCancelTransactionResponse,
+  mockCancelTransactionFailedResponse,
   mockDeActiveUserCardResponse,
+  mockDeActiveUserCardFailedResponse,
   mockDelay,
 } from '../mocks/ipgMocks.js';
 
 const IPG_SUCCESS = 2000;
+const mockFailureRate = 0.35;
 
 /**
  * @param {string} path - path under /v2/ipg (e.g. '/transaction')
@@ -110,13 +119,50 @@ function toQueryString(params) {
   return new URLSearchParams(params).toString();
 }
 
+function cloneMock(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+function shouldMockFail() {
+  return Math.random() < mockFailureRate;
+}
+
+function getMockFailureMessage(response, fallback = 'Mock request failed') {
+  const firstValidationError = response?.validationErrors?.find(
+    (item) => item && (item.message || typeof item === 'string')
+  );
+  if (firstValidationError) {
+    return typeof firstValidationError === 'string'
+      ? firstValidationError
+      : firstValidationError.message;
+  }
+  return response?.statusTitle || fallback;
+}
+
+function pickMockResponse(successResponse, failureResponse = null) {
+  if (!failureResponse) {
+    return cloneMock(successResponse);
+  }
+  return shouldMockFail() ? cloneMock(failureResponse) : cloneMock(successResponse);
+}
+
+function ensureSuccessfulMockResponse(response, fallbackMessage) {
+  if (response?.statusCode === IPG_SUCCESS) {
+    return response;
+  }
+  throw new Error(getMockFailureMessage(response, fallbackMessage));
+}
+
 /**
  * GET /transaction — transaction + merchant + appSettings
  */
 export async function getTransaction() {
   if (useIpgMock()) {
     await mockDelay();
-    return mockGetTransactionResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockGetTransactionResponse, mockGetTransactionFailedResponse),
+      'Failed to load transaction'
+    );
   }
   const q = requireSessionQuery();
   return ipgFetch(`/transaction?${toQueryString(q)}`, { method: 'GET' });
@@ -128,7 +174,10 @@ export async function getTransaction() {
 export async function getUserCards() {
   if (useIpgMock()) {
     await mockDelay();
-    return mockGetUserCardsResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockGetUserCardsResponse, mockGetUserCardsFailedResponse),
+      'Failed to load saved cards'
+    );
   }
   const q = requireSessionQuery();
   return ipgFetch(`/user/cards?${toQueryString(q)}`, { method: 'GET' });
@@ -140,7 +189,10 @@ export async function getUserCards() {
 export async function getBankBins() {
   if (useIpgMock()) {
     await mockDelay();
-    return mockGetBankBinsResponse;
+    if (shouldMockFail()) {
+      throw new Error('Failed to load bank bins in mock mode.');
+    }
+    return cloneMock(mockGetBankBinsResponse);
   }
   const scriptText = await ipgFetchText('/base-data/bank-bins.js', { method: 'GET' });
   return parseBankBinsScript(scriptText);
@@ -154,7 +206,10 @@ export async function getBankBins() {
 export async function sendTransactionOtp(body, captchaHeaders = {}) {
   if (useIpgMock()) {
     await mockDelay();
-    return mockSendOtpResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockSendOtpResponse, mockSendOtpFailedResponse),
+      'Failed to request OTP'
+    );
   }
   const session = requireSessionBody();
   const payload = { ...session, ...body };
@@ -176,18 +231,45 @@ export async function sendTransactionOtp(body, captchaHeaders = {}) {
 export async function payTransaction(body, captchaHeaders = {}) {
   if (useIpgMock()) {
     await mockDelay();
-    return mockPayTransactionResponse;
+    const failedResponse = shouldMockFail()
+      ? Math.random() < 0.5
+        ? mockPayTransactionFailedCanRetryResponse
+        : mockPayTransactionFailedNoRetryResponse
+      : null;
+    return pickMockResponse(mockPayTransactionResponse, failedResponse);
   }
   const session = requireSessionBody();
   const payload = { ...session, ...body };
-  return ipgFetch('/transaction/pay', {
+  const base = getIpgBaseUrl();
+  if (!base) {
+    throw new Error('IPG base URL is not configured');
+  }
+  const url = `${base}/v2/ipg/transaction/pay`;
+  const res = await fetch(url, {
     method: 'POST',
     body: JSON.stringify(payload),
+    credentials: 'include',
     headers: {
+      'Content-Type': 'application/json',
       CaptchaToken: captchaHeaders.captchaToken,
       CaptchaResponse: captchaHeaders.captchaResponse,
     },
   });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(json.statusTitle || json.message || `HTTP ${res.status}`);
+  }
+  if (json.statusCode !== undefined && json.statusCode !== IPG_SUCCESS) {
+    const payReceipt = json?.data?.paymentReceipt;
+    if (payReceipt && typeof payReceipt === 'object') {
+      return json;
+    }
+    const msg = json.validationErrors?.length
+      ? json.validationErrors.map((e) => e.message || e).join(', ')
+      : json.statusTitle || 'Request failed';
+    throw new Error(msg);
+  }
+  return json;
 }
 
 /**
@@ -196,7 +278,10 @@ export async function payTransaction(body, captchaHeaders = {}) {
 export async function getReceiptRedirectParams() {
   if (useIpgMock()) {
     await mockDelay();
-    return mockReceiptRedirectParamsResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockReceiptRedirectParamsResponse, mockReceiptRedirectParamsFailedResponse),
+      'Failed to load receipt redirect params'
+    );
   }
   const q = requireSessionQuery();
   return ipgFetch(`/transaction/receipt/redirect-params?${toQueryString(q)}`, { method: 'GET' });
@@ -208,7 +293,10 @@ export async function getReceiptRedirectParams() {
 export async function cancelTransaction() {
   if (useIpgMock()) {
     await mockDelay();
-    return mockCancelTransactionResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockCancelTransactionResponse, mockCancelTransactionFailedResponse),
+      'Failed to cancel transaction'
+    );
   }
   const session = requireSessionBody();
   return ipgFetch('/transaction/cancel', {
@@ -224,12 +312,18 @@ export async function cancelTransaction() {
 export async function deActiveUserCard(cardFields) {
   if (useIpgMock()) {
     await mockDelay();
-    return mockDeActiveUserCardResponse;
+    return ensureSuccessfulMockResponse(
+      pickMockResponse(mockDeActiveUserCardResponse, mockDeActiveUserCardFailedResponse),
+      'Failed to de-activate card'
+    );
   }
   const session = requireSessionBody();
   const payload = { ...session, ...cardFields };
   return ipgFetch('/user/cards/de-active', {
     method: 'POST',
     body: JSON.stringify(payload),
+    headers: {
+      'Content-Type': 'application/json',
+    },
   });
 }

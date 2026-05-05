@@ -46,10 +46,12 @@ export class EmptyState {
     const emptyState = document.createElement('div');
     emptyState.className = 'empty-state';
 
-    // Image / SVG as CSS mask (monochrome SVG + theme color via .app-icon)
+    // Image / SVG as CSS mask (monochrome SVG + theme color via .app-icon).
+    // Full-color illustrations under assets/images/states must use <img>, not mask.
     if (this.options.image) {
       const imageStr = String(this.options.image);
-      const useMask = /\.svg(\?|$)/i.test(imageStr);
+      const isStateIllustration = /\/assets\/images\/states\//.test(imageStr);
+      const useMask = /\.svg(\?|$)/i.test(imageStr) && !isStateIllustration;
       if (useMask) {
         const span = document.createElement('span');
         span.className = 'empty-state-image app-icon app-icon-block';

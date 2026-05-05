@@ -1,11 +1,8 @@
 :root {
-  /*
-   * Design tokens aligned with sep.mysep.merchantportal (Tailwind extend / shared-ui palette).
-   * Use CSS variables below in components; avoid hardcoding hex in feature CSS.
-   */
+  /* Design tokens. Use CSS variables below in components; avoid hardcoding hex values. */
 
   /* Primary */
-  --color-primary-light: #7da7eb;
+  --color-primary-light: var(--color-primary-300);
 
   /* Numbered scale (compat with existing selectors + focus rings) */
   --color-primary-50: #edf2fb;
@@ -18,7 +15,7 @@
   --color-primary: var(--color-primary-500);
   --color-primary-hover: var(--color-primary-600);
 
-  /* Gray (1–10 from portal) */
+  /* Gray scale (1-10) */
   --color-gray-1: #ffffff;
   --color-gray-2: #f5f6f8;
   --color-gray-3: #eaedf0;
@@ -30,7 +27,7 @@
   --color-gray-9: #3f4a5b;
   --color-gray-10: #011526;
 
-  /* Legacy gray scale → portal grays */
+  /* Legacy gray aliases */
   --color-gray-50: var(--color-gray-2);
   --color-gray-100: var(--color-gray-3);
   --color-gray-200: var(--color-gray-4);
@@ -40,18 +37,18 @@
   --color-gray-600: var(--color-gray-7);
   --color-gray-700: var(--color-gray-7);
 
-  /* Base text (portal gray-10 / Tailwind text-gray-10) */
+  /* Base text */
   --color-text-primary: rgb(1 21 38 / var(--text-opacity, 1));
   --color-text-secondary: var(--color-gray-7);
   --color-text-muted: var(--color-gray-6);
 
-  --color-light: #f5f5f5;
-  --color-bg-light: #f5f5f5;
-  --color-bg-white: #ffffff;
+  --color-bg-light: var(--color-gray-2);
+  --color-light: var(--color-bg-light);
+  --color-bg-white: var(--color-gray-1);
   --color-stroke: #e5e7eb;
   --color-card-soft-bg: #edf4fc;
-  --color-footer-copyright: #718e9c;
-  --color-footer-contact: #253035;
+  --color-text-tertiary: #718e9c;
+  --color-text-accent: #253035;
 
   /* Error */
   --color-error-light: #ff808e;
@@ -59,7 +56,7 @@
   --color-error-50: #fef2f2;
   --color-error-200: #fecaca;
   --color-error-300: #ff3651;
-  --color-error-500: #ff3651;
+  --color-error-500: var(--color-error-300);
 
   --color-error: var(--color-error-500);
 
@@ -87,8 +84,6 @@
 
   --color-info: var(--color-info-default);
 
-  /* Accent (portal) */
-
   /* Surfaces */
   --color-controller: var(--color-gray-2);
 
@@ -98,8 +93,7 @@
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
-  --spacing-3: 12px;
-  --spacing-7_5: 30px;
+  --spacing-2xl: 30px;
 
   /* Typography — self-hosted via src/assets/css/fonts/*-font-face.css (base.css) */
   --font-family-vazirmatn: 'Vazirmatn', system-ui, -apple-system, sans-serif;
@@ -121,7 +115,7 @@
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 12px;
-  --radius-xl: 12px;
+  --radius-xl: var(--radius-lg);
 
   /* Component sizes */
   --height-control-md: 48px;
@@ -134,7 +128,7 @@
   --color-icon-primary: var(--color-primary);
   --color-icon-on-primary: #ffffff;
 
-  /* Shadows (portal / Tailwind default card shadow) */
+  /* Shadows */
   --shadow: 0 20px 27px 0 rgba(0, 0, 0, 0.05);
   --shadow-color: rgba(0, 0, 0, 0.05);
   --shadow-colored: 0 20px 27px 0 var(--shadow-color);
@@ -143,11 +137,11 @@
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
   --shadow-default: var(--shadow);
 
-  /* Tailwind-like focus ring: ring-2 + ring-primary-light/50 (see .input-container.focused) */
+  /* Focus ring */
   --focus-ring-width: 2px;
   --focus-ring-color: rgb(125 167 235 / 0.5);
   --shadow-input-focus: 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
-  /* Error ring (Tailwind-like): ring-2 + error tint */
+  /* Error ring */
   --shadow-input-error-ring: 0 0 0 var(--focus-ring-width) rgb(255 54 81 / 0.38);
   /** @deprecated use --shadow-input-error-ring; kept for non-input surfaces if referenced */
   --shadow-input-error: var(--shadow-input-error-ring);
@@ -168,8 +162,8 @@
   --color-icon-muted: #b0b0b0;
   --color-icon-on-primary: #0f172a;
 
-  --color-light: #121212;
   --color-bg-light: #121212;
+  --color-light: var(--color-bg-light);
   --color-bg-white: #1e1e1e;
   --color-stroke: #3d3d3d;
   --color-text-primary: rgb(245 245 245 / var(--text-opacity, 1));

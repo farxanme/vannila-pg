@@ -40,10 +40,20 @@ export class Footer {
       const logo = document.createElement('div');
       logo.className = 'footer-logo';
       if (typeof this.options.logo === 'string') {
-        const img = document.createElement('img');
-        img.src = this.options.logo;
-        img.alt = 'Logo';
-        logo.appendChild(img);
+        const logoPath = this.options.logo.trim();
+        if (logoPath.toLowerCase().endsWith('.svg')) {
+          const icon = document.createElement('span');
+          icon.className = 'footer-logo-icon app-icon app-icon-block';
+          icon.style.setProperty('--app-icon-src', `url('${logoPath}')`);
+          icon.setAttribute('role', 'img');
+          icon.setAttribute('aria-label', 'Logo');
+          logo.appendChild(icon);
+        } else {
+          const img = document.createElement('img');
+          img.src = logoPath;
+          img.alt = 'Logo';
+          logo.appendChild(img);
+        }
       } else if (this.options.logo instanceof HTMLElement) {
         logo.appendChild(this.options.logo);
       }
@@ -64,6 +74,7 @@ export class Footer {
         phoneLink.className = 'footer-support-link';
         phoneLink.href = `tel:${this.options.supportPhone}`;
         phoneLink.textContent = this.options.supportPhone;
+        phoneLink.dir = 'ltr';
         support.appendChild(phoneLink);
       }
       container.appendChild(support);

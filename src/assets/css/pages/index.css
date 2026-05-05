@@ -1,11 +1,11 @@
 @import '../variables.css';
 
 /* Hide checkout UI until init completes (loading covers first; avoids flash of form/timer) */
-html.app-booting #app .main-content {
+html.app-booting .app-root .main-content {
   visibility: hidden;
 }
 
-html.app-ready #app .main-content {
+html.app-ready .app-root .main-content {
   visibility: visible;
 }
 
@@ -115,16 +115,15 @@ html.app-ready #app .main-content {
     padding-left: 48px;
     padding-right: 48px;
   }
-
-  .card-large #bill-list-section {
-    padding-left: 48px;
-    padding-right: 48px;
-  }
 }
 
 .gift-card-inline-notice,
 .pan-product-inline-notice {
   margin-top: var(--spacing-xs);
+}
+
+.payment-submit-top-error {
+  margin-bottom: var(--spacing-md);
 }
 
 /* Slightly compact inline notice under card field; keeps palette from .error-dom-info */
@@ -615,12 +614,19 @@ html.app-ready #app .main-content {
   padding-bottom: 0;
 }
 
+.transaction-expired-empty .empty-state-image {
+  width: 180px;
+  height: 132px;
+  max-width: 180px;
+  object-fit: contain;
+  opacity: 1;
+}
+
 .transaction-expired-empty .empty-state-image.app-icon {
-  width: 120px;
-  height: 120px;
-  max-width: 120px;
-  --app-icon-size: 120px;
-  opacity: 0.9;
+  width: 180px;
+  height: 132px;
+  max-width: 180px;
+  --app-icon-size: 180px;
 }
 
 .transaction-expired-empty .empty-state-description {
@@ -631,8 +637,12 @@ html.app-ready #app .main-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-md);
+  gap: 0;
   width: 100%;
+}
+
+.transaction-expired-actions .receipt-return-timer {
+  margin-top: var(--spacing-sm);
 }
 
 .redirect-loading-card,
@@ -663,17 +673,6 @@ html.app-ready #app .main-content {
 
 .redirect-manual-button {
   margin-top: var(--spacing-xs);
-}
-
-.transaction-expired-content .transaction-expired-return-timer {
-  margin-top: var(--spacing-xs);
-}
-
-#bill-list-content .transaction-info-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
 }
 
 .bill-selector-group .dropdown-item {
@@ -758,6 +757,71 @@ html.app-ready #app .main-content {
 
 .bill-selector-hint-paid {
   color: var(--color-primary);
+}
+
+.bill-receipt-modal {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.bill-receipt-status {
+  width: fit-content;
+  align-self: center;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.bill-receipt-rows {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.bill-receipt-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xs) 0;
+  border-bottom: 1px solid var(--color-stroke);
+}
+
+.bill-receipt-row:last-child {
+  border-bottom: none;
+}
+
+.bill-receipt-row-label {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.bill-receipt-row-value {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-xs);
+  text-align: end;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.modal-buttons .bill-receipt-download-button,
+.bottom-sheet-buttons .bill-receipt-download-button {
+  width: 48px;
+  min-width: 48px;
+  flex: 0 0 48px;
+  padding: 0;
+  border-radius: var(--radius-md);
+  font-size: 0;
+}
+
+.modal-buttons .bill-receipt-download-button .btn-icon,
+.bottom-sheet-buttons .bill-receipt-download-button .btn-icon {
+  margin: 0 auto;
+}
+
+.modal-buttons .bill-receipt-download-button .btn-icon .app-icon,
+.bottom-sheet-buttons .bill-receipt-download-button .btn-icon .app-icon {
+  --app-icon-size: 20px;
 }
 
 .card-list-sheet-item .bill-dropdown-item {
@@ -857,6 +921,12 @@ html.app-ready #app .main-content {
   --app-icon-size: 22px;
 }
 
+.bill-list-item-logo-circle img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
 .bill-list-item-amount {
   font-size: var(--font-size-sm);
   color: var(--color-text-primary);
@@ -894,7 +964,7 @@ html.app-ready #app .main-content {
   }
 
   /* Timer moves to mobile header title. */
-  .card-small #timer-header {
+  .card-small .timer-header {
     display: none;
   }
 }

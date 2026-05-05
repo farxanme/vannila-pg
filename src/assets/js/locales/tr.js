@@ -96,6 +96,7 @@ export default {
   'form.pay.disabled': 'Lütfen tüm bilgileri doldurun',
   'form.pay.processing': 'İşlem işleniyor...',
   'form.pay.success': 'Ödeme başarıyla tamamlandı',
+  'form.pay.errorCodeLabel': 'Hata kodu',
   'form.cancel': 'İptal',
   'form.title': 'Kart bilgilerinizi girin',
   'form.captcha.placeholder': 'Kodu girin',
@@ -240,6 +241,10 @@ export default {
   'bill.flow.noticeSettlement':
     'Fatura tahsilati genellikle anliktir; ancak hizmet saglayici altyapisi nedeniyle bazi durumlarda 48 saate kadar gecikebilir. Odemeniz basariliysa endise etmeyin, faturaniz yine de tahsil edilir.',
   'bill.flow.completeAndReturn': 'Fatura surecini tamamla ve uye isyeri sitesine don',
+  'bill.receipt.modalTitle': 'Fatura odeme makbuzu',
+  'bill.receipt.unavailable': 'Bu fatura icin makbuz verisi bulunamadi.',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    'Bu fatura basariyla odendi. Sonraki faturayi odemek icin lutfen 2 dakikalik OTP bekleme suresi bitene kadar bekleyin, sonra sonraki faturayi secip odeyin.',
   'transaction.descriptionExpand': 'Tam açıklamayı göster',
   'transaction.descriptionCollapse': 'Daha az göster',
   'transaction.type.balance': 'Bakiye Sorgulama',

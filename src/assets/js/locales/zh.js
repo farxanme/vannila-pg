@@ -137,6 +137,7 @@ export default {
   'form.showReceiptToggle': '接收回执的邮箱或手机号（可选）',
   'form.pay.processing': '正在处理交易...',
   'form.pay.success': '支付成功完成',
+  'form.pay.errorCodeLabel': '错误代码',
 
   // Payment init (SSR session)
   'paymentInit.error.title': '无法开始支付',
@@ -238,6 +239,10 @@ export default {
   'bill.flow.noticeSettlement':
     '账单通常会实时结算，但受服务公司基础设施影响，偶尔可能延迟至 48 小时。若您已成功支付，请放心，账单最终都会结算。',
   'bill.flow.completeAndReturn': '完成账单流程并返回商户网站',
+  'bill.receipt.modalTitle': '账单支付凭证',
+  'bill.receipt.unavailable': '该账单暂无可用凭证数据。',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    '该账单已支付成功。若要支付下一笔账单，请等待 2 分钟 OTP 倒计时结束后，再选择并支付下一笔账单。',
   'transaction.descriptionExpand': '显示完整说明',
   'transaction.descriptionCollapse': '收起说明',
   'transaction.type.balance': '余额查询',

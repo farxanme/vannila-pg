@@ -96,6 +96,7 @@ export default {
   'form.pay.disabled': 'يرجى إدخال جميع المعلومات',
   'form.pay.processing': 'جارٍ معالجة المعاملة...',
   'form.pay.success': 'تم الدفع بنجاح',
+  'form.pay.errorCodeLabel': 'رمز الخطأ',
   'form.cancel': 'إلغاء',
   'form.title': 'أدخل بيانات بطاقتك',
   'form.captcha.placeholder': 'أدخل الرمز',
@@ -237,6 +238,10 @@ export default {
   'bill.flow.noticeSettlement':
     'تسوية الفواتير تكون فورية غالبا، لكن قد تتاخر احيانا حتى 48 ساعة بسبب بنية شركة الخدمات. اذا نجحت عملية الدفع فلا داعي للقلق؛ ستتم تسوية الفاتورة.',
   'bill.flow.completeAndReturn': 'إنهاء دفع الفواتير والعودة إلى موقع التاجر',
+  'bill.receipt.modalTitle': 'إيصال دفع الفاتورة',
+  'bill.receipt.unavailable': 'لا تتوفر بيانات إيصال لهذه الفاتورة.',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    'تم دفع هذه الفاتورة بنجاح. لدفع الفاتورة التالية، يرجى الانتظار حتى انتهاء مهلة دقيقتين لرمز OTP، ثم اختيار الفاتورة التالية ودفعها.',
   'transaction.descriptionExpand': 'عرض الوصف كاملاً',
   'transaction.descriptionCollapse': 'عرض أقل',
   'transaction.type.balance': 'استعلام الرصيد',

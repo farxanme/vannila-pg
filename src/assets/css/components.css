@@ -16,7 +16,7 @@
   color: var(--color-text-primary);
 }
 
-#cvv2-input-container .input-label {
+.cvv2-input-container .input-label {
   font-family: var(--font-family-vazirmatn);
 }
 
@@ -29,7 +29,7 @@
   display: flex;
   align-items: center;
   border: 1px solid var(--color-gray-100);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   background: var(--color-controller);
   transition: all var(--transition-base);
   height: var(--height-control-md);
@@ -94,8 +94,8 @@
 .input-field {
   flex: 1 1 0;
   min-width: 0;
-  padding-block: var(--spacing-3);
-  padding-inline: var(--spacing-3);
+  padding-block: calc(var(--spacing-sm) + var(--spacing-xs));
+  padding-inline: calc(var(--spacing-sm) + var(--spacing-xs));
   font-size: var(--font-size-base);
   color: var(--color-text-primary);
   background: transparent;
@@ -117,11 +117,11 @@
 
 /* Extra inline padding toward action/clear strip (same in LTR & RTL via logical props) */
 .input-container:has(.input-right-container) .input-field {
-  padding-inline-end: calc(var(--spacing-3) + var(--spacing-xs));
+  padding-inline-end: calc(var(--spacing-md) + var(--spacing-xs));
 }
 
 .input-container:has(.input-action-left) .input-field {
-  padding-inline-start: calc(var(--spacing-3) + var(--spacing-xs));
+  padding-inline-start: calc(var(--spacing-md) + var(--spacing-xs));
 }
 
 .input-password-mask {
@@ -142,7 +142,7 @@
 .card-bank-logo {
   display: flex;
   align-items: center;
-  margin-inline-start: var(--spacing-3);
+  margin-inline-start: calc(var(--spacing-sm) + var(--spacing-xs));
   flex-shrink: 0;
 }
 
@@ -164,7 +164,7 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-xs);
-  padding-inline-end: var(--spacing-3);
+  padding-inline-end: calc(var(--spacing-sm) + var(--spacing-xs));
   padding-inline-start: 0;
   flex-shrink: 0;
 }
@@ -1078,14 +1078,18 @@
 }
 
 .payment-init-error .empty-state-image {
-  max-width: 120px;
-  opacity: 0.9;
+  width: 180px;
+  height: 132px;
+  max-width: 180px;
+  object-fit: contain;
+  opacity: 1;
 }
 
 .payment-init-error .empty-state-image.app-icon {
-  width: 120px;
-  height: 120px;
-  --app-icon-size: 120px;
+  width: 180px;
+  height: 132px;
+  max-width: 180px;
+  --app-icon-size: 180px;
 }
 
 .loading-container {
@@ -1265,7 +1269,7 @@
 }
 
 .btn-primary.btn-bordered:hover:not(:disabled) {
-  background: var(--color-primary-light);
+  background: var(--color-primary-300);
 }
 
 .btn-primary.btn-bordered:focus-visible {
@@ -1341,7 +1345,6 @@
   font-size: var(--font-size-sm);
   line-height: 1.45;
   color: var(--color-text-primary);
-  text-align: start;
   word-break: break-word;
 }
 
@@ -1464,7 +1467,6 @@
 .error-dom-message {
   flex: 1 1 auto;
   min-width: 0;
-  text-align: start;
 }
 
 .error-dom-dismiss {

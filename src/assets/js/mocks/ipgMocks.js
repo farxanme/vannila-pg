@@ -214,6 +214,13 @@ export const mockSendOtpResponse = {
   validationErrors: [],
 };
 
+export const mockSendOtpFailedResponse = {
+  data: null,
+  statusCode: 9401,
+  statusTitle: 'OtpFailed',
+  validationErrors: [{ message: 'OTP request failed in mock mode.' }],
+};
+
 export const mockPayTransactionResponse = {
   data: {
     paymentReceipt: {
@@ -242,6 +249,62 @@ export const mockPayTransactionResponse = {
   validationErrors: [],
 };
 
+export const mockPayTransactionFailedCanRetryResponse = {
+  data: {
+    paymentReceipt: {
+      id: 0,
+      ipgTransactionId: 85,
+      billInfoId: null,
+      receiptDate: '2026-05-02T07:06:53.1355502+03:30',
+      pTraceNo: 25765,
+      rrn: null,
+      receiptRefNum: null,
+      totalAmount: null,
+      affectiveAmount: null,
+      traceNo: null,
+      sTraceNo: null,
+      terminalNumber: 2765,
+      maskedPan: null,
+      hashedPan: null,
+      resultCode: '55',
+      resultDescription: 'رمز کارت نامعتبر است.',
+      canRetry: true,
+      isSuccess: false,
+    },
+  },
+  statusCode: 9004,
+  statusTitle: 'FailedPayment',
+  validationErrors: [],
+};
+
+export const mockPayTransactionFailedNoRetryResponse = {
+  data: {
+    paymentReceipt: {
+      id: 0,
+      ipgTransactionId: 86,
+      billInfoId: null,
+      receiptDate: '2026-05-02T07:08:12.1355502+03:30',
+      pTraceNo: 25766,
+      rrn: null,
+      receiptRefNum: null,
+      totalAmount: null,
+      affectiveAmount: null,
+      traceNo: null,
+      sTraceNo: null,
+      terminalNumber: 2765,
+      maskedPan: null,
+      hashedPan: null,
+      resultCode: '57',
+      resultDescription: 'انجام تراکنش برای این کارت مجاز نیست.',
+      canRetry: false,
+      isSuccess: false,
+    },
+  },
+  statusCode: 9004,
+  statusTitle: 'FailedPayment',
+  validationErrors: [],
+};
+
 export const mockReceiptRedirectParamsResponse = {
   data: {
     redirectUrl: 'https://unit-test/return',
@@ -256,6 +319,13 @@ export const mockReceiptRedirectParamsResponse = {
   validationErrors: [],
 };
 
+export const mockReceiptRedirectParamsFailedResponse = {
+  data: null,
+  statusCode: 9701,
+  statusTitle: 'RedirectParamsUnavailable',
+  validationErrors: [{ message: 'Receipt redirect params unavailable in mock mode.' }],
+};
+
 export const mockCancelTransactionResponse = {
   data: {},
   statusCode: 2000,
@@ -263,11 +333,39 @@ export const mockCancelTransactionResponse = {
   validationErrors: [],
 };
 
+export const mockCancelTransactionFailedResponse = {
+  data: null,
+  statusCode: 9601,
+  statusTitle: 'CancelFailed',
+  validationErrors: [{ message: 'Cancel transaction failed in mock mode.' }],
+};
+
 export const mockDeActiveUserCardResponse = {
   data: {},
   statusCode: 2000,
   statusTitle: 'Success',
   validationErrors: [],
+};
+
+export const mockDeActiveUserCardFailedResponse = {
+  data: null,
+  statusCode: 9801,
+  statusTitle: 'DeActiveFailed',
+  validationErrors: [{ message: 'Card de-activation failed in mock mode.' }],
+};
+
+export const mockGetTransactionFailedResponse = {
+  data: null,
+  statusCode: 9101,
+  statusTitle: 'GetTransactionFailed',
+  validationErrors: [{ message: 'Transaction data is unavailable in mock mode.' }],
+};
+
+export const mockGetUserCardsFailedResponse = {
+  data: null,
+  statusCode: 9201,
+  statusTitle: 'GetCardsFailed',
+  validationErrors: [{ message: 'Saved cards are unavailable in mock mode.' }],
 };
 
 export function mockDelay(ms = 250) {

@@ -97,6 +97,7 @@ export default {
   'form.pay.disabled': 'Please complete all information',
   'form.pay.processing': 'Processing transaction...',
   'form.pay.success': 'Payment completed successfully',
+  'form.pay.errorCodeLabel': 'Error code',
   'form.cancel': 'Cancel',
   'form.title': 'Enter your card details',
   'form.captcha.placeholder': 'Enter code',
@@ -241,6 +242,10 @@ export default {
   'bill.flow.noticeSettlement':
     'Bill settlement is usually instant, but in some cases it can be delayed up to 48 hours due to utility-provider infrastructure. If your payment was successful, your bill will still be settled.',
   'bill.flow.completeAndReturn': 'Complete bill flow and return to merchant website',
+  'bill.receipt.modalTitle': 'Bill payment receipt',
+  'bill.receipt.unavailable': 'No receipt data is available for this bill.',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    'This bill was paid successfully. To pay the next bill, please wait until the 2-minute OTP cooldown ends, then select and pay the next bill.',
   'transaction.descriptionExpand': 'Show full description',
   'transaction.descriptionCollapse': 'Show less',
   'transaction.type.balance': 'Balance Inquiry',

@@ -556,9 +556,11 @@
   gap: var(--spacing-sm);
 }
 
-.footer-logo img {
-  height: 40px;
-  width: auto;
+.footer-logo-icon {
+  display: block;
+  width: 160px;
+  height: 60px;
+  background-color: var(--color-text-tertiary);
 }
 
 .footer-copyright {
@@ -566,7 +568,7 @@
   flex-direction: column;
   align-items: center;
   font-size: var(--font-size-xs);
-  color: var(--color-footer-copyright);
+  color: var(--color-text-tertiary);
   font-family: var(--font-family-vazirmatn);
   text-align: center;
 }
@@ -576,29 +578,27 @@
 }
 
 .footer-copyright-brand-link {
-  color: var(--color-footer-copyright);
-  font-weight: 600;
-  text-underline-offset: 2px;
+  color: var(--color-text-tertiary);
 }
 
 .footer-copyright-brand-link:hover {
-  color: var(--color-footer-contact);
+  color: var(--color-text-accent);
 }
 
 .footer-support {
   font-size: var(--font-size-sm);
-  color: var(--color-footer-contact);
+  color: var(--color-text-accent);
   text-align: center;
 }
 
 .footer-support-link {
-  color: var(--color-footer-contact);
+  color: var(--color-text-accent);
   text-decoration: none;
   font-weight: 600;
 }
 
 .footer-support-link:hover {
-  text-decoration: underline;
+  color: var(--color-text-accent);
 }
 
 /* Main Content */
@@ -614,7 +614,7 @@
     transition: padding-top var(--transition-base);
   }
 
-  .header.scrolled ~ #app .main-content {
+  .header.scrolled ~ .app-root .main-content {
     padding-top: calc(110px + 14px);
   }
 }
@@ -626,6 +626,12 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-md);
   box-shadow: var(--shadow-default);
+}
+
+.init-error-card,
+.transaction-expired-card,
+.redirect-loading-card {
+  padding: var(--spacing-xl) var(--spacing-md);
 }
 
 .card-header {
@@ -644,7 +650,7 @@
   gap: var(--spacing-md);
 }
 
-#timer-header {
+.timer-header {
   height: 50px;
   min-height: 50px;
   padding: 0 16px;
@@ -679,16 +685,6 @@
 .grid {
   display: grid;
   gap: var(--spacing-lg);
-}
-
-.grid-2-col {
-  grid-template-columns: 1fr 2fr;
-}
-
-@media (max-width: 768px) {
-  .grid-2-col {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Form Layout */
@@ -726,20 +722,20 @@
   width: 100%;
 }
 
-.form-actions #pay-button {
+.form-actions .pay-button {
   grid-column: 1 / -1;
 }
 
-.form-actions #bill-skip-button,
-.form-actions #cancel-button {
+.form-actions .bill-skip-button,
+.form-actions .cancel-button {
   grid-column: span 1;
 }
 
-.form-actions #bill-skip-button[hidden] {
+.form-actions .bill-skip-button[hidden] {
   display: none !important;
 }
 
-.form-actions:has(#bill-skip-button[hidden]) #cancel-button {
+.form-actions:has(.bill-skip-button[hidden]) .cancel-button {
   grid-column: 1 / -1;
 }
 
@@ -780,14 +776,14 @@
 .transaction-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-7_5);
+  gap: var(--spacing-2xl);
   margin-top: var(--spacing-lg);
 }
 
 .transaction-summary-card {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-7_5);
+  gap: var(--spacing-2xl);
   padding: var(--spacing-md);
   background: var(--color-card-soft-bg);
   border-radius: var(--radius-lg);
@@ -865,13 +861,13 @@
 }
 
 .transaction-summary-card .transaction-amount-toman {
-  color: var(--color-gray-500);
+  color: var(--color-gray-400);
 }
 
 .more-content {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-7_5);
+  gap: var(--spacing-2xl);
 }
 
 .more-toggle {
@@ -920,7 +916,7 @@
   .transaction-info,
   .transaction-summary-card,
   .more-content {
-    gap: calc(var(--spacing-7_5) / 2);
+    gap: calc(var(--spacing-2xl) / 2);
   }
 }
 
@@ -1025,10 +1021,10 @@
   --timer-progress: 1;
   --timer-track-color: var(--color-gray-300);
   --timer-fill-color: var(--color-primary);
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
-  flex: 0 0 18px;
+  flex: 0 0 14px;
   display: inline-block;
   background: conic-gradient(
     var(--timer-fill-color) calc(var(--timer-progress) * 1turn),
@@ -1036,11 +1032,11 @@
   );
 }
 
-#timer-header.warning .timer-progress {
+.timer-header.warning .timer-progress {
   --timer-fill-color: var(--color-warning);
 }
 
-#timer-header.danger .timer-progress {
+.timer-header.danger .timer-progress {
   --timer-fill-color: var(--color-danger);
 }
 

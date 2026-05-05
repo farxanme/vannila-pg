@@ -97,6 +97,7 @@ export default {
   'form.pay.disabled': 'Пожалуйста, заполните всю информацию',
   'form.pay.processing': 'Обработка транзакции...',
   'form.pay.success': 'Платёж успешно выполнен',
+  'form.pay.errorCodeLabel': 'Код ошибки',
   'form.cancel': 'Отмена',
   'form.title': 'Введите данные карты',
   'form.captcha.placeholder': 'Введите код',
@@ -241,6 +242,10 @@ export default {
   'bill.flow.noticeSettlement':
     'Оплата счетов обычно зачисляется сразу, но иногда из-за инфраструктуры сервисной компании может задерживаться до 48 часов. Если платеж прошел успешно, не беспокойтесь: счет все равно будет погашен.',
   'bill.flow.completeAndReturn': 'Завершить процесс счетов и вернуться на сайт получателя',
+  'bill.receipt.modalTitle': 'Квитанция оплаты счета',
+  'bill.receipt.unavailable': 'Для этого счета нет данных квитанции.',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    'Этот счет оплачен успешно. Чтобы оплатить следующий счет, дождитесь окончания 2-минутного таймера OTP, затем выберите и оплатите следующий счет.',
   'transaction.descriptionExpand': 'Показать полностью',
   'transaction.descriptionCollapse': 'Свернуть',
   'transaction.type.balance': 'Запрос баланса',

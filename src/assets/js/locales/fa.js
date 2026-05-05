@@ -36,7 +36,7 @@ export default {
   'helpDrawer.paymentBody':
     'شماره کارت، تاریخ انقضا و CVV2 را با دقت وارد کنید. مبلغ و نام پذیرنده را قبل از پرداخت بررسی کنید.\n\n' +
     'پس از پرداخت موفق، رسید را تا تحویل کالا یا خدمت نگه دارید.\n\n' +
-    'در صورت مشاهدهٔ هر مورد غیرعادی، از ادامهٔ پرداخت خودداری کنید و از کانال‌های رسمی بانک یا پذیرنده پیگیری کنید.',
+    'در صورت مشاهده هر مورد غیرعادی، از ادامه پرداخت خودداری کنید و از کانال‌های رسمی بانک یا پذیرنده پیگیری کنید.',
 
   // Header
   'header.title': 'درگاه پرداخت اینترنتی سِپ',
@@ -49,7 +49,7 @@ export default {
   'footer.copyrightBrandLink': 'پرداخت الکترونیک سامان',
   'footer.copyrightLineSecondAfter': ' محفوظ است.',
   'footer.copyrightBrandLinkAriaLabel':
-    'وب‌سایت پرداخت الکترونیک سامان، sep.ir — باز شدن در زبانهٔ جدید',
+    'وب‌سایت پرداخت الکترونیک سامان، sep.ir — باز شدن در زبانه جدید',
 
   // Form
   'form.cardNumber': 'شماره کارت',
@@ -95,6 +95,7 @@ export default {
   'form.pay.disabled': 'لطفا اطلاعات را کامل وارد کنید',
   'form.pay.processing': 'در حال پردازش تراکنش...',
   'form.pay.success': 'پرداخت با موفقیت ثبت شد',
+  'form.pay.errorCodeLabel': 'کد خطا',
   'form.cancel': 'انصراف',
   'form.title': 'اطلاعات کارت خود را وارد کنید',
   'form.captcha.placeholder': 'کد را وارد کنید',
@@ -118,7 +119,7 @@ export default {
   'cancelConfirm.continuePay': 'ادامه پرداخت',
   'cancelConfirm.confirmLeave': 'انصراف از پرداخت',
   'form.giftCardNotice':
-    'برای برخی کارت‌های هدیهٔ بانک‌ها دریافت رمز پویا لازم نیست؛ در این صورت می‌توانید از رمز اینترنتی همان کارت‌هدیه استفاده کنید.',
+    'برای برخی کارت‌های هدیه بانک‌ها دریافت رمز پویا لازم نیست؛ در این صورت می‌توانید از رمز اینترنتی همان کارت‌هدیه استفاده کنید.',
   'form.panProductRestriction.inlineNotice':
     'برای پرداخت «{{productTitle}}» فقط کارت‌های مجاز این تراکنش قابل‌استفاده‌اند و با سایر کارت‌ها امکان تکمیل پرداخت وجود ندارد.',
   'form.panProductRestriction.invalidCard':
@@ -238,6 +239,10 @@ export default {
   'bill.flow.noticeSettlement':
     'تسویه قبوض معمولا آنی است، اما گاهی به‌دلیل زیرساخت شرکت خدماتی تا ۴۸ ساعت تاخیر دارد. اگر پرداخت شما موفق بوده، نگران نباشید؛ قبض شما در هر صورت تسویه می‌شود.',
   'bill.flow.completeAndReturn': 'تکمیل فرآیند قبض و بازگشت به سایت پذیرنده',
+  'bill.receipt.modalTitle': 'رسید پرداخت قبض',
+  'bill.receipt.unavailable': 'اطلاعات رسید برای این قبض موجود نیست.',
+  'bill.flow.waitForOtpCooldownAfterSuccess':
+    'پرداخت این قبض با موفقیت انجام شد. برای پرداخت قبض بعدی، لطفا تا پایان مهلت ۲ دقیقه‌ای دریافت رمز پویا صبر کنید؛ سپس قبض بعد را انتخاب و پرداخت کنید.',
   'transaction.descriptionExpand': 'نمایش کامل توضیحات',
   'transaction.descriptionCollapse': 'نمایش کمتر',
   'transaction.type.balance': 'مانده گیری',

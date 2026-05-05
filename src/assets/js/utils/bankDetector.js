@@ -157,15 +157,15 @@ const logoKeyByLocalizationKey = {
   ghavamin: 'ghavamin',
   parsian: 'parsian',
   blu: 'blu',
-  post: 'post-bank',
-  'middle-east': 'khavarmiane',
-  dey: 'day',
+  post: 'post',
+  'middle-east': 'middle-east',
+  dey: 'dey',
   'tosee-taavon': 'tosee-taavon',
   karafarin: 'karafarin',
   'mehr-eghtesad': 'mehr-eghtesad',
   mellal: 'mellal',
   sarmaye: 'sarmaye',
-  tourism: 'gardeshgari',
+  tourism: 'tourism',
   'central-bank': 'central-bank',
 };
 
@@ -173,22 +173,22 @@ const availableLogoKeys = new Set([
   'gharzolhasaneh-resalat',
   'ansar',
   'ghavamin',
-  'khavarmiane',
+  'middle-east',
   'central-bank',
   'gharzolhasaneh-mehr',
-  'gardeshgari',
+  'tourism',
   'melli',
   'iran-venezuela',
   'parsian',
   'ayandeh',
   'hekmat',
-  'post-bank',
-  'tosee-saderat',
+  'post',
+  'export-development',
   'future',
   'taavon-eslami',
   'kosar',
   'karafarin',
-  'day',
+  'dey',
   'keshavarzi',
   'mellat',
   'saman',
@@ -485,7 +485,7 @@ export function getBankLogo(bankName, bankBin = '') {
   }
 
   if (profile.logoKey && availableLogoKeys.has(profile.logoKey)) {
-    return `/assets/images/banks/${profile.logoKey}.svg`;
+    return `/assets/images/banks/bank-${profile.logoKey}.svg`;
   }
 
   const originalName = profile.name.trim();
@@ -497,10 +497,10 @@ export function getBankLogo(bankName, bankBin = '') {
     'melli-iran': 'melli',
     'industry-&-mine': 'sanat-madan',
     'kar-afarin': 'karafarin',
-    post: 'post-bank',
+    post: 'post',
     central: 'central-bank',
     'iri-central': 'central-bank',
-    'export-development': 'tosee-saderat',
+    'export-development': 'export-development',
     sarmayeh: 'sarmaye',
     mehr: 'mehr-eghtesad',
     'mehr-iran': 'mehr-eghtesad',
@@ -526,7 +526,7 @@ export function getBankLogo(bankName, bankBin = '') {
     return '/assets/images/icons/icn-square-info.svg';
   }
 
-  return `/assets/images/banks/${mappedKey}.svg`;
+  return `/assets/images/banks/bank-${mappedKey}.svg`;
 }
 
 /**
